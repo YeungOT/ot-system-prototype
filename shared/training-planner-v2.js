@@ -464,6 +464,106 @@
     return { valid: true, reason: `可安排 · 週期 ${cycle.start} 至 ${cycle.end}。` };
   }
 
+  function slotDropBlock(date, time) {
+    if (date.slice(0, 7) !== state.activeMonth) {
+      return { valid: false, reason: "相鄰月份日期只供查看，請先切換至該月份。" };
+    }
+    if (isLunchTime(time)) {
+      return { valid: false, reason: "午膳時段不可安排訓練。" };
+    }
+    return null;
+  }
+
+  function residentSlotDropResult(residentId, date, time, options = {}) {
+    const blocked = slotDropBlock(date, time);
+    if (blocked) return blocked;
+    return validateResidentPlacement(residentId, date, time, {
+      paid: options.paid ?? state.serviceMode === "extra",
+      ignoreSessionIds: options.ignoreSessionIds || [],
+      extraSessions: options.extraSessions || [],
+      allowAdjacent: false
+    });
+  }
+
+  function sessionSlotDropResult(sessionId, date, time) {
+    const found = findSession(sessionId);
+    if (!found) return { valid: false, reason: "找不到要移動的節數。" };
+    const blocked = slotDropBlock(date, time);
+    if (blocked) return blocked;
+    const invalid = found.session.memberIds
+      .map(residentId => validateResidentPlacement(residentId, date, time, {
+        paid: found.session.paid,
+        ignoreSessionIds: [sessionId],
+        allowAdjacent: false
+      }))
+      .find(result => !result.valid);
+    return invalid || { valid: true, reason: "可移動至此時段。" };
+  }
+
+  function residentToSessionResult(residentId, sessionId) {
+    const found = findSession(sessionId);
+    if (!found) return { valid: false, reason: "找不到目標小組。" };
+    const resident = residentById.get(residentId);
+    if (!resident) return { valid: false, reason: "找不到住客。" };
+    const session = found.session;
+    if (session.memberIds.includes(residentId)) {
+      return { valid: false, reason: "住客已在此小組。" };
+    }
+    if (session.memberIds.length >= GROUP_LIMIT) {
+      return { valid: false, reason: `小組人數已達上限 ${GROUP_LIMIT} 人。` };
+    }
+    const floors = new Set(
+      session.memberIds.map(id => residentById.get(id)?.floor).filter(Boolean)
+    );
+    if (floors.size && !floors.has(resident.floor)) {
+      return { valid: false, reason: "同一小組住客必須屬於同一樓層。" };
+    }
+    return validateResidentPlacement(residentId, session.date, session.time, {
+      paid: session.paid,
+      ignoreSessionIds: [sessionId],
+      allowAdjacent: false
+    });
+  }
+
+  function sessionsMergeResult(sourceId, targetId) {
+    const sourceFound = findSession(sourceId);
+    const targetFound = findSession(targetId);
+    if (!sourceFound || !targetFound) {
+      return { valid: false, reason: "找不到可合併的節數。" };
+    }
+    if (sourceId === targetId) {
+      return { valid: false, reason: "節數不能與自己合併。" };
+    }
+    const source = sourceFound.session;
+    const target = targetFound.session;
+    if (source.paid !== target.paid) {
+      return { valid: false, reason: "基本訓練與額外服務不可合併。" };
+    }
+    const memberIds = [...new Set([...source.memberIds, ...target.memberIds])];
+    if (memberIds.length > GROUP_LIMIT) {
+      return { valid: false, reason: `小組人數不可超過 ${GROUP_LIMIT} 人。` };
+    }
+    const floors = new Set(memberIds.map(id => residentById.get(id)?.floor).filter(Boolean));
+    if (floors.size > 1) {
+      return { valid: false, reason: "同一小組住客必須屬於同一樓層。" };
+    }
+    return { valid: true, reason: "可合併為小組。" };
+  }
+
+  function dropResultForSlot(payload, date, time, targetSessionId = null) {
+    if (!payload) return { valid: false, reason: "沒有可放置的項目。" };
+    const blocked = slotDropBlock(date, time);
+    if (blocked) return blocked;
+    if (targetSessionId) {
+      return payload.type === "resident"
+        ? residentToSessionResult(payload.residentId, targetSessionId)
+        : sessionsMergeResult(payload.sessionId, targetSessionId);
+    }
+    return payload.type === "resident"
+      ? residentSlotDropResult(payload.residentId, date, time)
+      : sessionSlotDropResult(payload.sessionId, date, time);
+  }
+
   function markPlanDraft(month, reason) {
     const plan = ensurePlan(month);
     plan.status = "draft";
@@ -723,6 +823,8 @@
       .tp2-cell.today { box-shadow: inset 0 0 0 2px #5eead4; }
       .tp2-cell.drop-valid { background: #ecfdf5; box-shadow: inset 0 0 0 2px #22c55e; }
       .tp2-cell.drop-invalid { background: #fff1f2; box-shadow: inset 0 0 0 2px #ef4444; }
+      .tp2-cell.drop-target.drop-valid { box-shadow: inset 0 0 0 3px #16a34a; }
+      .tp2-cell.drop-target.drop-invalid { box-shadow: inset 0 0 0 3px #dc2626; }
       .tp2-session {
         width: 100%;
         border: 1px solid #b8ddd7;
@@ -738,6 +840,8 @@
       .tp2-session.group { background: #eff6ff; border-color: #bfdbfe; border-left-color: #2563eb; color: #1d4ed8; }
       .tp2-session.extra { background: #fff7ed; border-color: #fed7aa; border-left-color: #b45309; color: #92400e; }
       .tp2-session.carry { box-shadow: inset 0 0 0 1px #f59e0b; }
+      .tp2-session.combine-valid { outline: 2px solid #16a34a; outline-offset: 1px; }
+      .tp2-session.combine-invalid { outline: 2px solid #dc2626; outline-offset: 1px; }
       .tp2-session strong { display: block; font-size: 9px; }
       .tp2-session small { display: block; margin-top: 1px; color: inherit; opacity: .75; font-size: 8px; }
       .tp2-vacancy {
@@ -1155,16 +1259,9 @@
   function moveSession(sessionId, targetDate, targetTime) {
     const found = findSession(sessionId);
     if (!found) return;
-    const residentIds = found.session.memberIds;
-    const invalid = residentIds
-      .map(id => validateResidentPlacement(id, targetDate, targetTime, {
-        paid: found.session.paid,
-        ignoreSessionIds: [sessionId],
-        allowAdjacent: true
-      }))
-      .find(result => !result.valid);
-    if (invalid) {
-      renderStatusMessage(invalid.reason);
+    const result = sessionSlotDropResult(sessionId, targetDate, targetTime);
+    if (!result.valid) {
+      renderStatusMessage(result.reason);
       return;
     }
     if (!found.session.patternId) {
@@ -1182,16 +1279,12 @@
   }
 
   function addResidentToSlot(residentId, date, time) {
-    const paid = state.serviceMode === "extra";
-    const result = validateResidentPlacement(residentId, date, time, {
-      paid,
-      allowAdjacent: true
-    });
+    const result = residentSlotDropResult(residentId, date, time);
     if (!result.valid) {
       renderStatusMessage(result.reason);
       return;
     }
-    addSession(date, time, [residentId], { paid });
+    addSession(date, time, [residentId], { paid: state.serviceMode === "extra" });
     saveState();
     render();
   }
@@ -1199,27 +1292,12 @@
   function joinResidentToSession(residentId, sessionId) {
     const found = findSession(sessionId);
     if (!found) return;
-    const resident = residentById.get(residentId);
-    const session = found.session;
-    if (session.memberIds.includes(residentId)) return;
-    if (session.memberIds.length >= GROUP_LIMIT) {
-      renderStatusMessage(`小組人數已達上限 ${GROUP_LIMIT} 人。`);
-      return;
-    }
-    const floors = new Set(session.memberIds.map(id => residentById.get(id)?.floor).filter(Boolean));
-    if (floors.size && !floors.has(resident.floor)) {
-      renderStatusMessage("同一小組住客必須屬於同一樓層。");
-      return;
-    }
-    const result = validateResidentPlacement(residentId, session.date, session.time, {
-      paid: session.paid,
-      ignoreSessionIds: [sessionId],
-      allowAdjacent: true
-    });
+    const result = residentToSessionResult(residentId, sessionId);
     if (!result.valid) {
       renderStatusMessage(result.reason);
       return;
     }
+    const session = found.session;
     session.memberIds.push(residentId);
     session.format = "g";
     markPlanDraft(found.plan.month, "加入小組");
@@ -1230,24 +1308,16 @@
   function mergeSessions(sourceId, targetId) {
     const sourceFound = findSession(sourceId);
     const targetFound = findSession(targetId);
-    if (!sourceFound || !targetFound || sourceId === targetId) return;
-    const source = sourceFound.session;
+    if (!sourceFound || !targetFound) return;
+    const result = sessionsMergeResult(sourceId, targetId);
+    if (!result.valid) {
+      renderStatusMessage(result.reason);
+      return;
+    }
     const target = targetFound.session;
-    if (source.paid !== target.paid) {
-      renderStatusMessage("基本訓練與額外服務不可合併。");
-      return;
-    }
-    const memberIds = [...new Set([...source.memberIds, ...target.memberIds])];
-    if (memberIds.length > GROUP_LIMIT) {
-      renderStatusMessage(`小組人數不可超過 ${GROUP_LIMIT} 人。`);
-      return;
-    }
-    const floors = new Set(memberIds.map(id => residentById.get(id)?.floor).filter(Boolean));
-    if (floors.size > 1) {
-      renderStatusMessage("同一小組住客必須屬於同一樓層。");
-      return;
-    }
-    target.memberIds = memberIds;
+    target.memberIds = [
+      ...new Set([...sourceFound.session.memberIds, ...target.memberIds])
+    ];
     target.format = "g";
     removeSession(sourceId);
     markPlanDraft(targetFound.plan.month, "合併小組");
@@ -1339,59 +1409,96 @@
     if (action.dataset.tpAction === "validate") validateCurrentPlan();
   });
 
+  function clearTp2DropCues() {
+    content.querySelectorAll(".dragging").forEach(item => item.classList.remove("dragging"));
+    content.querySelectorAll(".tp2-cell.drop-valid,.tp2-cell.drop-invalid,.tp2-cell.drop-target")
+      .forEach(cell => {
+        cell.classList.remove("drop-valid", "drop-invalid", "drop-target");
+        delete cell.dataset.dropReason;
+      });
+    content.querySelectorAll(".tp2-session.combine-valid,.tp2-session.combine-invalid")
+      .forEach(session => session.classList.remove("combine-valid", "combine-invalid"));
+  }
+
+  function paintTp2DropCues(payload) {
+    clearTp2DropCues();
+    content.querySelectorAll(".tp2-cell[data-tp-date][data-tp-time]").forEach(cell => {
+      const result = dropResultForSlot(payload, cell.dataset.tpDate, cell.dataset.tpTime);
+      cell.classList.add(result.valid ? "drop-valid" : "drop-invalid");
+      cell.dataset.dropReason = result.reason;
+    });
+  }
+
   content.addEventListener("dragstart", event => {
     const resident = event.target.closest("[data-tp-resident]");
-    if (resident) {
-      dragPayload = { type: "resident", residentId: resident.dataset.tpResident };
-      event.dataTransfer.effectAllowed = "copy";
-      return;
-    }
     const session = event.target.closest("[data-tp-session]");
-    if (session) {
-      dragPayload = { type: "session", sessionId: session.dataset.tpSession };
-      event.dataTransfer.effectAllowed = "move";
+    const source = resident || session;
+    if (!source) return;
+    dragPayload = resident
+      ? { type: "resident", residentId: resident.dataset.tpResident }
+      : { type: "session", sessionId: session.dataset.tpSession };
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = resident ? "copy" : "move";
     }
+    paintTp2DropCues(dragPayload);
+    source.classList.add("dragging");
   });
 
   content.addEventListener("dragover", event => {
     const sessionCard = event.target.closest("[data-tp-session]");
     const cell = event.target.closest("[data-tp-date][data-tp-time]");
-    if (!dragPayload || (!sessionCard && !cell)) return;
-    if (cell?.classList.contains("readonly") || cell?.classList.contains("lunch")) return;
+    if (!dragPayload || (!cell && !sessionCard)) return;
+    const result = dropResultForSlot(
+      dragPayload,
+      cell.dataset.tpDate,
+      cell.dataset.tpTime,
+      sessionCard?.dataset.tpSession
+    );
     event.preventDefault();
-    document.querySelectorAll(".tp2-cell.drop-valid,.tp2-cell.drop-invalid").forEach(item => {
-      item.classList.remove("drop-valid", "drop-invalid");
-    });
-    if (cell) cell.classList.add("drop-valid");
+    content.querySelectorAll(".tp2-cell.drop-target")
+      .forEach(item => item.classList.remove("drop-target"));
+    content.querySelectorAll(".tp2-session.combine-valid,.tp2-session.combine-invalid")
+      .forEach(item => item.classList.remove("combine-valid", "combine-invalid"));
+    cell.classList.remove("drop-valid", "drop-invalid");
+    cell.classList.add("drop-target", result.valid ? "drop-valid" : "drop-invalid");
+    cell.dataset.dropReason = result.reason;
+    if (sessionCard) {
+      sessionCard.classList.add(result.valid ? "combine-valid" : "combine-invalid");
+    }
   });
 
   content.addEventListener("drop", event => {
     const sessionCard = event.target.closest("[data-tp-session]");
     const cell = event.target.closest("[data-tp-date][data-tp-time]");
-    if (!dragPayload) return;
-    if (sessionCard && dragPayload.type === "resident") {
-      event.preventDefault();
-      joinResidentToSession(dragPayload.residentId, sessionCard.dataset.tpSession);
-    } else if (sessionCard && dragPayload.type === "session") {
-      event.preventDefault();
-      mergeSessions(dragPayload.sessionId, sessionCard.dataset.tpSession);
-    } else if (cell) {
-      event.preventDefault();
-      if (dragPayload.type === "resident") {
-        addResidentToSlot(dragPayload.residentId, cell.dataset.tpDate, cell.dataset.tpTime);
-      } else {
-        moveSession(dragPayload.sessionId, cell.dataset.tpDate, cell.dataset.tpTime);
-      }
-      cell.classList.remove("drop-valid", "drop-invalid");
-    }
+    if (!dragPayload || (!cell && !sessionCard)) return;
+    const payload = dragPayload;
+    const result = dropResultForSlot(
+      payload,
+      cell.dataset.tpDate,
+      cell.dataset.tpTime,
+      sessionCard?.dataset.tpSession
+    );
+    event.preventDefault();
+    clearTp2DropCues();
     dragPayload = null;
+    if (!result.valid) {
+      renderStatusMessage(result.reason);
+      return;
+    }
+    if (sessionCard && payload.type === "resident") {
+      joinResidentToSession(payload.residentId, sessionCard.dataset.tpSession);
+    } else if (sessionCard && payload.type === "session") {
+      mergeSessions(payload.sessionId, sessionCard.dataset.tpSession);
+    } else if (payload.type === "resident") {
+      addResidentToSlot(payload.residentId, cell.dataset.tpDate, cell.dataset.tpTime);
+    } else {
+      moveSession(payload.sessionId, cell.dataset.tpDate, cell.dataset.tpTime);
+    }
   });
 
   content.addEventListener("dragend", () => {
     dragPayload = null;
-    document.querySelectorAll(".tp2-cell.drop-valid,.tp2-cell.drop-invalid").forEach(item => {
-      item.classList.remove("drop-valid", "drop-invalid");
-    });
+    clearTp2DropCues();
   });
 
   document.getElementById("tp2-scope-dialog").addEventListener("cancel", () => {
@@ -1407,6 +1514,43 @@
   const legacyDayNames = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
   let legacyDragPayload = null;
   let legacyListenersBound = false;
+
+  function clearLegacyDropCues() {
+    content.querySelectorAll(".slot.drop-valid,.slot.drop-invalid,.slot.drop-target")
+      .forEach(slot => {
+        slot.classList.remove("drop-valid", "drop-invalid", "drop-target");
+        delete slot.dataset.dropReason;
+      });
+    content.querySelectorAll(".session-card.combine-valid,.session-card.combine-invalid")
+      .forEach(card => card.classList.remove("combine-valid", "combine-invalid"));
+    content.querySelectorAll(".dragging").forEach(item => item.classList.remove("dragging"));
+  }
+
+  function paintLegacyDropCues(payload) {
+    clearLegacyDropCues();
+    content.querySelectorAll(".slot[data-legacy-date][data-legacy-time]").forEach(slot => {
+      const result = dropResultForSlot(
+        payload,
+        slot.dataset.legacyDate,
+        slot.dataset.legacyTime
+      );
+      slot.classList.add(result.valid ? "drop-valid" : "drop-invalid");
+      slot.dataset.dropReason = result.reason;
+    });
+  }
+
+  function paintLegacyTargetCue(slot, targetSession, result) {
+    content.querySelectorAll(".slot.drop-target")
+      .forEach(item => item.classList.remove("drop-target"));
+    content.querySelectorAll(".session-card.combine-valid,.session-card.combine-invalid")
+      .forEach(card => card.classList.remove("combine-valid", "combine-invalid"));
+    slot.classList.remove("drop-valid", "drop-invalid");
+    slot.classList.add("drop-target", result.valid ? "drop-valid" : "drop-invalid");
+    slot.dataset.dropReason = result.reason;
+    if (targetSession) {
+      targetSession.classList.add(result.valid ? "combine-valid" : "combine-invalid");
+    }
+  }
 
   function legacyDateLabel(date) {
     return `${date.slice(8, 10)}/${date.slice(5, 7)}`;
@@ -1778,56 +1922,70 @@
       });
       content.addEventListener("dragstart", event => {
         const resident = event.target.closest("[data-legacy-resident]");
-        if (resident) {
-          legacyDragPayload = { type: "resident", residentId: resident.dataset.legacyResident };
-          event.dataTransfer.effectAllowed = "copy";
-          return;
-        }
         const session = event.target.closest("[data-legacy-session]");
-        if (session) {
-          legacyDragPayload = { type: "session", sessionId: session.dataset.legacySession };
-          event.dataTransfer.effectAllowed = "move";
+        const source = resident || session;
+        if (!source) return;
+        legacyDragPayload = resident
+          ? { type: "resident", residentId: resident.dataset.legacyResident }
+          : { type: "session", sessionId: session.dataset.legacySession };
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = resident ? "copy" : "move";
         }
+        paintLegacyDropCues(legacyDragPayload);
+        source.classList.add("dragging");
       });
       content.addEventListener("dragover", event => {
         const slot = event.target.closest("[data-legacy-date][data-legacy-time]");
-        if (!legacyDragPayload || !slot || slot.classList.contains("readonly") || slot.classList.contains("lunch")) return;
+        if (!legacyDragPayload || !slot) return;
+        const targetSession = event.target.closest("[data-legacy-session]");
+        const result = dropResultForSlot(
+          legacyDragPayload,
+          slot.dataset.legacyDate,
+          slot.dataset.legacyTime,
+          targetSession?.dataset.legacySession
+        );
         event.preventDefault();
-        slot.classList.add("drop-valid");
+        paintLegacyTargetCue(slot, targetSession, result);
       });
       content.addEventListener("drop", event => {
         const slot = event.target.closest("[data-legacy-date][data-legacy-time]");
         const targetSession = event.target.closest("[data-legacy-session]");
-        if (!legacyDragPayload) return;
-        if (slot) {
-          event.preventDefault();
-          if (legacyDragPayload.type === "resident" && targetSession) {
-            joinResidentToSession(
-              legacyDragPayload.residentId,
-              targetSession.dataset.legacySession
-            );
-          } else if (legacyDragPayload.type === "resident") {
-            addResidentToSlot(
-              legacyDragPayload.residentId,
-              slot.dataset.legacyDate,
-              slot.dataset.legacyTime
-            );
-          } else if (targetSession) {
-            mergeSessions(legacyDragPayload.sessionId, targetSession.dataset.legacySession);
-          } else {
-            moveSession(
-              legacyDragPayload.sessionId,
-              slot.dataset.legacyDate,
-              slot.dataset.legacyTime
-            );
-          }
-        }
+        if (!legacyDragPayload || !slot) return;
+        const payload = legacyDragPayload;
+        const result = dropResultForSlot(
+          payload,
+          slot.dataset.legacyDate,
+          slot.dataset.legacyTime,
+          targetSession?.dataset.legacySession
+        );
+        event.preventDefault();
+        clearLegacyDropCues();
         legacyDragPayload = null;
-        renderLegacyShell();
+        if (!result.valid) {
+          renderStatusMessage(result.reason);
+          return;
+        }
+        if (payload.type === "resident" && targetSession) {
+          joinResidentToSession(payload.residentId, targetSession.dataset.legacySession);
+        } else if (payload.type === "resident") {
+          addResidentToSlot(
+            payload.residentId,
+            slot.dataset.legacyDate,
+            slot.dataset.legacyTime
+          );
+        } else if (targetSession) {
+          mergeSessions(payload.sessionId, targetSession.dataset.legacySession);
+        } else {
+          moveSession(
+            payload.sessionId,
+            slot.dataset.legacyDate,
+            slot.dataset.legacyTime
+          );
+        }
       });
       content.addEventListener("dragend", () => {
         legacyDragPayload = null;
-        content.querySelectorAll(".slot.drop-valid").forEach(slot => slot.classList.remove("drop-valid"));
+        clearLegacyDropCues();
       });
       document.addEventListener("click", event => {
         if (event.target.closest('[data-action="close-dialog"]')) {
