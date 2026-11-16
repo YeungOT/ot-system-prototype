@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>院舍設定</title>
+  <script>
+    if (new URLSearchParams(location.search).has("embed")) {
+      document.documentElement.classList.add("embedded");
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #fff;
+      --line: #d8e1e7;
+      --ink: #111827;
+      --muted: #64748b;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --teal-soft: #e7f3f1;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --red: #b91c1c;
+      --red-soft: #fef2f2;
+      --green: #15803d;
+      --green-soft: #f0fdf4;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .06);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { min-height: 100vh; display: grid; grid-template-columns: 220px minmax(0, 1fr); }
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 2px 8px 14px; border-bottom: 1px solid var(--line); }
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--teal);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+    .brand-title { font-weight: 800; }
+    .brand-sub { color: var(--muted); font-size: 11px; }
+    .nav { display: grid; gap: 4px; }
+    .nav button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #334155;
+    }
+    .nav button:hover { background: #f1f5f9; }
+    .nav button.active { background: var(--teal-soft); color: var(--teal-dark); font-weight: 800; }
+
+    .main { min-width: 0; display: grid; grid-template-rows: 58px minmax(0, 1fr); }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 18px;
+    }
+    .home-pill {
+      min-width: 180px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      padding: 7px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .top-meta { color: var(--muted); }
+    .user-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      padding: 5px 10px 5px 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .content { padding: 14px; min-width: 0; }
+    .screen-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .screen-head h1 { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 700; letter-spacing: 0; }
+
+    .settings-shell {
+      width: min(980px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .save-state { color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .save-state.dirty { color: #b45309; }
+
+    .settings-grid {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      gap: 12px;
+      align-items: start;
+    }
+    .settings-card {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 11px 12px;
+    }
+    .settings-card h2 { margin: 0; font-size: 13px; }
+    .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .field { display: grid; gap: 3px; min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { color: #475569; font-size: 10px; font-weight: 800; }
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      padding: 6px 8px;
+      color: var(--ink);
+    }
+    .field input:focus,
+    .field select:focus {
+      outline: 2px solid #8dd3c8;
+      outline-offset: 1px;
+      border-color: var(--teal);
+    }
+    .field-note { color: var(--muted); font-size: 9px; line-height: 1.4; }
+    .effect-note {
+      margin-top: 9px;
+      padding: 7px 8px;
+      border-left: 2px solid #7fb3aa;
+      background: #f7fbfa;
+      color: #475569;
+      font-size: 10px;
+    }
+    .rule-line {
+      display: grid;
+      gap: 7px;
+      align-items: start;
+    }
+    .form-error {
+      margin: 0 14px 12px;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      background: var(--red-soft);
+      color: var(--red);
+      padding: 8px 9px;
+      font-size: 10px;
+    }
+    .form-error[hidden] { display: none; }
+
+    .save-bar {
+      padding: 10px 14px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .save-actions { display: flex; gap: 7px; }
+    .btn {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      padding: 6px 10px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+    .btn:hover { background: #f8fafc; }
+    .btn-primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 100;
+      max-width: min(360px, calc(100vw - 36px));
+      border-radius: 7px;
+      background: #17202a;
+      color: #fff;
+      padding: 9px 12px;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    html.embedded .sidebar,
+    html.embedded .topbar { display: none; }
+    html.embedded .app { display: block; }
+    html.embedded .main { display: block; }
+    html.embedded .content { padding: 12px; }
+
+    @media (max-width: 1120px) {
+      .app { grid-template-columns: 72px minmax(0, 1fr); }
+      .brand-title, .brand-sub { display: none; }
+    }
+    @media (max-width: 760px) {
+      .settings-grid { grid-template-columns: minmax(0, 1fr); }
+      .rule-card { grid-column: auto; }
+      .rule-line { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 680px) {
+      .sidebar { display: none; }
+      .app, .main { display: block; }
+      .topbar { display: none; }
+      .content { padding: 10px; }
+      .field-grid { grid-template-columns: minmax(0, 1fr); }
+      .field.full { grid-column: auto; }
+      .save-bar { align-items: flex-start; flex-direction: column; }
+      .save-actions { width: 100%; }
+      .save-actions .btn-primary { margin-left: auto; }
+    }
+  </style>
+  <link rel="stylesheet" href="../shared/design-system.css?v=20261116-resident-cards">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">OT</div>
+        <div>
+          <div class="brand-title">OT System</div>
+          <div class="brand-sub">Home settings</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="系統模組">
+        <button type="button">工作台</button>
+        <button type="button">住客管理</button>
+        <button type="button">訓練時間表</button>
+        <button type="button">復康運動紀錄</button>
+        <button type="button">評估系統</button>
+        <button type="button">ICP</button>
+        <button class="active" type="button">院舍設定</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="home-pill">
+          <span><strong id="chrome-home-code">yt</strong> <span id="chrome-home-name">油塘康璟</span></span>
+        </div>
+        <div class="topbar-actions">
+          <span class="top-meta">2026年10月</span>
+          <div class="user-pill"><span class="avatar">T</span><span>OT</span></div>
+        </div>
+      </header>
+
+      <div class="content">
+        <form class="settings-shell" id="settings-form" novalidate>
+          <div class="settings-grid">
+            <section class="settings-card">
+              <h2>院舍資料</h2>
+              <div class="field-grid">
+                <div class="field full">
+                  <label for="setting-name">院舍名稱</label>
+                  <input id="setting-name" name="name" autocomplete="organization" required>
+                </div>
+                <div class="field full">
+                  <label for="setting-license">牌照處檔號</label>
+                  <input id="setting-license" name="licenseNumber" inputmode="numeric">
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-card">
+              <h2>人力及容量</h2>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="setting-hours">每月所需治療師時數</label>
+                  <input id="setting-hours" name="monthlyTherapistHours" type="number" min="0" max="744" step="1" required>
+                </div>
+                <div class="field">
+                  <label for="setting-group-limit">小組人數上限</label>
+                  <input id="setting-group-limit" name="groupLimit" type="number" min="1" max="20" step="1" required>
+                </div>
+                <div class="field">
+                  <label for="setting-total-beds">總床位</label>
+                  <input id="setting-total-beds" name="totalBeds" type="number" min="1" max="999" step="1" required>
+                </div>
+                <div class="field">
+                  <label for="setting-voucher-beds">券位床位數</label>
+                  <input id="setting-voucher-beds" name="voucherBeds" type="number" min="0" max="999" step="1" required>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-card">
+              <h2>午膳時段</h2>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="setting-lunch-start">開始</label>
+                  <input id="setting-lunch-start" name="lunchStart" type="time" required>
+                </div>
+                <div class="field">
+                  <label for="setting-lunch-end">結束</label>
+                  <input id="setting-lunch-end" name="lunchEnd" type="time" required>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-card rule-card">
+              <h2>ICP 規則</h2>
+              <div class="rule-line">
+                <div class="field">
+                  <label for="setting-urgent-rule">緊急 ICP 影響</label>
+                  <select id="setting-urgent-rule" name="urgentIcpRule">
+                    <option value="none">沒有影響</option>
+                    <option value="restart">重啟週期</option>
+                    <option value="current">計算於週期內</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <p class="form-error" id="settings-error" hidden></p>
+
+          <div class="save-bar">
+            <span class="save-state" id="bottom-save-state">所有設定已儲存</span>
+            <div class="save-actions">
+              <button class="btn" id="reset-settings" type="button">還原</button>
+              <button class="btn btn-primary" type="submit">儲存設定</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../shared/home-settings.js"></script>
+  <script src="../shared/prototype-catalog.js"></script>
+  <script src="../shared/mock-residents.js"></script>
+  <script src="../shared/prototype-domain.js"></script>
+  <script>
+    const form = document.getElementById("settings-form");
+    const statuses = [document.getElementById("bottom-save-state")];
+    const errorBox = document.getElementById("settings-error");
+    let editingHomeCode = OT_HOME_SETTINGS.getActiveHomeCode();
+    let dirty = false;
+    let toastTimer = null;
+
+    function applyPageChrome(home) {
+      document.getElementById("chrome-home-code").textContent = home.code;
+      document.getElementById("chrome-home-name").textContent = home.name;
+    }
+
+    function fillForm(home) {
+      document.getElementById("setting-name").value = home.name;
+      document.getElementById("setting-license").value = home.licenseNumber;
+      document.getElementById("setting-hours").value = home.monthlyTherapistHours;
+      document.getElementById("setting-total-beds").value = home.totalBeds;
+      document.getElementById("setting-voucher-beds").value = home.voucherBeds;
+      document.getElementById("setting-group-limit").value = home.groupLimit;
+      document.getElementById("setting-lunch-start").value = home.lunchStart;
+      document.getElementById("setting-lunch-end").value = home.lunchEnd;
+      document.getElementById("setting-urgent-rule").value = home.urgentIcpRule;
+      applyPageChrome(home);
+    }
+
+    function setDirty(value) {
+      dirty = value;
+      statuses.forEach(status => {
+        status.textContent = value ? "尚未儲存" : "所有設定已儲存";
+        status.classList.toggle("dirty", value);
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function loadHome(code) {
+      editingHomeCode = code;
+      const home = OT_HOME_SETTINGS.getHome(code);
+      fillForm(home);
+      errorBox.hidden = true;
+      setDirty(false);
+    }
+
+    loadHome(editingHomeCode);
+
+    form.addEventListener("input", () => setDirty(true));
+    form.addEventListener("change", () => setDirty(true));
+
+    document.getElementById("reset-settings").addEventListener("click", () => {
+      fillForm(OT_HOME_SETTINGS.getHome(editingHomeCode));
+      errorBox.hidden = true;
+      setDirty(false);
+      showToast("已還原已儲存的設定。");
+    });
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const values = {
+        name: document.getElementById("setting-name").value.trim(),
+        licenseNumber: document.getElementById("setting-license").value.trim(),
+        monthlyTherapistHours: Number(document.getElementById("setting-hours").value),
+        totalBeds: Number(document.getElementById("setting-total-beds").value),
+        voucherBeds: Number(document.getElementById("setting-voucher-beds").value),
+        groupLimit: Number(document.getElementById("setting-group-limit").value),
+        lunchStart: document.getElementById("setting-lunch-start").value,
+        lunchEnd: document.getElementById("setting-lunch-end").value,
+        urgentIcpRule: document.getElementById("setting-urgent-rule").value
+      };
+      if (values.voucherBeds > values.totalBeds) {
+        errorBox.textContent = "券位床位數不可多於總床位。";
+        errorBox.hidden = false;
+        return;
+      }
+      if (!values.lunchStart || !values.lunchEnd || values.lunchStart >= values.lunchEnd) {
+        errorBox.textContent = "午膳結束時間必須晚於開始時間。";
+        errorBox.hidden = false;
+        return;
+      }
+      try {
+        const saved = OT_HOME_SETTINGS.saveHome(editingHomeCode, values);
+        try {
+          OT_PROTOTYPE.updateSettings(saved);
+        } catch (storeError) {
+          // The settings page remains usable if the shared prototype state is unavailable.
+        }
+        fillForm(saved);
+        errorBox.hidden = true;
+        setDirty(false);
+        statuses.forEach(status => {
+          status.textContent = `已儲存 ${new Date().toLocaleTimeString("zh-HK", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+          })}`;
+        });
+        showToast("設定已套用至其他系統。");
+      } catch (error) {
+        errorBox.textContent = "未能儲存設定；請檢查瀏覽器儲存權限。";
+        errorBox.hidden = false;
+      }
+    });
+
+    window.addEventListener("storage", event => {
+      if (
+        event.key === OT_HOME_SETTINGS.activeHomeKey &&
+        !dirty &&
+        event.newValue &&
+        event.newValue !== editingHomeCode
+      ) {
+        loadHome(event.newValue);
+      }
+    });
+  </script>
+  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+</body>
+</html>

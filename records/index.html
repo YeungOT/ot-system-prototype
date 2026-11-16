@@ -1,0 +1,1796 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>復康運動紀錄</title>
+  <script>
+    const params = new URLSearchParams(location.search);
+    if (params.has("embed")) {
+      document.documentElement.classList.add("embedded");
+    }
+    if (params.has("dev")) {
+      document.documentElement.classList.add("developer");
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --line: #d8e1e7;
+      --ink: #111827;
+      --muted: #64748b;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --teal-soft: #e7f3f1;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --amber: #b45309;
+      --amber-soft: #fff7ed;
+      --red: #b91c1c;
+      --red-soft: #fef2f2;
+      --green: #15803d;
+      --green-soft: #f0fdf4;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .06);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible,
+    [tabindex]:focus-visible,
+    select:focus-visible {
+      outline: 3px solid rgba(15, 118, 110, .25);
+      outline-offset: 2px;
+    }
+
+    .app { min-height: 100vh; display: grid; grid-template-columns: 220px minmax(0, 1fr); }
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 2px 8px 14px; border-bottom: 1px solid var(--line); }
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--teal);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+    .brand-title { font-weight: 800; }
+    .brand-sub { color: var(--muted); font-size: 11px; }
+    .nav { display: grid; gap: 4px; }
+    .nav button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #334155;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .nav button:hover { background: #f1f5f9; }
+    .nav button.active { background: var(--teal-soft); color: var(--teal-dark); font-weight: 800; }
+    .nav small { color: var(--muted); font-size: 10px; }
+
+    .main { min-width: 0; display: grid; grid-template-rows: 58px minmax(0, 1fr); }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 18px;
+    }
+    .home-pill {
+      min-width: 180px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      padding: 7px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .top-meta { color: var(--muted); }
+    .topbar-actions,
+    .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .user-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      padding: 5px 10px 5px 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: #111827;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .content {
+      min-width: 0;
+      height: calc(100vh - 58px);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .screen-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 8px;
+      flex: 0 0 auto;
+    }
+    h1 { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 700; letter-spacing: 0; }
+    .btn {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 7px 11px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+    .btn:hover { background: #f8fafc; }
+    .btn-primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .icon-btn {
+      width: 34px;
+      min-height: 34px;
+      padding: 0;
+      display: inline-grid;
+      place-items: center;
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .control-bar {
+      flex: 0 0 auto;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 5px 8px;
+      overflow: visible;
+    }
+    .mode-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 2px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      flex: 0 0 auto;
+    }
+    .mode-tab {
+      min-width: 128px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      padding: 6px 9px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .mode-tab:hover { background: #e9eef3; }
+    .mode-tab.active {
+      background: var(--surface);
+      color: var(--teal-dark);
+      box-shadow: var(--shadow);
+    }
+    .toolbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+    .month-nav { display: flex; align-items: center; gap: 5px; flex: 0 0 auto; }
+    .month-nav strong { min-width: 110px; text-align: center; font-size: 12px; }
+    .month-nav .btn { min-height: 34px; height: 34px; }
+    .place-menu { position: relative; flex: 0 0 auto; }
+    .place-menu summary {
+      min-height: 34px;
+      list-style: none;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      padding: 6px 10px;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .place-menu summary::-webkit-details-marker { display: none; }
+    .place-menu summary::after {
+      content: "";
+      width: 7px;
+      height: 7px;
+      margin: -3px 1px 0 4px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      color: var(--muted);
+      transform: rotate(45deg);
+    }
+    .place-menu[open] summary::after {
+      margin-top: 3px;
+      transform: rotate(225deg);
+    }
+    .place-menu[open] summary { background: var(--teal-soft); border-color: #b7ded7; color: var(--teal-dark); }
+    .place-popover {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 5px);
+      z-index: 40;
+      min-width: 170px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, .18);
+      padding: 7px;
+      display: grid;
+      gap: 5px;
+    }
+    .place-option {
+      min-height: 30px;
+      border-radius: 5px;
+      padding: 5px 7px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .place-option:hover { background: #f8fafc; }
+    .record-search {
+      width: 190px;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      padding: 6px 9px;
+    }
+    .compact-select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      padding: 5px 7px;
+    }
+
+    .summary-line {
+      min-height: 36px;
+      margin-top: 8px;
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 7px 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .summary-copy { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .summary-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); flex: 0 0 auto; }
+    #summary-copy { display: flex; align-items: center; gap: 16px; min-width: 0; }
+    .summary-copy strong { white-space: nowrap; }
+    .summary-copy span { color: var(--muted); font-size: 11px; }
+    .legend { color: var(--muted); font-size: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .legend i {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+      margin-right: 3px;
+      vertical-align: 1px;
+    }
+    .legend .individual { background: #b7ded7; }
+    .legend .group { background: #bfdbfe; }
+    .legend .extra-individual { background: #fcd9b6; }
+    .legend .extra-group { background: #fdba74; }
+    .legend .special { background: #fca5a5; }
+    .legend .hospital { background: #f2d4b9; }
+    .legend .planned { background: #fef3c7; }
+
+    .sheet {
+      margin-top: 8px;
+      min-height: 0;
+      flex: 1 1 auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+    }
+    .record-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none;
+      overflow: auto;
+      background: #fff;
+    }
+    .record-table-wrap {
+      position: relative;
+      width: max-content;
+      min-width: 100%;
+    }
+    .record-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      min-width: 100%;
+      font-size: 11px;
+    }
+    .record-table th,
+    .record-table td {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .record-table th:last-child,
+    .record-table td:last-child { border-right: 0; }
+    .record-table tr:last-child td { border-bottom: 0; }
+    .resident-head,
+    .resident-cell {
+      position: sticky;
+      left: 0;
+      z-index: 8;
+      width: 164px;
+      min-width: 164px;
+      max-width: 164px;
+      background: var(--surface);
+      text-align: left;
+      padding: 3px 7px;
+    }
+    .resident-head {
+      z-index: 12;
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 800;
+    }
+    .day-head {
+      width: 34px;
+      min-width: 34px;
+      height: 36px;
+      padding: 4px 1px;
+      background: #f8fafc;
+      color: #475569;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 800;
+      position: sticky;
+      top: 0;
+      z-index: 6;
+    }
+    .day-head span { display: block; color: var(--muted); font-size: 8px; font-weight: 700; }
+    .day-head.weekend { background: #f3f5f7; color: #64748b; }
+    .day-head.today { background: var(--teal-soft); color: var(--teal-dark); }
+    .day-head.today,
+    .day-head.before-today,
+    .record-cell-wrap.today,
+    .record-cell-wrap.before-today {
+      border-right-color: transparent;
+    }
+    .today-column-guides {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      z-index: 7;
+      pointer-events: none;
+    }
+    .today-column-guides::before,
+    .today-column-guides::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: var(--guide-line-width, 1px);
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(15, 118, 110, .95) 0 2px,
+        transparent 2px 8px
+      );
+    }
+    .today-column-guides::before { left: 0; }
+    .today-column-guides::after { right: 0; }
+    .day-head.week-start,
+    .record-cell-wrap.week-start {
+      box-shadow: inset 1px 0 0 #ef4444;
+    }
+    .row-resident {
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr) 30px;
+      align-items: center;
+      column-gap: 4px;
+      min-width: 0;
+      min-height: 20px;
+      line-height: 1.2;
+    }
+    .record-table .row-resident.row-resident {
+      grid-template-columns: 36px minmax(0, 1fr) 30px;
+      grid-template-rows: auto;
+      column-gap: 4px;
+      row-gap: 0;
+    }
+    .record-table .row-resident.row-resident .bed {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .record-table .row-resident.row-resident .resident-name-line {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .record-table .row-resident.row-resident .row-check {
+      grid-column: 3;
+      grid-row: 1;
+    }
+    .bed {
+      width: 36px;
+      border-radius: 4px;
+      background: #eef2f6;
+      color: #475569;
+      padding: 1px 4px;
+      box-sizing: border-box;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 900;
+    }
+    .resident-inline-name {
+      min-width: 0;
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .resident-name-line {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow: hidden;
+    }
+    .resident-place {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .row-check {
+      min-width: 27px;
+      justify-self: end;
+      text-align: right;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .row-check.short { color: var(--red); }
+    .row-check.met { color: var(--green); }
+    .record-cell-wrap {
+      position: relative;
+      width: 34px;
+      min-width: 34px;
+      height: 34px;
+      padding: 1px;
+      text-align: center;
+    }
+    .record-cell {
+      width: 100%;
+      height: 100%;
+      min-height: 30px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      color: #475569;
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1.1;
+      padding: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .record-cell:hover { background: #f1f5f9; box-shadow: inset 0 0 0 1px #cbd5e1; }
+    .record-cell.selected { box-shadow: inset 0 0 0 2px var(--teal); }
+    .record-table tr.query-focus .resident-cell {
+      background: var(--teal-soft);
+      box-shadow: inset 3px 0 0 var(--teal);
+    }
+    .record-cell.individual { background: #eaf8f5; color: var(--teal-dark); }
+    .record-cell.group { background: var(--blue-soft); color: #1d4ed8; }
+    .record-cell.extra-individual { background: var(--amber-soft); color: var(--amber); }
+    .record-cell.extra-group { background: #ffedd5; color: #9a3412; }
+    .record-cell.refusal { background: var(--red-soft); color: var(--red); }
+    .record-cell.hospital { background: var(--amber-soft); color: var(--amber); }
+    .record-cell.planned {
+      background: #fffbeb;
+      color: #92400e;
+    }
+    .record-cell.planned:hover { background: #fef3c7; box-shadow: none; }
+    .record-cell.planned.overdue { background: #fee2e2; color: #991b1b; }
+    .record-cell.planned.overdue:hover { background: #fecaca; box-shadow: none; }
+    .record-cell.locked {
+      background: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .record-cell.locked:hover { background: #f1f5f9; box-shadow: none; }
+    .record-cell.admission { background: var(--green-soft); color: var(--green); }
+    .record-cell.discharge { background: #f1f5f9; color: #475569; }
+    .record-cell.gap {
+      background: repeating-linear-gradient(135deg, #f8fafc, #f8fafc 4px, #e8edf1 4px, #e8edf1 6px);
+      color: #94a3b8;
+      cursor: default;
+    }
+    .record-cell .cell-code { display: block; }
+    .record-cell.session-split::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      pointer-events: none;
+      background: linear-gradient(
+        135deg,
+        transparent calc(50% - .5px),
+        rgba(71, 85, 105, .32) calc(50% - .5px),
+        rgba(71, 85, 105, .32) calc(50% + .5px),
+        transparent calc(50% + .5px)
+      );
+    }
+    .record-cell .cell-form,
+    .record-cell .cell-activity {
+      position: absolute;
+      z-index: 1;
+      font-size: 10px;
+      line-height: 1;
+    }
+    .record-cell .cell-form { top: 4px; left: 6px; }
+    .record-cell .cell-activity { right: 6px; bottom: 4px; }
+
+    .cell-menu {
+      position: fixed;
+      z-index: 80;
+      width: 232px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 14px 36px rgba(15, 23, 42, .2);
+      padding: 9px;
+    }
+    .menu-fields { display: grid; gap: 7px; }
+    .menu-field { display: block; }
+    .menu-field select {
+      width: 100%;
+      min-width: 0;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 3px 6px;
+      font-size: 11px;
+    }
+    .menu-field select:disabled { background: #f8fafc; color: #94a3b8; }
+    .cell-menu-actions {
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+    .cell-menu-actions .btn { min-height: 26px; padding: 3px 8px; }
+    .menu-error { min-height: 15px; margin-top: 5px; color: var(--red); font-size: 10px; }
+    .cell-meta {
+      margin-top: 7px;
+      border-top: 1px solid var(--line);
+      padding-top: 7px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    dialog {
+      width: min(570px, calc(100vw - 24px));
+      max-height: calc(100vh - 30px);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 0;
+      color: var(--ink);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, .24);
+    }
+    dialog::backdrop { background: rgba(15, 23, 42, .35); }
+    .dialog-head { padding: 15px 17px 11px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font-size: 17px; }
+    .dialog-head p { margin: 3px 0 0; color: var(--muted); }
+    .dialog-body { padding: 13px 17px 3px; max-height: calc(100vh - 175px); overflow: auto; }
+    .form-section + .form-section { margin-top: 15px; }
+    .form-label { margin-bottom: 6px; color: #334155; font-size: 11px; font-weight: 800; }
+    .choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+    .choice {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: #334155;
+      padding: 7px 9px;
+      text-align: left;
+      font-weight: 700;
+    }
+    .choice:hover { background: #f8fafc; }
+    .choice.active { border-color: var(--teal); background: var(--teal-soft); color: var(--teal-dark); }
+    .activity-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+    .activity {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: #475569;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .activity.active { background: var(--teal-soft); border-color: #b7ded7; color: var(--teal-dark); }
+    .activity:disabled { cursor: not-allowed; opacity: .38; }
+    .special-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .special-choice {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: #475569;
+      padding: 5px 4px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .special-choice.active { border-color: var(--red); background: var(--red-soft); color: var(--red); }
+    .form-error { min-height: 18px; color: var(--red); font-size: 11px; padding-top: 8px; }
+    .dialog-actions {
+      padding: 10px 17px 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .dialog-actions-right { display: flex; gap: 8px; margin-left: auto; }
+
+    #print-dialog { width: min(1120px, calc(100vw - 20px)); }
+    .print-toolbar {
+      padding: 10px 13px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .print-toolbar strong { font-size: 14px; }
+    .print-preview { overflow: auto; padding: 14px; background: #eef2f5; }
+    .print-sheet {
+      width: max-content;
+      min-width: 100%;
+      background: #fff;
+      color: #111827;
+      padding: 16px;
+      border: 1px solid #d8e1e7;
+    }
+    .print-sheet h3 { margin: 0 0 2px; font-size: 17px; }
+    .print-sheet p { margin: 0 0 10px; color: var(--muted); font-size: 10px; }
+    .print-table { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 8px; }
+    .print-table th,
+    .print-table td { border: 1px solid #b8c5ce; padding: 2px; text-align: center; }
+    .print-table th:first-child,
+    .print-table td:first-child {
+      min-width: 92px;
+      text-align: left;
+      position: static;
+      background: #fff;
+    }
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 100;
+      max-width: min(380px, calc(100vw - 36px));
+      border: 1px solid #334155;
+      border-radius: 7px;
+      background: #111827;
+      color: #fff;
+      padding: 10px 13px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, .24);
+      transform: translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .empty-state {
+      padding: 38px 18px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    @media (max-width: 1120px) {
+      .app { grid-template-columns: 72px minmax(0, 1fr); }
+      .brand-title, .brand-sub, .nav small { display: none; }
+      .sidebar { padding-inline: 8px; }
+    }
+    @media (max-width: 720px) {
+      .sidebar { display: none; }
+      .app, .main { display: block; }
+      body { overflow: auto; }
+      .content { padding: 12px; }
+      .screen-head { flex-direction: column; }
+      .content { height: auto; min-height: calc(100vh - 54px); overflow: visible; }
+      .control-bar { overflow-x: auto; }
+      .mode-tab { min-width: 0; flex: 1; padding-inline: 9px; }
+      .summary-line { align-items: flex-start; flex-direction: column; }
+      #summary-copy { flex-wrap: wrap; row-gap: 4px; }
+      .sheet { min-height: 420px; }
+      .record-scroll { max-height: calc(100vh - 300px); }
+      .resident-head, .resident-cell { width: 152px; min-width: 152px; max-width: 152px; }
+      .dialog-body { padding-inline: 13px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+    @media print {
+      body > *:not(#print-dialog) { display: none !important; }
+      #print-dialog { display: block !important; position: static; border: 0; width: 100%; max-height: none; }
+      #print-dialog::backdrop { display: none; }
+      .print-toolbar { display: none; }
+      .print-preview { padding: 0; background: #fff; overflow: visible; }
+      .print-sheet { border: 0; padding: 0; }
+    }
+
+    html.embedded .sidebar,
+    html.embedded .topbar { display: none; }
+    html.embedded .app { display: block; }
+    html.embedded .main { display: block; }
+    html.embedded .content { height: 100vh; padding: 16px; }
+  </style>
+  <link rel="stylesheet" href="../shared/design-system.css?v=20261116-resident-cards">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">OT</div>
+        <div>
+          <div class="brand-title">OT System</div>
+          <div class="brand-sub">復康運動紀錄</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="系統模組">
+        <button><span>工作台</span><small>首頁</small></button>
+        <button><span>住客管理</span><small>007</small></button>
+        <button><span>訓練時間表</span><small>006</small></button>
+        <button class="active"><span>復康運動紀錄</span><small>007a / 007c</small></button>
+        <button><span>評估系統</span><small>016 / MOCA</small></button>
+        <button><span>ICP</span><small>週期</small></button>
+        <button><span>院舍設定</span><small>設定</small></button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="home-pill">
+          <span><strong id="chrome-home-code">yt</strong> <span id="chrome-home-name">油塘康璟</span></span>
+          <span class="ui-chevron" aria-hidden="true"></span>
+        </div>
+        <div class="topbar-actions">
+          <span class="top-meta">2026年10月</span>
+          <span class="top-meta">OT</span>
+          <div class="user-pill"><span class="avatar">T</span><span>OT</span></div>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="control-bar">
+          <div class="mode-switch" role="group" aria-label="紀錄類型">
+            <button class="mode-tab active" type="button" data-mode="a" aria-pressed="true">復康訓練</button>
+            <button class="mode-tab" type="button" data-mode="c" aria-pressed="false">額外服務</button>
+          </div>
+          <div class="toolbar-right">
+            <div class="month-nav">
+              <button class="btn icon-btn" type="button" data-action="prev-month" title="上一個月" aria-label="上一個月">←</button>
+              <strong id="month-label">2026年10月</strong>
+              <button class="btn icon-btn" type="button" data-action="next-month" title="下一個月" aria-label="下一個月">→</button>
+              <button class="btn" type="button" data-action="current-month">本月</button>
+            </div>
+            <input class="record-search" id="record-search" type="search" placeholder="搜尋床號或姓名" aria-label="搜尋床號或姓名">
+            <details class="place-menu">
+              <summary><span>宿位</span><strong id="place-summary">全部</strong></summary>
+              <div class="place-popover">
+                <label class="place-option"><input type="checkbox" data-place="voucher" checked> 券位</label>
+                <label class="place-option"><input type="checkbox" data-place="bought" checked> 買位</label>
+                <label class="place-option"><input type="checkbox" data-place="private" checked> 私位 / 暫託</label>
+              </div>
+            </details>
+            <select class="compact-select" id="floor-filter" aria-label="樓層篩選">
+              <option value="all">全部樓層</option>
+            </select>
+            <select class="compact-select" id="mobility-filter" aria-label="活動現況篩選">
+              <option value="all">全部活動現況</option>
+              <option value="IW">IW 自由活動</option>
+              <option value="IWC">IWC 自由輪椅活動</option>
+              <option value="CB">CB 久坐</option>
+              <option value="BB">BB 臥床</option>
+            </select>
+            <button class="btn" type="button" data-action="print-preview">列印</button>
+          </div>
+        </section>
+
+        <section class="sheet">
+          <div class="record-scroll" id="record-scroll"></div>
+        </section>
+
+        <section class="summary-line">
+          <div class="summary-copy">
+            <span class="summary-dot" aria-hidden="true"></span>
+            <div id="summary-copy"></div>
+          </div>
+          <div class="legend" id="legend"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="cell-menu" id="cell-menu" hidden>
+    <div class="menu-fields">
+      <label class="menu-field"><select id="form-select" aria-label="形式"></select></label>
+      <label class="menu-field"><select id="activity-select" aria-label="活動"></select></label>
+      <label class="menu-field"><select id="status-select" aria-label="住客狀態"></select></label>
+    </div>
+    <div class="cell-meta" id="cell-meta"></div>
+    <div class="menu-error" id="menu-error" role="alert"></div>
+    <div class="cell-menu-actions">
+      <button class="btn" type="button" data-action="clear-cell">清除</button>
+      <button class="btn btn-primary" type="button" data-action="save-cell">儲存</button>
+    </div>
+  </div>
+
+  <dialog id="print-dialog" aria-labelledby="print-title">
+    <div class="print-toolbar">
+      <strong id="print-title">列印預覽</strong>
+      <div class="actions">
+        <button class="btn" type="button" data-action="close-print">返回</button>
+        <button class="btn btn-primary" type="button" data-action="print">列印</button>
+      </div>
+    </div>
+    <div class="print-preview" id="print-preview"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../shared/home-settings.js"></script>
+  <script src="../shared/prototype-catalog.js"></script>
+  <script src="../shared/mock-residents.js"></script>
+  <script src="../shared/prototype-domain.js"></script>
+  <script>
+    function applyHomeSettings() {
+      const home = OT_HOME_SETTINGS.getHome();
+      document.getElementById("chrome-home-code").textContent = home.code;
+      document.getElementById("chrome-home-name").textContent = home.name;
+    }
+
+    const STORAGE_KEY = OT_MOCK_STORAGE_KEYS.records;
+    const PLAN_STORAGE_KEY = OT_MOCK_STORAGE_KEYS.trainingSchedule;
+    const TODAY = new Date(2026, 9, 22);
+    const TODAY_KEY = "2026-10-22";
+    const PLAN_WEEK_DATES = {
+      1: ["2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10"],
+      2: ["2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17"],
+      3: ["2026-10-21", "2026-10-22", "2026-10-23", "2026-10-24"],
+      4: ["2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31"]
+    };
+    const FALLBACK_PLAN = [
+      { id: "s01", week: 1, day: 0, memberIds: ["r1"], format: "i" },
+      { id: "s02", week: 1, day: 1, memberIds: ["r2"], format: "i" },
+      { id: "s03", week: 1, day: 2, memberIds: ["r3", "r4"], format: "g" },
+      { id: "s04", week: 2, day: 0, memberIds: ["r1"], format: "i" },
+      { id: "s05", week: 2, day: 1, memberIds: ["r2"], format: "i" },
+      { id: "s06", week: 2, day: 2, memberIds: ["r3", "r4"], format: "g" },
+      { id: "s07", week: 3, day: 0, memberIds: ["r1"], format: "i" },
+      { id: "s08", week: 3, day: 3, memberIds: ["r2"], format: "i" },
+      { id: "s09", week: 3, day: 1, memberIds: ["r3", "r4"], format: "g" },
+      { id: "s10", week: 1, day: 0, memberIds: ["r5"], format: "i" },
+      { id: "s11", week: 3, day: 2, memberIds: ["r5"], format: "i" },
+      { id: "s12", week: 1, day: 1, memberIds: ["r6"], format: "i" },
+      { id: "s13", week: 3, day: 3, memberIds: ["r6"], format: "i" }
+    ];
+    const PLACE_LABELS = { voucher: "券", bought: "買", private: "私", respite: "暫" };
+    const ACTIVITY_LABELS = Object.fromEntries(
+      OT_PROTOTYPE_CATALOG.activities.map(activity => [activity.code, activity.label])
+    );
+    Object.assign(ACTIVITY_LABELS, {
+      Ax: "評估",
+      X: "拒絕訓練",
+      H: "入住醫院"
+    });
+    const SPECIAL_OPTIONS = [
+      { code: "X", label: "拒絕訓練" },
+      { code: "H", label: "入住醫院" },
+      { code: "IN", label: "入住" },
+      { code: "OUT", label: "退住" }
+    ];
+    const residents = OT_PROTOTYPE.residents().map(resident => ({
+      id: resident.id,
+      bed: resident.bed,
+      name: resident.name,
+      place: {
+        "券位": "voucher",
+        "買位": "bought",
+        "私位": "private",
+        "暫託": "respite"
+      }[resident.place] || "voucher",
+      cadence: resident.trainingFrequency?.includes("星期") ? "weekly" : "monthly",
+      floor: resident.floor || "1樓",
+      mobility: resident.mobility || "IW",
+      need: 2,
+      activities: resident.activityCodes?.length
+        ? resident.activityCodes
+        : ["5", "8", "C"],
+      extraTarget: Number(resident.extraServices) || 0
+    }));
+
+    const seed = {
+      a: {
+        "2026-10-21|r1": { form: "i", activity: "5" },
+        "2026-10-23|r1": { form: "i", activity: "8" },
+        "2026-10-22|r2": { form: "i", activity: "8" },
+        "2026-10-19|r3": { form: "g", activity: "C" },
+        "2026-10-21|r3": { form: "i", activity: "5" },
+        "2026-10-19|r4": { form: "g", activity: "C" },
+        "2026-10-23|r4": { form: "g", activity: "8" },
+        "2026-10-08|r5": { form: "i", activity: "C" },
+        "2026-10-22|r5": { form: "i", activity: "5" },
+        "2026-10-20|r7": { form: "i", activity: "9" }
+      },
+      c: {
+        "2026-10-19|r1": { form: "ei", activity: "5" },
+        "2026-10-23|r1": { form: "eg", activity: "C" },
+        "2026-10-20|r2": { form: "eg", activity: "8" },
+        "2026-10-21|r3": { form: "ei", activity: "C" },
+        "2026-10-22|r5": { form: "eg", activity: "5" }
+      },
+      statuses: {
+        "2026-10-05|r1": "H",
+        "2026-10-23|r1": "H",
+        "2026-10-20|r2": "X",
+        "2026-10-09|r6": "IN",
+        "2026-10-12|r6": "H",
+        "2026-10-15|r6": "H",
+        "2026-10-25|r6": "OUT"
+      },
+      statusMeta: {}
+    };
+
+    let activeMode = "a";
+    let visibleMonth = new Date(2026, 9, 1);
+    let activePlaces = new Set(["voucher", "bought", "private"]);
+    let activeFloor = "all";
+    let activeMobility = "all";
+    let recordSearchTerm = "";
+    let data = cloneData(seed);
+    let plannedSessions = FALLBACK_PLAN.map(session => ({ ...session, memberIds: [...session.memberIds] }));
+    let selectedCell = null;
+    let draftEntry = null;
+    let toastTimer = null;
+
+    const residentById = new Map(residents.map(resident => [resident.id, resident]));
+    const escapeHtml = value => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    function cloneData(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function loadData() {
+      let migratedDemoLifecycle = false;
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (stored?.a && stored?.c && stored?.statuses) data = stored;
+      } catch (error) {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+      data.statusMeta = data.statusMeta || {};
+      const demoLifecycle = {
+        "2026-10-05|r1": "H",
+        "2026-10-23|r1": "H",
+        "2026-10-09|r6": "IN",
+        "2026-10-12|r6": "H",
+        "2026-10-15|r6": "H",
+        "2026-10-25|r6": "OUT"
+      };
+      Object.entries(demoLifecycle).forEach(([key, value]) => {
+        if (data.statuses[key]) return;
+        data.statuses[key] = value;
+        migratedDemoLifecycle = true;
+      });
+      [data.a, data.c].forEach(collection => {
+        Object.values(collection).forEach(record => {
+          if (!record || typeof record !== "object") return;
+          record.modifiedBy = record.modifiedBy || "OT Test";
+          record.modifiedAt = record.modifiedAt || "2026-10-22T09:30:00+08:00";
+        });
+      });
+      if (migratedDemoLifecycle) saveData();
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (error) {
+        // The mock remains usable without persistent storage.
+      }
+    }
+
+    function loadPlan() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(PLAN_STORAGE_KEY));
+        if (stored?.plans) {
+          plannedSessions = Object.values(stored.plans)
+            .filter(plan => plan.status === "valid")
+            .flatMap(plan => plan.sessions)
+            .map(session => ({
+              ...session,
+              paid: Boolean(session.paid),
+              format: session.paid
+                ? (session.format === "g" ? "eg" : "ei")
+                : session.format
+            }));
+          return;
+        }
+        if (Array.isArray(stored?.sessions) && stored.sessions.length) {
+          plannedSessions = stored.sessions.map(session => ({
+            ...session,
+            memberIds: [...session.memberIds]
+          }));
+        }
+      } catch (error) {
+        plannedSessions = FALLBACK_PLAN.map(session => ({
+          ...session,
+          memberIds: [...session.memberIds]
+        }));
+      }
+    }
+
+    function monthKey(date = visibleMonth) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function dateKey(day) {
+      return `${monthKey()}-${String(day).padStart(2, "0")}`;
+    }
+
+    function cellKey(residentId, day) {
+      return `${dateKey(day)}|${residentId}`;
+    }
+
+    function daysInVisibleMonth() {
+      return new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate();
+    }
+
+    function isSameMonth(dateA, dateB) {
+      return dateA.getFullYear() === dateB.getFullYear() && dateA.getMonth() === dateB.getMonth();
+    }
+
+    function weekStart(date) {
+      const copy = new Date(date);
+      const offset = (copy.getDay() + 6) % 7;
+      copy.setDate(copy.getDate() - offset);
+      copy.setHours(0, 0, 0, 0);
+      return copy;
+    }
+
+    function addDays(date, amount) {
+      const copy = new Date(date);
+      copy.setDate(copy.getDate() + amount);
+      return copy;
+    }
+
+    function isInWeek(dateText, reference) {
+      const date = new Date(`${dateText}T00:00:00`);
+      const start = weekStart(reference);
+      return date >= start && date < addDays(start, 7);
+    }
+
+    function referenceDate() {
+      const year = visibleMonth.getFullYear();
+      const month = visibleMonth.getMonth();
+      if (year === TODAY.getFullYear() && month === TODAY.getMonth()) return TODAY;
+      return new Date(year, month, Math.min(15, daysInVisibleMonth()));
+    }
+
+    function filteredResidents() {
+      return residents.filter(resident => {
+        const category = resident.place === "respite" ? "private" : resident.place;
+        if (!activePlaces.has(category)) return false;
+        if (activeFloor !== "all" && resident.floor !== activeFloor) return false;
+        if (activeMobility !== "all" && resident.mobility !== activeMobility) return false;
+        if (recordSearchTerm && !`${resident.bed} ${resident.name}`.toLowerCase().includes(recordSearchTerm.toLowerCase())) return false;
+        return true;
+      });
+    }
+
+    function recordsForMode() {
+      return activeMode === "a" ? data.a : data.c;
+    }
+
+    function sessionCount(resident) {
+      const entries = Object.entries(recordsForMode()).filter(([key, value]) => (
+        key.endsWith(`|${resident.id}`) && value
+      ));
+      if (activeMode === "c") return entries.length;
+      if (resident.cadence === "monthly") return entries.length;
+      return entries.filter(([key]) => isInWeek(key.slice(0, 10), referenceDate())).length;
+    }
+
+    function checkForResident(resident) {
+      const count = sessionCount(resident);
+      const target = activeMode === "c" ? resident.extraTarget : resident.need;
+      return {
+        count,
+        target,
+        missing: Math.max(0, target - count),
+        met: count >= target
+      };
+    }
+
+    function hospitalGap(residentId, day) {
+      const statusEntries = Object.entries(data.statuses)
+        .filter(([key, value]) => key.endsWith(`|${residentId}`) && value === "H")
+        .map(([key]) => key.slice(0, 10))
+        .filter(key => key.startsWith(monthKey()))
+        .sort();
+      const current = dateKey(day);
+      for (let index = 0; index < statusEntries.length - 1; index += 1) {
+        if (current > statusEntries[index] && current < statusEntries[index + 1]) return true;
+      }
+      return false;
+    }
+
+    function residentDateLock(residentId, day) {
+      const date = dateKey(day);
+      const events = Object.entries(data.statuses)
+        .filter(([key, value]) => key.endsWith(`|${residentId}`) && (value === "IN" || value === "OUT"))
+        .map(([key, value]) => ({ date: key.slice(0, 10), type: value }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+      const prior = events.filter(event => event.date <= date).at(-1);
+      if (prior?.type === "OUT" && prior.date < date) {
+        return "退住後不可填寫";
+      }
+      if (!prior) {
+        const nextAdmission = events.find(event => event.type === "IN" && event.date > date);
+        if (nextAdmission) return "入住前不可填寫";
+      }
+      return null;
+    }
+
+    function planDateForSession(session) {
+      return session.date || PLAN_WEEK_DATES[session.week]?.[session.day] || null;
+    }
+
+    function isPaidPlanSession(session) {
+      return Boolean(session.paid) || session.format === "ei" || session.format === "eg";
+    }
+
+    function pendingPlanForCell(residentId, day) {
+      const key = cellKey(residentId, day);
+      if (data.statuses[key] || recordsForMode()[key]) return null;
+      if (residentDateLock(residentId, day)) return null;
+      const date = dateKey(day);
+      return plannedSessions.find(session => (
+        planDateForSession(session) === date &&
+        session.memberIds.includes(residentId) &&
+        (activeMode === "c" ? isPaidPlanSession(session) : !isPaidPlanSession(session))
+      )) || null;
+    }
+
+    function pendingPlanCount(rows) {
+      return rows.reduce((count, resident) => (
+        count + Array.from({ length: daysInVisibleMonth() }, (_, index) => index + 1)
+          .filter(day => pendingPlanForCell(resident.id, day))
+          .length
+      ), 0);
+    }
+
+    function dayLabel(day) {
+      const date = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), day);
+      return ["日", "一", "二", "三", "四", "五", "六"][date.getDay()];
+    }
+
+    function isWeekend(day) {
+      const date = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), day);
+      return date.getDay() === 0 || date.getDay() === 6;
+    }
+
+    function startsWeek(day) {
+      if (day === 1) return false;
+      return new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), day).getDay() === 0;
+    }
+
+    function isToday(day) {
+      return isSameMonth(visibleMonth, TODAY) && day === TODAY.getDate();
+    }
+
+    function isDayBeforeToday(day) {
+      return isSameMonth(visibleMonth, TODAY) && day === TODAY.getDate() - 1;
+    }
+
+    function cellContent(resident, day) {
+      const key = cellKey(resident.id, day);
+      const status = data.statuses[key];
+      const statusMeta = data.statusMeta[key] || {
+        modifiedBy: "Prototype",
+        modifiedAt: "2026-10-23T09:30:00+08:00"
+      };
+      if (status === "H") return { text: "H", sub: "醫院", type: "hospital", ...statusMeta };
+      if (status === "X") return { text: "X", sub: "拒絕", type: "refusal", ...statusMeta };
+      if (status === "IN") return { text: "入", sub: "入住", type: "admission", ...statusMeta };
+      if (status === "OUT") return { text: "退", sub: "退住", type: "discharge", ...statusMeta };
+
+      const record = recordsForMode()[key];
+      if (!record) return null;
+      const isIndividual = record.form === "i" || record.form === "ei";
+      return {
+        text: `${record.form}·${record.activity}`,
+        sub: ACTIVITY_LABELS[record.activity] || record.activity,
+        form: record.form,
+        activity: record.activity,
+        modifiedBy: record.modifiedBy || "OT Test",
+        modifiedAt: record.modifiedAt || "2026-10-22T09:30:00+08:00",
+        type: activeMode === "c"
+          ? record.form === "ei" ? "extra-individual" : "extra-group"
+          : isIndividual ? "individual" : "group"
+      };
+    }
+
+    function renderHeader() {
+      const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+      document.getElementById("month-label").textContent = `${visibleMonth.getFullYear()}年${monthNames[visibleMonth.getMonth()]}`;
+      document.querySelectorAll(".mode-tab").forEach(tab => {
+        const active = tab.dataset.mode === activeMode;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-pressed", String(active));
+      });
+      document.querySelectorAll("[data-place]").forEach(input => {
+        input.checked = activePlaces.has(input.dataset.place);
+      });
+      const placeLabels = [
+        activePlaces.has("voucher") ? "券位" : "",
+        activePlaces.has("bought") ? "買位" : "",
+        activePlaces.has("private") ? "私位／暫託" : ""
+      ].filter(Boolean);
+      document.getElementById("place-summary").textContent = placeLabels.length === 3
+        ? "全部"
+        : placeLabels.length
+          ? placeLabels.join("、")
+          : "無";
+      const floorFilter = document.getElementById("floor-filter");
+      const floors = [...new Set(residents.map(resident => resident.floor))].sort();
+      if (floorFilter.options.length === 1) {
+        floors.forEach(floor => {
+          const option = document.createElement("option");
+          option.value = floor;
+          option.textContent = floor;
+          floorFilter.append(option);
+        });
+      }
+      floorFilter.value = activeFloor;
+      document.getElementById("mobility-filter").value = activeMobility;
+      document.getElementById("record-search").value = recordSearchTerm;
+    }
+
+    function renderSummary() {
+      const rows = filteredResidents();
+      const totalRecorded = rows.reduce((sum, resident) => sum + sessionCount(resident), 0);
+      const missingRows = rows.filter(resident => !checkForResident(resident).met).length;
+      const pendingCells = pendingPlanCount(rows);
+      const targetTotal = rows.reduce((sum, resident) => (
+        sum + (activeMode === "c" ? resident.extraTarget : resident.need)
+      ), 0);
+      document.getElementById("summary-copy").innerHTML = activeMode === "a"
+        ? `<strong>${rows.length} 位住客 · 已記錄 ${totalRecorded} 節 · ${pendingCells} 格待填</strong><span>${missingRows} 位未達本週／本月基本頻率</span>`
+        : `<strong>${rows.length} 位住客 · 額外服務 ${totalRecorded} / ${targetTotal} 節 · ${pendingCells} 格待填</strong><span>${missingRows} 位未達額外服務目標</span>`;
+      document.getElementById("legend").innerHTML = activeMode === "a"
+        ? '<span><i class="individual"></i>個別</span><span><i class="group"></i>小組</span><span><i class="planned"></i>006 待填</span><span><i class="special"></i>X / 拒絕</span><span><i class="hospital"></i>H / 醫院</span>'
+        : '<span><i class="extra-individual"></i>額外個別</span><span><i class="extra-group"></i>額外小組</span><span><i class="planned"></i>006 待填</span><span><i class="special"></i>X / 拒絕</span><span><i class="hospital"></i>H / 醫院</span>';
+    }
+
+    function renderTable() {
+      const days = Array.from({ length: daysInVisibleMonth() }, (_, index) => index + 1);
+      const rows = filteredResidents();
+      const dayHeads = days.map(day => (
+        `<th class="day-head ${startsWeek(day) ? "week-start" : ""} ${isWeekend(day) ? "weekend" : ""} ${isDayBeforeToday(day) ? "before-today" : ""} ${isToday(day) ? "today" : ""}">${day}<span>${dayLabel(day)}</span></th>`
+      )).join("");
+      const body = rows.map(resident => {
+        const check = checkForResident(resident);
+        const place = PLACE_LABELS[resident.place];
+        const cells = days.map(day => {
+          const key = cellKey(resident.id, day);
+          const weekStartClass = startsWeek(day) ? "week-start" : "";
+          const beforeTodayClass = isDayBeforeToday(day) ? "before-today" : "";
+          const todayClass = isToday(day) ? "today" : "";
+          if (hospitalGap(resident.id, day)) {
+            return `<td class="record-cell-wrap ${weekStartClass} ${beforeTodayClass} ${todayClass}"><div class="record-cell gap" title="留醫期間"><span class="cell-code">╱</span></div></td>`;
+          }
+          const lockReason = residentDateLock(resident.id, day);
+          const content = cellContent(resident, day);
+          const pendingPlan = content ? null : pendingPlanForCell(resident.id, day);
+          const overdue = Boolean(pendingPlan && dateKey(day) < TODAY_KEY);
+          const title = lockReason
+            ? lockReason
+            : pendingPlan
+            ? `006 已安排 ${pendingPlan.format}，尚待輸入紀錄`
+            : content
+              ? `${content.text} · ${content.sub} · 最後修改 ${content.modifiedBy} ${new Date(content.modifiedAt).toLocaleString("zh-HK", { hour12: false })}`
+              : "新增記錄";
+          const aria = lockReason
+            ? `${resident.name} ${day}日 ${lockReason}`
+            : pendingPlan
+              ? `${resident.name} ${day}日 006 已安排，尚待輸入紀錄`
+              : content
+                ? `${resident.name} ${day}日 ${content.text} ${content.sub}`
+                : `${resident.name} ${day}日 新增記錄`;
+          return `
+            <td class="record-cell-wrap ${weekStartClass} ${beforeTodayClass} ${todayClass}">
+              <button class="record-cell ${content?.type || ""} ${content?.form ? "session-split" : ""} ${pendingPlan ? "planned" : ""} ${overdue ? "overdue" : ""} ${lockReason ? "locked" : ""}" type="button"
+                ${lockReason ? "disabled" : 'data-action="open-cell"'} data-resident-id="${resident.id}" data-day="${day}"
+                title="${escapeHtml(title)}"
+                aria-label="${escapeHtml(aria)}">
+                ${content?.form
+                  ? `<span class="cell-form">${escapeHtml(content.form)}</span><span class="cell-activity">${escapeHtml(content.activity)}</span>`
+                  : `<span class="cell-code">${content ? escapeHtml(content.text) : ""}</span>`}
+              </button>
+            </td>
+          `;
+        }).join("");
+        return `
+          <tr data-resident-id="${resident.id}">
+            <td class="resident-cell">
+              <div class="row-resident">
+                <span class="bed">${escapeHtml(resident.bed)}</span>
+                <span class="resident-name-line">
+                  <strong class="resident-inline-name">${escapeHtml(resident.name)}</strong>
+                  <span class="resident-place">${place}</span>
+                </span>
+                <span class="row-check ${check.met ? "met" : "short"}">${check.count}/${check.target}</span>
+              </div>
+            </td>
+            ${cells}
+          </tr>
+        `;
+      }).join("");
+      document.getElementById("record-scroll").innerHTML = rows.length
+        ? `
+          <div class="record-table-wrap">
+            <div class="today-column-guides" aria-hidden="true"></div>
+            <table class="record-table">
+              <thead>
+                <tr>
+                  <th class="resident-head">住客</th>
+                  ${dayHeads}
+                </tr>
+              </thead>
+              <tbody>${body}</tbody>
+            </table>
+          </div>
+        `
+        : '<div class="empty-state">沒有符合目前宿位篩選的住客。</div>';
+    }
+
+    function updateTodayColumnGuides() {
+      const wrap = document.querySelector(".record-table-wrap");
+      const todayHead = wrap?.querySelector(".day-head.today");
+      const guides = wrap?.querySelector(".today-column-guides");
+      if (!wrap || !todayHead || !guides) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      const todayRect = todayHead.getBoundingClientRect();
+      const devicePixelRatio = window.devicePixelRatio || 1;
+      const snapToDevicePixel = value => (
+        Math.round(value * devicePixelRatio) / devicePixelRatio
+      );
+      const left = snapToDevicePixel(todayRect.left - wrapRect.left);
+      const right = snapToDevicePixel(todayRect.right - wrapRect.left);
+      guides.style.left = `${left}px`;
+      guides.style.width = `${right - left}px`;
+      guides.style.setProperty("--guide-line-width", `${1 / devicePixelRatio}px`);
+    }
+
+    function render() {
+      renderHeader();
+      renderSummary();
+      renderTable();
+      requestAnimationFrame(updateTodayColumnGuides);
+    }
+
+    function focusRecordFromQuery() {
+      const residentId = params.get("residentId");
+      if (!residentById.has(residentId)) return;
+      const date = params.get("date");
+      if (date) {
+        const parsed = new Date(`${date}T00:00:00`);
+        if (!Number.isNaN(parsed.getTime())) {
+          visibleMonth = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
+          render();
+        }
+      }
+      requestAnimationFrame(() => {
+        const row = document.querySelector(`tr[data-resident-id="${residentId}"]`);
+        row?.classList.add("query-focus");
+        row?.scrollIntoView({ block: "center", inline: "start" });
+        if (!date) return;
+        const day = Number(date.slice(8, 10));
+        const cell = document.querySelector(
+          `[data-action="open-cell"][data-resident-id="${residentId}"][data-day="${day}"]`
+        );
+        cell?.scrollIntoView({ block: "center", inline: "center" });
+        if (cell && !cell.disabled) openCell(residentId, day);
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function openCell(residentId, day) {
+      const resident = residentById.get(residentId);
+      const key = cellKey(residentId, day);
+      const record = recordsForMode()[key];
+      const status = data.statuses[key] || null;
+      selectedCell = { residentId, day, key, record };
+      draftEntry = {
+        form: record?.form || null,
+        activity: record?.activity || null,
+        special: status
+      };
+      document.querySelectorAll(".record-cell.selected").forEach(cell => cell.classList.remove("selected"));
+      const anchor = document.querySelector(`[data-action="open-cell"][data-resident-id="${residentId}"][data-day="${day}"]`);
+      anchor?.classList.add("selected");
+      document.getElementById("menu-error").textContent = "";
+      document.getElementById("cell-meta").textContent = record
+        ? `最後修改：${record.modifiedBy || "OT Test"} · ${new Date(record.modifiedAt || "2026-10-22T09:30:00+08:00").toLocaleString("zh-HK", { hour12: false })}`
+        : status && data.statusMeta[key]
+          ? `最後修改：${data.statusMeta[key].modifiedBy} · ${new Date(data.statusMeta[key].modifiedAt).toLocaleString("zh-HK", { hour12: false })}`
+        : "尚未有紀錄。";
+      populateCellMenu(resident);
+      positionCellMenu(anchor);
+    }
+
+    function closeCell() {
+      document.getElementById("cell-menu").hidden = true;
+      document.querySelectorAll(".record-cell.selected").forEach(cell => cell.classList.remove("selected"));
+      selectedCell = null;
+      draftEntry = null;
+    }
+
+    function populateCellMenu(resident) {
+      if (!selectedCell || !draftEntry) return;
+      const forms = activeMode === "a"
+        ? [{ code: "", label: "請選擇形式" }, { code: "i", label: "個別" }, { code: "g", label: "小組" }]
+        : [{ code: "", label: "請選擇形式" }, { code: "ei", label: "額外個別" }, { code: "eg", label: "額外小組" }];
+      const formSelect = document.getElementById("form-select");
+      formSelect.innerHTML = forms.map(form => `<option value="${form.code}">${escapeHtml(form.label)}</option>`).join("");
+      formSelect.value = draftEntry.form || "";
+
+      const activitySelect = document.getElementById("activity-select");
+      const activityOptions = [...new Set([...resident.activities, "Ax"])];
+      activitySelect.innerHTML = [
+        '<option value="">請選擇活動</option>',
+        ...activityOptions.map(activity => (
+          `<option value="${activity}">${escapeHtml(ACTIVITY_LABELS[activity] || activity)}</option>`
+        ))
+      ].join("");
+      activitySelect.value = draftEntry.activity || "";
+
+      const statusSelect = document.getElementById("status-select");
+      statusSelect.innerHTML = [
+        '<option value="">無特殊狀態</option>',
+        ...SPECIAL_OPTIONS.map(option => (
+          `<option value="${option.code}">${option.label}</option>`
+        ))
+      ].join("");
+      statusSelect.value = draftEntry.special || "";
+      formSelect.disabled = Boolean(draftEntry.special);
+      activitySelect.disabled = Boolean(draftEntry.special);
+      document.getElementById("cell-menu").hidden = false;
+    }
+
+    function positionCellMenu(anchor) {
+      if (!anchor) return;
+      const menu = document.getElementById("cell-menu");
+      const rect = anchor.getBoundingClientRect();
+      const menuRect = menu.getBoundingClientRect();
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - menuRect.width - 8));
+      let top = rect.bottom + 5;
+      if (top + menuRect.height > window.innerHeight - 8) {
+        top = Math.max(8, rect.top - menuRect.height - 5);
+      }
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+    }
+
+    function saveCell() {
+      if (!selectedCell || !draftEntry) return;
+      if (!draftEntry.special && (!draftEntry.form || !draftEntry.activity)) {
+        document.getElementById("menu-error").textContent = "請先選擇形式和活動性質。";
+        return;
+      }
+      const key = selectedCell.key;
+      if (draftEntry.special) {
+        data.statuses[key] = draftEntry.special;
+        data.statusMeta[key] = {
+          modifiedBy: OT_PROTOTYPE.currentUser().name,
+          modifiedAt: new Date().toISOString()
+        };
+        delete data.a[key];
+        delete data.c[key];
+      } else {
+        recordsForMode()[key] = {
+          form: draftEntry.form,
+          activity: draftEntry.activity,
+          modifiedBy: OT_PROTOTYPE.currentUser().name,
+          modifiedAt: new Date().toISOString()
+        };
+        delete data.statuses[key];
+        delete data.statusMeta[key];
+      }
+      const savedSpecial = draftEntry.special;
+      const savedMode = activeMode;
+      saveData();
+      try {
+        if (savedSpecial === "H") {
+          OT_PROTOTYPE.syncHospitalStay(selectedCell.residentId, data.statuses);
+        } else if (savedSpecial === "OUT") {
+          const storeResident = OT_PROTOTYPE.resident(selectedCell.residentId);
+          if (storeResident && storeResident.status !== "discharged") {
+            OT_PROTOTYPE.dischargeResident(selectedCell.residentId, {
+              date: `${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-${String(selectedCell.day).padStart(2, "0")}`,
+              reason: "007 記錄退住"
+            });
+          }
+        } else if (savedSpecial === "IN") {
+          const storeResident = OT_PROTOTYPE.resident(selectedCell.residentId);
+          if (storeResident) {
+            OT_PROTOTYPE.updateResident(selectedCell.residentId, {
+              status: "active",
+              statusLabel: "Active",
+              timeline: [
+                ...(storeResident.timeline || []),
+                ["入院", `${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, "0")}-${String(selectedCell.day).padStart(2, "0")}`]
+              ]
+            }, "記錄入院狀態");
+          }
+        }
+      } catch (error) {
+        showToast(error.message);
+      }
+      closeCell();
+      render();
+      showToast(
+        savedSpecial
+          ? "住客狀態已記錄"
+          : savedMode === "a"
+            ? "復康訓練記錄已儲存"
+            : "額外服務記錄已儲存"
+      );
+    }
+
+    function clearCell() {
+      if (!selectedCell) return;
+      const key = selectedCell.key;
+      delete data.a[key];
+      delete data.c[key];
+      delete data.statuses[key];
+      delete data.statusMeta[key];
+      saveData();
+      closeCell();
+      render();
+      showToast("記錄已清除");
+    }
+
+    function printableTable() {
+      const days = Array.from({ length: daysInVisibleMonth() }, (_, index) => index + 1);
+      const dayHead = days.map(day => `<th>${day}<br><span>${dayLabel(day)}</span></th>`).join("");
+      const rows = filteredResidents().map(resident => {
+        const cells = days.map(day => {
+          const key = cellKey(resident.id, day);
+          const status = data.statuses[key];
+          const content = cellContent(resident, day);
+          if (status === "IN") return "<td>入</td>";
+          if (status === "OUT") return "<td>退</td>";
+          if (hospitalGap(resident.id, day)) return '<td class="print-gap">╱</td>';
+          return `<td>${content ? escapeHtml(content.text) : ""}</td>`;
+        }).join("");
+        return `<tr><td>${escapeHtml(resident.bed)} · ${escapeHtml(resident.name)}</td>${cells}</tr>`;
+      }).join("");
+      return `
+        <h3>${activeMode === "a" ? "買位／院舍券復康運動紀錄表" : "額外復康服務運動紀錄表"}</h3>
+        <p>${escapeHtml(OT_HOME_SETTINGS.getHome().name)} · ${visibleMonth.getFullYear()}年${visibleMonth.getMonth() + 1}月 · ${activeMode === "a" ? "007a" : "007c"}</p>
+        <table class="print-table">
+          <thead><tr><th>住客</th>${dayHead}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function openPrintPreview() {
+      document.getElementById("print-preview").innerHTML = `<div class="print-sheet">${printableTable()}</div>`;
+      document.getElementById("print-dialog").showModal();
+    }
+
+    document.addEventListener("click", event => {
+      if (
+        !document.getElementById("cell-menu").hidden &&
+        !event.target.closest("#cell-menu") &&
+        !event.target.closest('[data-action="open-cell"]')
+      ) {
+        closeCell();
+      }
+
+      const modeButton = event.target.closest("[data-mode]");
+      if (modeButton) {
+        closeCell();
+        activeMode = modeButton.dataset.mode;
+        render();
+        return;
+      }
+
+      const cellButton = event.target.closest('[data-action="open-cell"]');
+      if (cellButton) {
+        openCell(cellButton.dataset.residentId, Number(cellButton.dataset.day));
+        return;
+      }
+
+      const actionButton = event.target.closest("[data-action]");
+      if (!actionButton) return;
+      const action = actionButton.dataset.action;
+      if (action === "prev-month" || action === "next-month") {
+        closeCell();
+        visibleMonth = new Date(
+          visibleMonth.getFullYear(),
+          visibleMonth.getMonth() + (action === "prev-month" ? -1 : 1),
+          1
+        );
+        render();
+        return;
+      }
+      if (action === "current-month") {
+        closeCell();
+        visibleMonth = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+        render();
+        return;
+      }
+      if (action === "close-cell") return closeCell();
+      if (action === "save-cell") return saveCell();
+      if (action === "clear-cell") return clearCell();
+      if (action === "print-preview") return openPrintPreview();
+      if (action === "close-print") return document.getElementById("print-dialog").close();
+      if (action === "print") return window.print();
+    });
+
+    document.addEventListener("change", event => {
+      if (event.target.matches("[data-place]")) {
+        closeCell();
+        const place = event.target.dataset.place;
+        if (activePlaces.has(place)) activePlaces.delete(place);
+        else activePlaces.add(place);
+        render();
+        return;
+      }
+      if (event.target.id === "floor-filter") {
+        activeFloor = event.target.value;
+        render();
+        return;
+      }
+      if (event.target.id === "mobility-filter") {
+        activeMobility = event.target.value;
+        render();
+        return;
+      }
+      if (!selectedCell || !draftEntry) return;
+      if (event.target.id === "form-select") {
+        draftEntry.form = event.target.value || null;
+        draftEntry.special = null;
+        document.getElementById("status-select").value = "";
+        document.getElementById("menu-error").textContent = "";
+      }
+      if (event.target.id === "activity-select") {
+        draftEntry.activity = event.target.value || null;
+        draftEntry.special = null;
+        document.getElementById("status-select").value = "";
+        document.getElementById("menu-error").textContent = "";
+      }
+      if (event.target.id === "status-select") {
+        draftEntry.special = event.target.value || null;
+        if (draftEntry.special) {
+          draftEntry.form = null;
+          draftEntry.activity = null;
+          document.getElementById("form-select").value = "";
+          document.getElementById("activity-select").value = "";
+        }
+        document.getElementById("form-select").disabled = Boolean(draftEntry.special);
+        document.getElementById("activity-select").disabled = Boolean(draftEntry.special);
+        document.getElementById("menu-error").textContent = "";
+      }
+    });
+    document.getElementById("record-search").addEventListener("input", event => {
+      recordSearchTerm = event.target.value.trim();
+      render();
+    });
+
+    window.addEventListener("resize", () => {
+      closeCell();
+      updateTodayColumnGuides();
+    });
+    document.getElementById("record-scroll").addEventListener("scroll", closeCell, { passive: true });
+    window.addEventListener("storage", event => {
+      if (event.key === PLAN_STORAGE_KEY) {
+        loadPlan();
+        render();
+      }
+    });
+
+    applyHomeSettings();
+    loadData();
+    loadPlan();
+    render();
+    focusRecordFromQuery();
+    window.addEventListener("storage", event => {
+      if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
+    });
+  </script>
+  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+</body>
+</html>

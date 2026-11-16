@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OT System</title>
+  <script>
+    (() => {
+      const routes = {
+        workbench: "workbench/index.html",
+        residents: "residents/index.html",
+        training: "training/index.html",
+        records: "records/index.html",
+        assessment: "assessment/paper-aligned.html",
+        icp: "icp/worklist.html",
+        settings: "settings/index.html"
+      };
+      const requested = location.hash.replace(/^#/, "");
+      const target = routes[requested] || routes.workbench;
+      location.replace(new URL(target, location.href).href);
+    })();
+  </script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --line: #d8e1e7;
+      --ink: #111827;
+      --muted: #64748b;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --teal-soft: #e7f3f1;
+      --workspace-surface: #f7faf9;
+      --shell-surface: #ffffff;
+      --sidebar-expanded: 216px;
+      --sidebar-collapsed: 76px;
+      --topbar-height: 64px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      overflow: hidden;
+      background: var(--shell-surface);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button { font: inherit; cursor: pointer; }
+
+    .app {
+      display: grid;
+      grid-template-rows: var(--topbar-height) minmax(0, 1fr);
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      border-radius: 0;
+      background: var(--shell-surface);
+    }
+    .app-body {
+      display: grid;
+      grid-template-columns: var(--sidebar-expanded) minmax(0, 1fr);
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      background: var(--shell-surface);
+      transition: grid-template-columns .18s ease;
+    }
+    .app.sidebar-collapsed .app-body {
+      grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr);
+    }
+    .app.sidebar-collapsed .sidebar {
+      padding-inline: 8px;
+    }
+    .sidebar {
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: var(--shell-surface);
+      border-right: 0;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    .nav { display: grid; gap: 4px; }
+    .nav button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 9px;
+    }
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .nav-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nav button:hover { background: #f1f5f9; }
+    .nav button.active {
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-weight: 800;
+    }
+
+    .main {
+      min-width: 0;
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      border: 0;
+      border-start-start-radius: 20px;
+      background: var(--workspace-surface);
+      box-shadow: none;
+      position: relative;
+    }
+    .topbar {
+      position: relative;
+      z-index: 10;
+      min-width: 0;
+      background: var(--shell-surface);
+      border-bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 18px 0 30px;
+    }
+    .topbar-left, .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 10px;
+    }
+    .sidebar-toggle {
+      width: 100%;
+      min-height: 36px;
+      margin: 0;
+      padding: 0 11px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      transition: background-color .15s ease, color .15s ease;
+    }
+    .toggle-icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      display: grid;
+      place-items: center;
+      transform: rotate(180deg);
+      transition: transform .18s ease;
+    }
+    .toggle-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .toggle-label { white-space: nowrap; }
+    .sidebar-toggle:hover { background: #f1f5f9; }
+    .sidebar-toggle:focus-visible {
+      outline: 3px solid rgba(15, 118, 110, .25);
+      outline-offset: 2px;
+    }
+    .app.sidebar-collapsed .nav-label { display: none; }
+    .app.sidebar-collapsed .nav button { justify-content: center; padding-inline: 0; }
+    .app.sidebar-collapsed .sidebar-toggle {
+      width: 100%;
+      min-height: 36px;
+      padding: 0;
+      justify-content: center;
+    }
+    .app.sidebar-collapsed .toggle-label { display: none; }
+    .app.sidebar-collapsed .toggle-icon { transform: none; }
+    .icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .home-select {
+      width: min(280px, calc(100vw - 220px));
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background-color: #fff;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #62666d 50%),
+        linear-gradient(135deg, #62666d 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 16px,
+        calc(100% - 13px) 16px;
+      background-repeat: no-repeat;
+      background-size: 5px 5px, 5px 5px;
+      outline: 0;
+      color: var(--ink);
+      padding: 0 38px 0 14px;
+      font-weight: 500;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .home-select:focus-visible {
+      outline: 3px solid rgba(15, 118, 110, .25);
+      outline-offset: 2px;
+    }
+    .top-meta { color: var(--muted); }
+    .annotation-toggle {
+      min-height: 34px;
+      border: 1px solid #b7ded7;
+      border-radius: 7px;
+      background: #edf8f5;
+      color: var(--teal-dark);
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .annotation-toggle:hover { background: #e2f4f0; }
+    .annotation-toggle:focus-visible {
+      outline: 3px solid rgba(15, 118, 110, .25);
+      outline-offset: 2px;
+    }
+    .user-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      padding: 5px 10px 5px 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: #111827;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+      background: var(--workspace-surface);
+    }
+    .module-frame {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: var(--workspace-surface);
+    }
+    .placeholder {
+      height: 100%;
+      padding: 18px;
+    }
+    .placeholder-panel {
+      height: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+    }
+    .placeholder-panel strong { color: var(--ink); margin-right: 6px; }
+    .annotation-preview-toolbar {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #b7ded7;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .96);
+      padding: 6px 7px 6px 11px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, .18);
+    }
+    .annotation-preview-toolbar strong {
+      color: var(--teal-dark);
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .annotation-preview-toolbar button {
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .annotation-preview-root {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      overflow: auto;
+      margin: 0;
+      min-height: 100vh;
+      background: #f4f6f8;
+    }
+    body.annotation-preview-active {
+      overflow: hidden;
+    }
+    body.annotation-preview-active > .app,
+    body.annotation-preview-active > .assessment-tracker,
+    body.annotation-preview-active > .draft-dialog {
+      display: none !important;
+    }
+    .assessment-tracker {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 90;
+      width: min(340px, calc(100vw - 24px));
+      border: 1px solid #b7ded7;
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: 0 14px 38px rgba(15, 23, 42, .2);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      overflow: hidden;
+    }
+    .assessment-tracker[hidden] { display: none; }
+    .assessment-tracker-resume {
+      min-width: 0;
+      border: 0;
+      background: #fff;
+      padding: 10px 11px;
+      color: var(--ink);
+      text-align: left;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 9px;
+    }
+    .assessment-tracker-resume:hover { background: #f7fbfa; }
+    .assessment-tracker-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .assessment-tracker-copy { min-width: 0; display: grid; gap: 1px; }
+    .assessment-tracker-copy strong { font-size: 12px; }
+    .assessment-tracker-copy span {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 10px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .assessment-tracker-close {
+      width: 35px;
+      border: 0;
+      background: #fff;
+      color: var(--muted);
+      font-size: 17px;
+    }
+    .assessment-tracker-close:hover { background: #f8fafc; color: var(--ink); }
+    .assessment-tracker-resume:focus-visible,
+    .assessment-tracker-close:focus-visible { outline: 2px solid var(--teal); outline-offset: -3px; }
+
+    .draft-dialog {
+      width: min(430px, calc(100vw - 24px));
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 0;
+      color: var(--ink);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, .26);
+    }
+    .draft-dialog::backdrop { background: rgba(15, 23, 42, .35); }
+    .draft-dialog-head { padding: 15px 16px 10px; }
+    .draft-dialog-head h2 { margin: 0; font-size: 16px; }
+    .draft-dialog-body { padding: 0 16px 14px; color: #475569; font-size: 12px; line-height: 1.6; }
+    .draft-dialog-actions {
+      padding: 10px 16px 15px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+    .draft-dialog-actions button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      padding: 6px 10px;
+      font-weight: 700;
+    }
+    .draft-dialog-actions .primary {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+    .role-select {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    @media (max-width: 860px) {
+      .app-body { grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr); }
+      .sidebar { padding-inline: 8px; }
+      .nav-label,
+      .toggle-label { display: none; }
+      .nav button { justify-content: center; padding-inline: 0; }
+      .sidebar-toggle {
+        width: 100%;
+        min-height: 36px;
+        padding: 0;
+        justify-content: center;
+      }
+    }
+    @media (max-width: 620px) {
+      .topbar { padding-left: 18px; }
+      .home-select { width: min(220px, calc(100vw - 160px)); }
+      .top-meta { display: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="shared/design-system.css?v=20261116-resident-cards">
+</head>
+<body>
+  <svg class="icon-sprite" aria-hidden="true">
+    <symbol id="icon-workbench" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+      <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+      <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+      <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+    </symbol>
+    <symbol id="icon-residents" viewBox="0 0 24 24">
+      <circle cx="9" cy="8" r="3"></circle>
+      <path d="M3.5 19c.5-3.2 2.4-5 5.5-5s5 1.8 5.5 5"></path>
+      <path d="M15 6.5a2.5 2.5 0 0 1 0 5"></path>
+      <path d="M16 14c2.7.2 4.2 1.8 4.5 4.5"></path>
+    </symbol>
+    <symbol id="icon-training" viewBox="0 0 24 24">
+      <rect x="4" y="5" width="16" height="15" rx="2"></rect>
+      <path d="M8 3v4M16 3v4M4 10h16"></path>
+      <path d="M8 14h3M13 14h3M8 17h3"></path>
+    </symbol>
+    <symbol id="icon-schedule" viewBox="0 0 24 24">
+      <rect x="3.5" y="5" width="17" height="15" rx="2"></rect>
+      <path d="M7.5 3v4M16.5 3v4M3.5 9h17"></path>
+      <circle cx="15.5" cy="15" r="3"></circle>
+      <path d="M15.5 13.5v1.7l1.2.8"></path>
+    </symbol>
+    <symbol id="icon-records" viewBox="0 0 24 24">
+      <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+      <path d="M8 11h.01M12 11h4M8 16h.01M12 16h4"></path>
+    </symbol>
+    <symbol id="icon-assessment" viewBox="0 0 24 24">
+      <path d="M3 19 8.2 5h1.6L15 19M5 14h7"></path>
+      <path d="m16.5 9 5 7M21.5 9l-5 7"></path>
+    </symbol>
+    <symbol id="icon-icp" viewBox="0 0 24 24">
+      <path d="M8 4h8v3H8zM6 5H4v16h16V5h-2"></path>
+      <path d="M12 17.2S8.8 15.2 8.8 12.8a1.8 1.8 0 0 1 3.2-1 1.8 1.8 0 0 1 3.2 1c0 2.4-3.2 4.4-3.2 4.4Z"></path>
+    </symbol>
+    <symbol id="icon-settings" viewBox="0 0 24 24">
+      <path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2Z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </symbol>
+  </svg>
+  <div class="app app-frame">
+    <header class="topbar">
+      <div class="topbar-left">
+        <select id="home-select" class="home-select" aria-label="目前院舍"></select>
+      </div>
+      <div class="topbar-right">
+        <button class="annotation-toggle" id="open-annotation-preview" type="button" aria-label="Open annotatable module view">Annotate</button>
+        <span class="top-meta">2026年10月26日</span>
+        <label class="user-pill" title="切換示範身份">
+          <span class="avatar" id="current-user-avatar">T</span>
+          <select class="role-select" id="current-role-select" aria-label="目前使用者">
+            <option value="ot">OT · Testing</option>
+            <option value="pt">PT · Testing</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <aside class="sidebar">
+        <nav class="nav" aria-label="系統模組">
+          <button class="active" data-module="workbench" type="button" title="工作台" aria-label="工作台">
+            <svg class="nav-icon" aria-hidden="true"><use href="#icon-workbench"></use></svg>
+            <span class="nav-label">工作台</span>
+          </button>
+          <button data-module="residents" type="button" title="住客管理" aria-label="住客管理">
+            <svg class="nav-icon" aria-hidden="true"><use href="#icon-residents"></use></svg>
+            <span class="nav-label">住客管理</span>
+          </button>
+          <button data-module="training" type="button" title="訓練時間表" aria-label="訓練時間表">
+            <span class="nav-code-icon" aria-hidden="true">006</span>
+            <span class="nav-label">訓練時間表</span>
+          </button>
+          <button data-module="records" type="button" title="復康運動紀錄" aria-label="復康運動紀錄">
+            <svg class="nav-icon" aria-hidden="true"><use href="#icon-records"></use></svg>
+            <span class="nav-label">復康運動紀錄</span>
+          </button>
+          <button data-module="assessment" type="button" title="評估系統" aria-label="評估系統">
+            <svg class="nav-icon" aria-hidden="true"><use href="#icon-assessment"></use></svg>
+            <span class="nav-label">評估系統</span>
+          </button>
+          <button data-module="icp" type="button" title="ICP" aria-label="ICP">
+            <span class="nav-code-icon" aria-hidden="true">ICP</span>
+            <span class="nav-label">ICP</span>
+          </button>
+          <button data-module="settings" type="button" title="院舍設定" aria-label="院舍設定">
+            <svg class="nav-icon" aria-hidden="true"><use href="#icon-settings"></use></svg>
+            <span class="nav-label">院舍設定</span>
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          <button id="sidebar-toggle" class="sidebar-toggle" type="button" title="收起側欄" aria-label="收起側欄" aria-expanded="true">
+            <span class="toggle-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"></path></svg>
+            </span>
+            <span class="toggle-label">收起選單</span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="main workspace">
+        <section class="stage">
+          <iframe
+            id="module-frame"
+            class="module-frame"
+            title="工作台"
+            src="workbench/index.html?embed=1&v=20261110-10"
+          ></iframe>
+          <div id="placeholder" class="placeholder" hidden>
+            <div class="placeholder-panel"><strong id="placeholder-title">模組</strong>尚未建立</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <aside class="assessment-tracker" id="assessment-tracker" aria-label="進行中的 016 評估" hidden>
+    <button class="assessment-tracker-resume" id="assessment-tracker-resume" type="button">
+      <span class="assessment-tracker-mark">016</span>
+      <span class="assessment-tracker-copy">
+        <strong id="assessment-tracker-resident">016 評估進行中</strong>
+        <span id="assessment-tracker-progress">返回評估</span>
+      </span>
+    </button>
+    <button class="assessment-tracker-close" id="assessment-tracker-close" type="button" aria-label="關閉 016 提示">×</button>
+  </aside>
+
+  <dialog class="draft-dialog" id="assessment-close-dialog" aria-labelledby="assessment-close-title">
+    <div class="draft-dialog-head">
+      <h2 id="assessment-close-title">確定關閉評估？</h2>
+    </div>
+    <div class="draft-dialog-body">
+      草稿會保留，可在「評估系統」繼續。
+    </div>
+    <div class="draft-dialog-actions">
+      <button id="assessment-keep-working" type="button">取消</button>
+      <button class="primary" id="assessment-dismiss-tracker" type="button">確定</button>
+    </div>
+  </dialog>
+
+  <script src="shared/home-settings.js"></script>
+  <script src="shared/prototype-catalog.js"></script>
+  <script src="shared/mock-residents.js"></script>
+  <script src="shared/prototype-domain.js"></script>
+  <script>
+    const modules = {
+      workbench: { label: "工作台", src: "workbench/index.html?embed=1&v=20261110-10" },
+      residents: { label: "住客管理", src: "residents/index.html?embed=1&v=20261110-11" },
+      training: { label: "訓練時間表", src: "training/index.html?embed=1&v=20261110-10" },
+      records: { label: "復康運動紀錄", src: "records/index.html?embed=1&v=20261110-10" },
+      assessment: { label: "評估系統", src: "assessment/paper-aligned.html?embed=1&v=20261110-10" },
+      icp: { label: "ICP", src: "icp/worklist.html?embed=1&v=20261110-10" },
+      settings: { label: "院舍設定", src: "settings/index.html?embed=1&v=20261110-10" }
+    };
+
+    const navButtons = document.querySelectorAll(".nav button");
+    const frame = document.getElementById("module-frame");
+    const placeholder = document.getElementById("placeholder");
+    const placeholderTitle = document.getElementById("placeholder-title");
+    const app = document.querySelector(".app");
+    const sidebarToggle = document.getElementById("sidebar-toggle");
+    const homeSelect = document.getElementById("home-select");
+    const assessmentTracker = document.getElementById("assessment-tracker");
+    const assessmentTrackerResume = document.getElementById("assessment-tracker-resume");
+    const assessmentTrackerClose = document.getElementById("assessment-tracker-close");
+    const assessmentCloseDialog = document.getElementById("assessment-close-dialog");
+    const annotationButton = document.getElementById("open-annotation-preview");
+    const currentRoleSelect = document.getElementById("current-role-select");
+    const currentUserAvatar = document.getElementById("current-user-avatar");
+    const ACTIVE_ASSESSMENT_DRAFT_KEY = OT_MOCK_STORAGE_KEYS.assessmentDraft;
+    let currentModuleKey = "workbench";
+    let activeAssessmentDraft = readShellAssessmentDraft();
+    const escapeHtml = value => String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    function applyCurrentUser() {
+      const user = OT_PROTOTYPE.currentUser();
+      currentRoleSelect.value = user.role === "PT" ? "pt" : "ot";
+      currentUserAvatar.textContent = user.role === "PT" ? "P" : "T";
+    }
+
+    function readShellAssessmentDraft() {
+      try {
+        const draft = JSON.parse(localStorage.getItem(ACTIVE_ASSESSMENT_DRAFT_KEY));
+        return draft && typeof draft === "object" ? draft : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeShellAssessmentDraft(draft) {
+      activeAssessmentDraft = draft || null;
+      try {
+        if (activeAssessmentDraft) {
+          localStorage.setItem(ACTIVE_ASSESSMENT_DRAFT_KEY, JSON.stringify(activeAssessmentDraft));
+        } else {
+          localStorage.removeItem(ACTIVE_ASSESSMENT_DRAFT_KEY);
+        }
+      } catch (error) {
+        // The in-memory draft still works during this shell session.
+      }
+    }
+
+    function assessmentRoleSummary(draft) {
+      const roles = draft?.record?.roles;
+      if (!roles) return "草稿已保留";
+      const ot = roles.ot?.complete ? "OT 已完成" : "OT 待完成";
+      const pt = roles.pt?.complete ? "PT 已完成" : "PT 待完成";
+      return `${ot} · ${pt}`;
+    }
+
+    function renderAssessmentTracker() {
+      const draft = activeAssessmentDraft || readShellAssessmentDraft();
+      const active = Boolean(
+        draft &&
+        draft.record?.status !== "completed" &&
+        !draft.dismissed &&
+        currentModuleKey !== "assessment"
+      );
+      assessmentTracker.hidden = !active;
+      if (!active) return;
+      document.getElementById("assessment-tracker-resident").textContent =
+        `${draft.resident?.bed || "016"} · ${draft.resident?.name || "評估進行中"}`;
+      document.getElementById("assessment-tracker-progress").textContent =
+        `${draft.record?.code || "016"} · ${assessmentRoleSummary(draft)}`;
+    }
+
+    function postDraftToAssessmentFrame() {
+      if (currentModuleKey !== "assessment" || !activeAssessmentDraft || !frame.contentWindow) return;
+      const frameUrl = new URL(frame.src, location.href);
+      if (frameUrl.searchParams.get("mode") !== "session") return;
+      frame.contentWindow.postMessage(
+        { type: "ot-assessment-restore", draft: activeAssessmentDraft },
+        "*"
+      );
+    }
+
+    function resumeAssessment() {
+      const draft = activeAssessmentDraft || readShellAssessmentDraft();
+      if (!draft?.resumeUrl) return;
+      draft.dismissed = false;
+      writeShellAssessmentDraft(draft);
+      openModule("assessment", draft.resumeUrl);
+    }
+
+    function renderHomeOptions() {
+      homeSelect.innerHTML = OT_HOME_SETTINGS.getHomeList().map(home => (
+        `<option value="${home.code}">${home.code} · ${home.name}</option>`
+      )).join("");
+      homeSelect.value = OT_HOME_SETTINGS.getActiveHomeCode();
+    }
+
+    function setSidebarCollapsed(collapsed) {
+      app.classList.toggle("sidebar-collapsed", collapsed);
+      sidebarToggle.title = collapsed ? "展開側欄" : "收起側欄";
+      sidebarToggle.setAttribute("aria-label", sidebarToggle.title);
+      sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+      try {
+        localStorage.setItem("ot-shell.sidebar-collapsed", collapsed ? "1" : "0");
+      } catch (error) {
+        // The shell still works when storage is unavailable.
+      }
+    }
+
+    try {
+      setSidebarCollapsed(localStorage.getItem("ot-shell.sidebar-collapsed") === "1");
+    } catch (error) {
+      setSidebarCollapsed(false);
+    }
+
+    sidebarToggle.addEventListener("click", () => {
+      setSidebarCollapsed(!app.classList.contains("sidebar-collapsed"));
+    });
+
+    homeSelect.addEventListener("change", () => {
+      OT_HOME_SETTINGS.setActiveHome(homeSelect.value);
+      openModule(currentModuleKey);
+    });
+
+    currentRoleSelect.addEventListener("change", () => {
+      OT_PROTOTYPE.setCurrentUser(currentRoleSelect.value);
+      applyCurrentUser();
+      openModule(currentModuleKey);
+    });
+
+    window.addEventListener("storage", event => {
+      if (event.key === OT_HOME_SETTINGS.activeHomeKey && event.newValue) {
+        homeSelect.value = event.newValue;
+      }
+      if (event.key === OT_HOME_SETTINGS.storageKey) renderHomeOptions();
+      if (event.key === ACTIVE_ASSESSMENT_DRAFT_KEY) {
+        activeAssessmentDraft = readShellAssessmentDraft();
+        renderAssessmentTracker();
+      }
+    });
+
+    assessmentTrackerResume.addEventListener("click", resumeAssessment);
+    assessmentTrackerClose.addEventListener("click", () => {
+      assessmentCloseDialog.showModal();
+    });
+    document.getElementById("assessment-keep-working").addEventListener("click", () => {
+      assessmentCloseDialog.close();
+    });
+    document.getElementById("assessment-dismiss-tracker").addEventListener("click", () => {
+      if (activeAssessmentDraft) {
+        activeAssessmentDraft.dismissed = true;
+        writeShellAssessmentDraft(activeAssessmentDraft);
+      }
+      assessmentCloseDialog.close();
+      renderAssessmentTracker();
+    });
+    assessmentCloseDialog.addEventListener("cancel", () => {
+      assessmentCloseDialog.close();
+    });
+
+    window.addEventListener("message", event => {
+      if (event.source !== frame.contentWindow) return;
+      if (event.data?.type === "ot-open-module" && modules[event.data.module]) {
+        const source = String(event.data.source || modules[event.data.module].src);
+        if (source.startsWith(`${event.data.module}/`)) {
+          openModule(event.data.module, source);
+        }
+        return;
+      }
+      if (event.data?.type === "ot-assessment-draft-cleared") {
+        writeShellAssessmentDraft(null);
+        renderAssessmentTracker();
+        return;
+      }
+      if (event.data?.type === "ot-assessment-draft" && event.data.draft) {
+        writeShellAssessmentDraft(event.data.draft);
+        renderAssessmentTracker();
+      }
+    });
+
+    let annotationPreviewRoot = null;
+    let annotationPreviewToolbar = null;
+    let annotationHadEmbeddedClass = false;
+
+    function closeAnnotationPreview() {
+      annotationPreviewRoot?.remove();
+      annotationPreviewToolbar?.remove();
+      document.querySelectorAll("[data-annotation-preview-style]").forEach(node => node.remove());
+      annotationPreviewRoot = null;
+      annotationPreviewToolbar = null;
+      document.body.classList.remove("annotation-preview-active");
+      if (!annotationHadEmbeddedClass) document.documentElement.classList.remove("embedded");
+      annotationButton.focus({ preventScroll: true });
+    }
+
+    function copyAnnotationStyles(sourceDocument) {
+      sourceDocument.querySelectorAll('link[rel~="stylesheet"], style').forEach(node => {
+        const copy = node.cloneNode(true);
+        copy.setAttribute("data-annotation-preview-style", "");
+        if (copy.tagName === "LINK") copy.href = node.href;
+        document.head.append(copy);
+      });
+    }
+
+    function copyAnnotationFormState(sourceDocument, targetRoot) {
+      const sourceControls = [...sourceDocument.querySelectorAll("input, select, textarea")];
+      const targetControls = [...targetRoot.querySelectorAll("input, select, textarea")];
+      sourceControls.forEach((source, index) => {
+        const target = targetControls[index];
+        if (!target) return;
+        if (target.type === "checkbox" || target.type === "radio") {
+          target.checked = source.checked;
+        } else if (target.tagName === "SELECT") {
+          target.value = source.value;
+        } else {
+          target.value = source.value;
+        }
+      });
+    }
+
+    function openAnnotationPreview() {
+      if (annotationPreviewRoot) return;
+      const sourceDocument = frame.contentDocument;
+      if (!sourceDocument?.body) return;
+
+      const root = document.createElement("div");
+      root.className = "annotation-preview-root";
+      root.setAttribute("data-codex-annotation-surface", currentModuleKey);
+      const bodyStyle = sourceDocument.defaultView.getComputedStyle(sourceDocument.body);
+      root.style.background = bodyStyle.backgroundColor;
+      root.style.color = bodyStyle.color;
+      root.style.fontFamily = bodyStyle.fontFamily;
+      root.style.fontSize = bodyStyle.fontSize;
+      root.style.lineHeight = bodyStyle.lineHeight;
+
+      sourceDocument.body.childNodes.forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE && ["SCRIPT", "NOSCRIPT"].includes(node.tagName)) return;
+        root.append(node.cloneNode(true));
+      });
+
+      const toolbar = document.createElement("div");
+      toolbar.className = "annotation-preview-toolbar";
+      toolbar.innerHTML = `
+        <strong>${modules[currentModuleKey]?.label || "Annotation"}</strong>
+        <button type="button" aria-label="Close annotation preview">Close</button>
+      `;
+      toolbar.querySelector("button").addEventListener("click", closeAnnotationPreview);
+
+      copyAnnotationStyles(sourceDocument);
+      document.body.append(root, toolbar);
+      annotationHadEmbeddedClass = document.documentElement.classList.contains("embedded");
+      if (sourceDocument.documentElement.classList.contains("embedded")) {
+        document.documentElement.classList.add("embedded");
+      }
+      document.body.classList.add("annotation-preview-active");
+      copyAnnotationFormState(sourceDocument, root);
+      annotationPreviewRoot = root;
+      annotationPreviewToolbar = toolbar;
+      annotationPreviewToolbar.querySelector("button").focus({ preventScroll: true });
+    }
+
+    annotationButton.addEventListener("click", openAnnotationPreview);
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && annotationPreviewRoot) closeAnnotationPreview();
+    });
+
+    frame.addEventListener("load", () => {
+      postDraftToAssessmentFrame();
+      renderAssessmentTracker();
+    });
+
+    function openModule(key, sourceOverride = null) {
+      currentModuleKey = key;
+      const button = document.querySelector(`.nav button[data-module="${key}"]`);
+      const module = modules[key];
+      const label = module?.label || button?.querySelector("span")?.textContent || key;
+      navButtons.forEach(item => {
+        const active = item === button;
+        item.classList.toggle("active", active);
+        if (active) item.setAttribute("aria-current", "page");
+        else item.removeAttribute("aria-current");
+      });
+
+      if (module) {
+        let source = sourceOverride || module.src;
+        if (key === "assessment" && !sourceOverride) {
+          source = `${module.src}&view=manager&refresh=${Date.now()}`;
+        }
+        placeholder.hidden = true;
+        frame.hidden = false;
+        frame.title = label;
+        frame.src = source;
+      } else {
+        frame.hidden = true;
+        placeholder.hidden = false;
+        placeholderTitle.textContent = label;
+      }
+
+      history.replaceState(null, "", `#${key}`);
+      renderAssessmentTracker();
+    }
+
+    navButtons.forEach(button => {
+      button.addEventListener("click", () => openModule(button.dataset.module));
+    });
+
+    applyCurrentUser();
+    renderHomeOptions();
+    renderAssessmentTracker();
+    const initialModule = location.hash.slice(1);
+    if (initialModule && document.querySelector(`.nav button[data-module="${initialModule}"]`)) {
+      openModule(initialModule);
+    }
+  </script>
+  <script src="shared/ui-system.js?v=20261116-browser-comments"></script>
+</body>
+</html>

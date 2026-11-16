@@ -1,0 +1,1763 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ICP 工作清單</title>
+  <script>
+    if (new URLSearchParams(location.search).has("embed")) {
+      document.documentElement.classList.add("embedded");
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --line: #d8e1e7;
+      --ink: #111827;
+      --muted: #64748b;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --teal-soft: #e7f3f1;
+      --amber: #b45309;
+      --amber-soft: #fff7ed;
+      --green: #15803d;
+      --green-soft: #f0fdf4;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --red: #b91c1c;
+      --red-soft: #fef2f2;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .06);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { min-height: 100vh; display: grid; grid-template-columns: 220px minmax(0, 1fr); }
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 2px 8px 14px; border-bottom: 1px solid var(--line); }
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--teal);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+    .brand-title { font-weight: 800; }
+    .brand-sub { color: var(--muted); font-size: 11px; }
+    .nav { display: grid; gap: 4px; }
+    .nav button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #334155;
+    }
+    .nav button:hover { background: #f1f5f9; }
+    .nav button.active { background: var(--teal-soft); color: var(--teal-dark); font-weight: 800; }
+
+    .main { min-width: 0; display: grid; grid-template-rows: 58px minmax(0, 1fr); }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 18px;
+    }
+    .home-pill {
+      min-width: 180px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      padding: 7px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .top-meta { color: var(--muted); }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .user-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      padding: 5px 10px 5px 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: #111827;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .content { padding: 14px; min-width: 0; }
+    .screen-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+    h1 { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 700; letter-spacing: 0; }
+    .sub { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .actions { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .btn {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 6px 10px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+    .btn:hover { background: #f8fafc; }
+    .btn-primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn-danger { border-color: #fecaca; color: var(--red); }
+    .icon-btn {
+      width: 34px;
+      padding: 0;
+      display: inline-grid;
+      place-items: center;
+      font-size: 16px;
+    }
+
+    .summary-strip {
+      min-height: 38px;
+      margin-bottom: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 7px 11px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .summary-strip strong { color: var(--ink); }
+    .summary-item { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .summary-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+    .summary-dot.assess { background: var(--red); }
+    .summary-dot.assessing { background: var(--blue); }
+    .summary-dot.fill { background: var(--amber); }
+    .summary-dot.filled { background: var(--green); }
+
+    .controls {
+      position: relative;
+      z-index: 10;
+      min-height: 44px;
+      margin-bottom: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .month-nav { display: flex; align-items: center; gap: 4px; }
+    .month-nav strong { min-width: 106px; text-align: center; font-size: 12px; }
+    .month-nav .btn { min-height: 32px; height: 32px; box-shadow: none; }
+    .segmented {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+      padding: 2px;
+    }
+    .segmented button {
+      min-height: 28px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .segmented button.active { background: var(--surface); color: var(--teal-dark); box-shadow: var(--shadow); }
+    .search-box {
+      min-height: 32px;
+      min-width: 180px;
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+    }
+    .search-box span { color: var(--muted); }
+    .search-box input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-size: 11px; }
+    .filter-wrap { position: relative; }
+    .icp-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icp-emergency { margin-left: 0; }
+    .filter-button { min-height: 32px; box-shadow: none; }
+    .filter-count {
+      display: inline-grid;
+      place-items: center;
+      min-width: 16px;
+      height: 16px;
+      margin-left: 4px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-size: 9px;
+    }
+    .filter-popover {
+      position: absolute;
+      top: calc(100% + 5px);
+      right: 0;
+      width: 280px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 14px 35px rgba(15, 23, 42, .18);
+      padding: 10px;
+      display: grid;
+      gap: 9px;
+    }
+    .filter-popover[hidden] { display: none; }
+    .filter-field { display: grid; gap: 3px; }
+    .filter-field label { color: var(--muted); font-size: 10px; font-weight: 800; }
+    .filter-field select,
+    .filter-field input {
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      padding: 5px 7px;
+      color: var(--ink);
+      width: 100%;
+    }
+    .filter-actions { display: flex; justify-content: flex-end; gap: 6px; padding-top: 2px; }
+    .active-filters {
+      min-height: 0;
+      margin: -2px 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .active-filters:empty { display: none; }
+    .filter-chip {
+      border: 1px solid #b7ded7;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      padding: 2px 7px;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .worklist-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 6px;
+      align-items: start;
+    }
+    .worklist-layout.has-inspector {
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+    }
+    .worklist-stack { display: grid; gap: 4px; min-width: 0; }
+    .table-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .table-scroll { overflow: auto; }
+    table { width: 100%; min-width: 620px; border-collapse: collapse; table-layout: fixed; }
+    th, td {
+      padding: 5px 6px;
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid #edf1f4;
+      text-align: left;
+      vertical-align: middle;
+      font-size: 10px;
+    }
+    th:last-child, td:last-child { border-right: 0; }
+    table:not(.compact-table) th:nth-child(2),
+    table:not(.compact-table) td:nth-child(2),
+    .compact-table th:first-child,
+    .compact-table td:first-child {
+      border-right: 0;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .icp-column-resizer {
+      position: absolute;
+      top: 0;
+      right: -3px;
+      z-index: 5;
+      width: 7px;
+      height: 100%;
+      cursor: col-resize;
+    }
+    .icp-column-resizer::after {
+      content: "";
+      position: absolute;
+      top: 20%;
+      bottom: 20%;
+      left: 3px;
+      width: 1px;
+      background: transparent;
+    }
+    .icp-column-resizer:hover::after,
+    .icp-column-resizer:focus-visible::after,
+    body.icp-column-resizing .icp-column-resizer::after {
+      background: var(--teal);
+    }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody tr:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
+    tbody tr.selected { background: #eef9f7; }
+    tbody tr.selected td:first-child { box-shadow: inset 1px 0 0 var(--teal); }
+    tbody tr:last-child td { border-bottom: 0; }
+    .bed {
+      display: inline-block;
+      min-width: 31px;
+      border-radius: 4px;
+      background: #eef2f6;
+      color: #475569;
+      padding: 2px 4px;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 900;
+    }
+    .resident-cell strong { display: block; font-size: 11px; }
+    .resident-cell span { display: block; margin-top: 1px; color: var(--muted); font-size: 9px; }
+    .date { white-space: nowrap; font-family: "Cascadia Mono", Consolas, monospace; font-size: 10px; }
+    .half-block-head {
+      min-height: 30px;
+      padding: 5px 7px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .half-block-head strong { font-size: 11px; }
+    .half-block-head span { color: var(--muted); font-size: 9px; }
+    .deadline { display: grid; gap: 2px; }
+    .deadline-type { color: var(--muted); font-size: 10px; font-weight: 700; }
+    .overdue {
+      width: max-content;
+      border-radius: 999px;
+      background: var(--red-soft);
+      color: var(--red);
+      padding: 1px 5px;
+      font-size: 8px;
+      font-weight: 900;
+    }
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 7px;
+      font-size: 9px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .status-assess { background: var(--red-soft); color: var(--red); }
+    .status-assessing { background: var(--blue-soft); color: var(--blue); }
+    .status-fill { background: var(--amber-soft); color: var(--amber); }
+    .status-filled { background: var(--green-soft); color: var(--green); }
+    .assessment-path { display: grid; gap: 1px; min-width: 0; }
+    .assessment-path strong,
+    .assessment-path span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .assessment-path strong { color: #1d4ed8; font-size: 9px; }
+    .assessment-path span { color: var(--muted); font-size: 8px; }
+    .assessment-link {
+      border: 0;
+      background: transparent;
+      color: var(--blue);
+      padding: 0;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .assessment-empty { color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .completion-pair { display: flex; align-items: center; gap: 3px; }
+    .completion-pill {
+      min-width: 30px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--muted);
+      padding: 3px 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .completion-pill.done { border-color: #bbf7d0; background: var(--green-soft); color: var(--green); }
+    .completion-pill.readonly { cursor: default; }
+    .completion-pill:disabled { cursor: not-allowed; opacity: .55; }
+    .compact-table { min-width: 0; table-layout: fixed; }
+    .compact-table th,
+    .compact-table td { padding: 8px 7px; font-size: 11px; }
+    .compact-table th:nth-child(1) { width: 42%; }
+    .compact-table th:nth-child(2) { width: 28%; }
+    .compact-table th:nth-child(3) { width: 30%; }
+    .compact-resident { display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .compact-resident .resident-cell { min-width: 0; }
+    .compact-resident .resident-cell strong,
+    .compact-resident .resident-cell span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row-progress { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .progress-tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #f8fafc;
+      color: var(--muted);
+      padding: 2px 5px;
+      font-size: 9px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .progress-tag.done { border-color: #bbf7d0; background: var(--green-soft); color: var(--green); }
+    .progress-tag b {
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 8px;
+      letter-spacing: -.02em;
+    }
+    .empty-state { padding: 30px 14px; color: var(--muted); text-align: center; }
+
+    .inspector {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: sticky;
+      top: 0;
+      max-height: calc(100vh - 24px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      outline: none;
+    }
+    .inspector[hidden] { display: none; }
+    .inspector-head {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .inspector-kicker { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 5px; }
+    .inspector-head h2 { margin: 0; font-size: 20px; line-height: 1.2; letter-spacing: 0; }
+    .inspector-close {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      color: #475569;
+      padding: 0;
+      flex: 0 0 auto;
+    }
+    .inspector-body { padding: 10px 12px 12px; overflow: auto; display: grid; gap: 8px; }
+    .workspace-card {
+      margin-top: 0;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      padding: 10px 11px;
+    }
+    .workspace-card-head {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .workspace-card h3 { margin: 0; font-size: 13px; }
+    .workspace-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .inline-form { display: flex; gap: 6px; }
+    .inline-form input {
+      min-width: 0;
+      flex: 1;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+    .inline-form select {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 5px 7px;
+      font-size: 12px;
+    }
+    .inline-form .btn { min-height: 36px; padding: 6px 11px; font-size: 11px; }
+    .encounter-summary {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #f8fafc;
+      padding: 8px 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .encounter-link {
+      width: 100%;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+    }
+    .encounter-link:hover { background: var(--blue-soft); }
+    .encounter-link:disabled { cursor: default; opacity: .65; }
+    .encounter-identity { display: grid; gap: 1px; min-width: 0; }
+    .encounter-identity strong { color: #1d4ed8; font-size: 11px; }
+    .encounter-identity span { color: var(--muted); font-family: "Cascadia Mono", Consolas, monospace; font-size: 9px; }
+    .role-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+    .role-badge {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--muted);
+      padding: 3px 5px;
+      font-size: 9px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .role-badge.done { border-color: #bbf7d0; background: var(--green-soft); color: var(--green); }
+    .mark-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+    .mark-button {
+      min-height: 56px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+      color: var(--ink);
+      padding: 7px 9px;
+      text-align: left;
+      display: grid;
+      gap: 1px;
+    }
+    .mark-button span { color: var(--muted); font-size: 9px; font-weight: 900; }
+    .mark-button strong { font-size: 12px; }
+    .mark-button small { color: var(--muted); font-size: 9px; }
+    .mark-button.done { border-color: #bbf7d0; background: var(--green-soft); }
+    .mark-button.done strong { color: var(--green); }
+    .mark-button:disabled { cursor: not-allowed; opacity: .55; }
+    .workspace-card .lock-note { margin: 7px 0 0; color: var(--muted); font-size: 9px; }
+    .workspace-card > .btn {
+      margin-top: 8px;
+      min-height: 34px;
+      font-size: 11px;
+      box-shadow: none;
+    }
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .history-item:last-child { border-bottom: 0; }
+
+    dialog {
+      width: min(450px, calc(100vw - 24px));
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 0;
+      color: var(--ink);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, .24);
+    }
+    dialog::backdrop { background: rgba(15, 23, 42, .35); }
+    .dialog-head { padding: 13px 15px 10px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font-size: 16px; }
+    .dialog-head p { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
+    .dialog-body { padding: 12px 15px; display: grid; gap: 9px; }
+    .dialog-field { display: grid; gap: 3px; }
+    .dialog-field[hidden] { display: none; }
+    .dialog-field label { color: var(--muted); font-size: 10px; font-weight: 800; }
+    .dialog-field label .field-source {
+      margin-left: 5px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      padding: 2px 5px;
+      font-size: 8px;
+    }
+    .dialog-field input,
+    .dialog-field select,
+    .dialog-field textarea {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      padding: 6px 8px;
+      color: var(--ink);
+      min-height: 34px;
+    }
+    .dialog-field textarea { min-height: 64px; resize: vertical; }
+    .impact-preview {
+      border-radius: 5px;
+      background: #f8fafc;
+      color: #475569;
+      padding: 7px 8px;
+      font-size: 10px;
+    }
+    .dialog-actions {
+      padding: 10px 15px 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 100;
+      max-width: min(380px, calc(100vw - 36px));
+      border-radius: 7px;
+      background: #17202a;
+      color: #fff;
+      padding: 9px 12px;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    html.embedded .sidebar,
+    html.embedded .topbar { display: none; }
+    html.embedded .app { display: block; }
+    html.embedded .main { display: block; }
+    html.embedded .content { padding: 12px; }
+
+    @media (max-width: 1120px) {
+      .app { grid-template-columns: 72px minmax(0, 1fr); }
+      .brand-title, .brand-sub { display: none; }
+    }
+    @media (max-width: 900px) {
+      .screen-head { align-items: flex-start; flex-direction: column; }
+      .worklist-layout.has-inspector { grid-template-columns: minmax(0, 1fr); }
+      .worklist-layout.has-inspector .worklist-stack,
+      .worklist-layout.has-inspector #empty-state { display: none; }
+      .inspector { position: static; max-height: none; }
+      .filter-popover { right: auto; left: 0; }
+    }
+    @media (max-width: 680px) {
+      .sidebar { display: none; }
+      .app, .main { display: block; }
+      .topbar { display: none; }
+      .content { padding: 10px; }
+      .summary-strip { align-items: flex-start; flex-wrap: wrap; gap: 6px 12px; }
+      .search-box { min-width: 100%; }
+      .icp-actions { width: 100%; justify-content: flex-end; }
+    }
+  </style>
+  <link rel="stylesheet" href="../shared/design-system.css?v=20261116-resident-cards">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">OT</div>
+        <div>
+          <div class="brand-title">OT System</div>
+          <div class="brand-sub">ICP worklist</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="系統模組">
+        <button type="button">工作台</button>
+        <button type="button">住客管理</button>
+        <button type="button">訓練時間表</button>
+        <button type="button">復康運動紀錄</button>
+        <button type="button">評估系統</button>
+        <button class="active" type="button">ICP</button>
+        <button type="button">院舍設定</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="home-pill">
+          <span><strong id="chrome-home-code">yt</strong> <span id="chrome-home-name">油塘康璟</span></span>
+          <span class="ui-chevron" aria-hidden="true"></span>
+        </div>
+        <div class="topbar-actions">
+          <span class="top-meta">2026年10月</span>
+          <div class="user-pill"><span class="avatar">T</span><span>OT</span></div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="summary-strip" id="summary-strip"></div>
+
+        <section class="controls" aria-label="ICP 篩選">
+          <div class="month-nav">
+            <button class="btn icon-btn" type="button" data-action="prev-month" aria-label="上一個月">←</button>
+            <strong id="month-label">2026年10月</strong>
+            <button class="btn icon-btn" type="button" data-action="next-month" aria-label="下一個月">→</button>
+            <button class="btn" type="button" data-action="current-month">本月</button>
+          </div>
+          <div class="segmented" role="group" aria-label="半月">
+            <button class="active" type="button" data-half="all" aria-pressed="true">全部</button>
+            <button type="button" data-half="first" aria-pressed="false">上半月</button>
+            <button type="button" data-half="second" aria-pressed="false">下半月</button>
+          </div>
+          <label class="console-search search-box">
+            <svg class="console-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m20 20-4-4"></path>
+            </svg>
+            <input id="search-input" type="search" placeholder="搜尋床號或住客" aria-label="搜尋 ICP 住客" autocomplete="off">
+          </label>
+          <div class="icp-actions">
+            <div class="filter-wrap">
+              <button class="btn filter-button" type="button" data-action="toggle-filters">
+                篩選 <span class="filter-count" id="filter-count">0</span>
+              </button>
+              <form class="filter-popover" id="filter-popover" hidden>
+                <div class="filter-field">
+                  <label for="status-filter">狀態</label>
+                  <select id="status-filter">
+                    <option value="all">全部</option>
+                    <option value="assess">待評估</option>
+                    <option value="assessing">評估中</option>
+                    <option value="fill">待填 ICP</option>
+                    <option value="filled">已填 ICP</option>
+                    <option value="due">只顯示逾期</option>
+                  </select>
+                </div>
+                <div class="filter-field">
+                  <label for="discipline-filter">治療師尚未完成</label>
+                  <select id="discipline-filter">
+                    <option value="all">全部</option>
+                    <option value="ot">OT 尚有未完成項目</option>
+                    <option value="pt">PT 尚有未完成項目</option>
+                  </select>
+                </div>
+                <div class="filter-field">
+                  <label for="range-start">自訂日期由</label>
+                  <input id="range-start" type="date">
+                </div>
+                <div class="filter-field">
+                  <label for="range-end">至</label>
+                  <input id="range-end" type="date">
+                </div>
+                <div class="filter-actions">
+                  <button class="btn" type="button" data-action="clear-filters">清除</button>
+                  <button class="btn btn-primary" type="button" data-action="close-filters">完成</button>
+                </div>
+              </form>
+            </div>
+            <button class="btn btn-danger icp-emergency" type="button" data-action="open-urgent">建立緊急 ICP</button>
+          </div>
+        </section>
+
+        <div class="active-filters" id="active-filters"></div>
+
+        <div class="worklist-layout" id="worklist-layout">
+          <section class="worklist-stack" id="worklist-stack" aria-label="ICP 工作清單"></section>
+          <div class="table-card empty-state" id="empty-state" hidden>沒有符合目前篩選的 ICP 週期。</div>
+
+          <aside class="inspector" id="inspector" hidden></aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="urgent-dialog" aria-labelledby="urgent-title">
+    <form method="dialog" id="urgent-form">
+      <div class="dialog-head">
+        <h2 id="urgent-title">建立緊急 ICP</h2>
+        <p>記錄日期及原因，系統會依院舍設定更新限期。</p>
+      </div>
+      <div class="dialog-body">
+        <div class="dialog-field">
+          <label for="urgent-resident">住客</label>
+          <select id="urgent-resident" required></select>
+        </div>
+        <div class="dialog-field">
+          <label for="urgent-date">緊急 ICP 日期</label>
+          <input id="urgent-date" type="date" value="2026-10-22" required>
+        </div>
+        <div class="dialog-field">
+          <label for="urgent-reason">原因</label>
+          <textarea id="urgent-reason" placeholder="例如：照顧需要突然改變" required></textarea>
+        </div>
+        <div class="dialog-field">
+          <label for="urgent-impact">緊急 ICP 影響 <span class="field-source">院舍設定</span></label>
+          <select id="urgent-impact" disabled>
+            <option value="none">沒有影響</option>
+            <option value="restart">重啟週期</option>
+            <option value="current">計算於週期內</option>
+          </select>
+        </div>
+        <div class="dialog-field">
+          <label for="urgent-assessment-source">016 評估</label>
+          <select id="urgent-assessment-source">
+            <option value="start">新增 ICP 016 評估</option>
+            <option value="none">暫不處理</option>
+          </select>
+        </div>
+        <div class="impact-preview" id="impact-preview"></div>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn" type="button" data-action="close-urgent">取消</button>
+        <button class="btn btn-primary" type="submit" value="confirm">建立緊急 ICP</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../shared/home-settings.js"></script>
+  <script src="../shared/prototype-catalog.js"></script>
+  <script src="../shared/mock-residents.js"></script>
+  <script src="../shared/prototype-domain.js"></script>
+  <script>
+    const TODAY_KEY = OT_PROTOTYPE.today;
+    const MONTH_NAMES = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+    const STATUS_META = {
+      assess: { label: "待評估", className: "status-assess" },
+      assessing: { label: "評估中", className: "status-assessing" },
+      fill: { label: "待填 ICP", className: "status-fill" },
+      filled: { label: "已填 ICP", className: "status-filled" }
+    };
+
+    function applyHomeSettings() {
+      const home = OT_HOME_SETTINGS.getHome();
+      document.getElementById("chrome-home-code").textContent = home.code;
+      document.getElementById("chrome-home-name").textContent = home.name;
+    }
+    let cycles = [];
+    let visibleMonth = new Date(2026, 9, 1);
+    let halfFilter = "all";
+    let statusFilter = "all";
+    let disciplineFilter = "all";
+    let customRange = { start: "", end: "" };
+    let searchTerm = "";
+    let selectedCycleId = null;
+    let toastTimer = null;
+    const ICP_COLUMN_STORAGE_KEY = "ot.icp.column-widths.v1";
+    const ICP_COLUMNS = {
+      full: [
+        { key: "bed", label: "床號", width: 52, minWidth: 44 },
+        { key: "resident", label: "住客", width: 130, minWidth: 90 },
+        { key: "due", label: "ICP 限期", width: 100, minWidth: 82 },
+        { key: "nextType", label: "下次性質", width: 78, minWidth: 68 },
+        { key: "icpDate", label: "ICP 日期", width: 96, minWidth: 80 },
+        { key: "ax", label: "ICP Ax", width: 130, minWidth: 96 },
+        { key: "assessment", label: "評估進度", width: 92, minWidth: 82 },
+        { key: "forms", label: "ICP 表格進度", width: 112, minWidth: 92 }
+      ],
+      compact: [
+        { key: "resident", label: "住客", width: 160, minWidth: 110 },
+        { key: "due", label: "限期", width: 112, minWidth: 88 },
+        { key: "progress", label: "進度", width: 190, minWidth: 150 }
+      ]
+    };
+    let icpColumnWidths;
+    try {
+      icpColumnWidths = JSON.parse(localStorage.getItem(ICP_COLUMN_STORAGE_KEY) || "{}");
+    } catch (error) {
+      icpColumnWidths = {};
+    }
+
+    const escapeHtml = value => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    const parseDate = value => new Date(`${value}T00:00:00`);
+    const today = parseDate(TODAY_KEY);
+
+    function refreshCycles() {
+      cycles = OT_PROTOTYPE.cycles();
+    }
+
+    function pad(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function dateKey(date) {
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    function addDays(date, amount) {
+      const copy = new Date(date);
+      copy.setDate(copy.getDate() + amount);
+      return copy;
+    }
+
+    function addMonths(date, amount) {
+      const copy = new Date(date);
+      copy.setMonth(copy.getMonth() + amount);
+      return copy;
+    }
+
+    function formatDate(value, year = false) {
+      if (!value) return "—";
+      const date = parseDate(value);
+      return year
+        ? `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())}`
+        : `${pad(date.getDate())}/${pad(date.getMonth() + 1)}`;
+    }
+
+    function isSameMonth(date, month) {
+      return date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth();
+    }
+
+    function cycleStage(cycle) {
+      if (!cycle.assessmentDone) return "assess";
+      if (!cycle.icpOtDone || !cycle.icpPtDone || !cycle.icpDate) return "fill";
+      return "filled";
+    }
+
+    function assessmentComplete(cycle) {
+      return Boolean(cycle.assessmentDone);
+    }
+
+    function icpFormsComplete(cycle) {
+      return Boolean(cycle.icpOtDone && cycle.icpPtDone && cycle.icpDate);
+    }
+
+    function rolePair(otDone, ptDone) {
+      return `OT ${otDone ? "✓" : "·"} PT ${ptDone ? "✓" : "·"}`;
+    }
+
+    function isOverdue(cycle) {
+      return !icpFormsComplete(cycle) && parseDate(cycle.dueDate) < today;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function monthKey(date) {
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
+    }
+
+    function matchesFilters(cycle) {
+      const due = parseDate(cycle.dueDate);
+      if (customRange.start && customRange.end) {
+        if (cycle.dueDate < customRange.start || cycle.dueDate > customRange.end) return false;
+      } else {
+        if (!isSameMonth(due, visibleMonth)) return false;
+        if (halfFilter === "first" && due.getDate() > 15) return false;
+        if (halfFilter === "second" && due.getDate() < 16) return false;
+      }
+      if (statusFilter === "due" && !isOverdue(cycle)) return false;
+      if (statusFilter !== "all" && statusFilter !== "due" && cycleStage(cycle) !== statusFilter) return false;
+      if (disciplineFilter === "ot" && cycle.icpOtDone) return false;
+      if (disciplineFilter === "pt" && cycle.icpPtDone) return false;
+      if (searchTerm && !`${cycle.bed} ${cycle.name}`.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+      return true;
+    }
+
+    function activeFilterCount() {
+      return [
+        statusFilter !== "all",
+        disciplineFilter !== "all",
+        Boolean(customRange.start && customRange.end)
+      ].filter(Boolean).length;
+    }
+
+    function renderHeader() {
+      document.getElementById("month-label").textContent = `${visibleMonth.getFullYear()}年${MONTH_NAMES[visibleMonth.getMonth()]}`;
+      document.querySelectorAll("[data-half]").forEach(button => {
+        const active = button.dataset.half === halfFilter;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      document.getElementById("filter-count").textContent = activeFilterCount();
+
+      const monthCycles = cycles.filter(cycle => isSameMonth(parseDate(cycle.dueDate), visibleMonth));
+      const counts = {
+        assess: monthCycles.filter(cycle => cycleStage(cycle) === "assess").length,
+        assessing: monthCycles.filter(cycle => cycleStage(cycle) === "assessing").length,
+        fill: monthCycles.filter(cycle => cycleStage(cycle) === "fill").length,
+        filled: monthCycles.filter(cycle => cycleStage(cycle) === "filled").length,
+        overdue: monthCycles.filter(isOverdue).length
+      };
+      document.getElementById("summary-strip").innerHTML = `
+        <span class="summary-item"><i class="summary-dot assess"></i>待評估 <strong>${counts.assess}</strong></span>
+        <span class="summary-item"><i class="summary-dot assessing"></i>評估中 <strong>${counts.assessing}</strong></span>
+        <span class="summary-item"><i class="summary-dot fill"></i>待填 ICP <strong>${counts.fill}</strong></span>
+        <span class="summary-item"><i class="summary-dot filled"></i>已填 ICP <strong>${counts.filled}</strong></span>
+        <span class="summary-item"><i class="summary-dot"></i>逾期 <strong>${counts.overdue}</strong></span>
+      `;
+
+      const filters = [];
+      if (statusFilter !== "all") filters.push(statusFilter === "due" ? "逾期" : STATUS_META[statusFilter].label);
+      if (disciplineFilter !== "all") filters.push(disciplineFilter === "ot" ? "OT 尚有未完成項目" : "PT 尚有未完成項目");
+      if (customRange.start && customRange.end) filters.push(`${customRange.start} 至 ${customRange.end}`);
+      document.getElementById("active-filters").innerHTML = filters
+        .map(text => `<span class="filter-chip">${escapeHtml(text)}</span>`)
+        .join("");
+    }
+
+    function compactProgressMarkup(cycle) {
+      const assessmentDone = assessmentComplete(cycle);
+      const icpDone = icpFormsComplete(cycle);
+      return `
+        <div class="row-progress">
+          <span class="progress-tag ${assessmentDone ? "done" : ""}">016 <b>${assessmentDone ? "完成" : "待完成"}</b></span>
+          <span class="progress-tag ${icpDone ? "done" : ""}">ICP <b>${rolePair(cycle.icpOtDone, cycle.icpPtDone)}</b></span>
+        </div>
+      `;
+    }
+
+    function cycleRowMarkup(cycle, compact = false) {
+      const stage = cycleStage(cycle);
+      const meta = STATUS_META[stage];
+      const completion = (area, otDone, ptDone) => `
+        <span class="completion-pair">
+          ${area === "assessment"
+            ? `<span class="completion-pill ${otDone ? "done" : ""}">${otDone ? "已完成" : "待完成"}</span>`
+            : `<button class="completion-pill ${otDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="${area}" data-role="ot" data-cycle-id="${cycle.id}" aria-pressed="${otDone}">OT ${otDone ? "✓" : "·"}</button>
+               <button class="completion-pill ${ptDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="${area}" data-role="pt" data-cycle-id="${cycle.id}" aria-pressed="${ptDone}">PT ${ptDone ? "✓" : "·"}</button>`}
+        </span>
+      `;
+      if (compact) {
+        return `
+          <tr data-cycle-id="${cycle.id}" tabindex="0" aria-label="開啟 ${escapeHtml(cycle.bed)} ${escapeHtml(cycle.name)} ICP 週期" class="${cycle.id === selectedCycleId ? "selected" : ""}">
+            <td>
+              <div class="compact-resident">
+                <span class="bed">${escapeHtml(cycle.bed)}</span>
+                <span class="resident-cell"><strong>${escapeHtml(cycle.name)}</strong><span>${escapeHtml(cycle.place)}</span></span>
+              </div>
+            </td>
+            <td>
+              <span class="deadline">
+                <span class="date">${formatDate(cycle.dueDate, true)}</span>
+                ${isOverdue(cycle) ? '<span class="overdue">逾期</span>' : ""}
+              </span>
+            </td>
+            <td>${compactProgressMarkup(cycle)}</td>
+          </tr>
+        `;
+      }
+      return `
+        <tr data-cycle-id="${cycle.id}" tabindex="0" aria-label="開啟 ${escapeHtml(cycle.bed)} ${escapeHtml(cycle.name)} ICP 週期" class="${cycle.id === selectedCycleId ? "selected" : ""}">
+          <td><span class="bed">${escapeHtml(cycle.bed)}</span></td>
+          <td class="resident-cell"><strong>${escapeHtml(cycle.name)}</strong><span>${escapeHtml(cycle.place)}</span></td>
+          <td>
+            <span class="deadline">
+              <span class="date">${formatDate(cycle.dueDate, true)}</span>
+              ${isOverdue(cycle) ? '<span class="overdue">逾期</span>' : ""}
+            </span>
+          </td>
+          <td class="date">${escapeHtml(cycle.nextIcpType || "6個月")}</td>
+          <td class="date">${cycle.icpDate ? formatDate(cycle.icpDate, true) : "—"}</td>
+          <td>
+            ${cycle.activeAssessment
+              ? `<button class="assessment-link" type="button" data-action="open-assessment" data-cycle-id="${cycle.id}" data-assessment-id="${cycle.activeAssessment.id}" title="${escapeHtml(cycle.activeAssessment.id)}">
+                   <span class="assessment-path">
+                     <strong>${escapeHtml(cycle.activeAssessment.type)}</strong>
+                     <span>${escapeHtml(cycle.activeAssessment.id)}</span>
+                   </span>
+                 </button>`
+              : '<span class="assessment-empty">未建立 ICP Ax</span>'}
+          </td>
+          <td>
+            ${cycle.activeAssessment
+              ? completion("assessment", cycle.assessmentDone, false)
+              : ""}
+          </td>
+          <td>${completion("icp", cycle.icpOtDone, cycle.icpPtDone)}</td>
+        </tr>
+      `;
+    }
+
+    function visibleIcpColumns(compact) {
+      return ICP_COLUMNS[compact ? "compact" : "full"].map(column => ({
+        ...column,
+        width: Math.max(
+          column.minWidth,
+          Number(icpColumnWidths[`${compact ? "compact" : "full"}:${column.key}`]) || column.width
+        )
+      }));
+    }
+
+    function saveIcpColumnWidths() {
+      try {
+        localStorage.setItem(ICP_COLUMN_STORAGE_KEY, JSON.stringify(icpColumnWidths));
+      } catch (error) {
+        // Resizing remains available for the current page session.
+      }
+    }
+
+    function tableMarkup(rows, heading = "", compact = false) {
+      const columns = visibleIcpColumns(compact);
+      const totalWidth = columns.reduce((sum, column) => sum + column.width, 0);
+      return `
+        <section class="table-card">
+          ${heading ? `<header class="half-block-head"><strong>${heading}</strong><span>${rows.length} 位</span></header>` : ""}
+          <div class="table-scroll">
+            <table class="${compact ? "compact-table" : ""}" style="min-width:${totalWidth}px">
+              <colgroup>
+                ${columns.map(column => `<col data-icp-col="${column.key}" style="width:${column.width}px">`).join("")}
+              </colgroup>
+              <thead>
+                ${compact ? `
+                  <tr>
+                    ${columns.map((column, index) => `
+                      <th data-icp-column="${column.key}">${column.label}${index < columns.length - 1
+                        ? '<span class="icp-column-resizer" role="separator" aria-orientation="vertical" tabindex="0"></span>'
+                        : ""}</th>
+                    `).join("")}
+                  </tr>
+                ` : `
+                  <tr>
+                    ${columns.map((column, index) => `
+                      <th data-icp-column="${column.key}">${column.label}${index < columns.length - 1
+                        ? '<span class="icp-column-resizer" role="separator" aria-orientation="vertical" tabindex="0"></span>'
+                        : ""}</th>
+                    `).join("")}
+                  </tr>
+                `}
+              </thead>
+              <tbody>${rows.map(cycle => cycleRowMarkup(cycle, compact)).join("")}</tbody>
+            </table>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTable() {
+      const visible = cycles
+        .filter(matchesFilters)
+        .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+      const stack = document.getElementById("worklist-stack");
+      document.getElementById("empty-state").hidden = visible.length > 0;
+      if (!visible.length) {
+        stack.innerHTML = "";
+        return;
+      }
+      const compact = Boolean(selectedCycleId);
+
+      if (halfFilter === "all" && !(customRange.start && customRange.end)) {
+        const firstHalf = visible.filter(cycle => parseDate(cycle.dueDate).getDate() <= 15);
+        const secondHalf = visible.filter(cycle => parseDate(cycle.dueDate).getDate() >= 16);
+        stack.innerHTML = [
+          firstHalf.length ? tableMarkup(firstHalf, "上半月", compact) : "",
+          secondHalf.length ? tableMarkup(secondHalf, "下半月", compact) : ""
+        ].join("");
+        return;
+      }
+
+      stack.innerHTML = tableMarkup(visible, "", compact);
+    }
+
+    function cycleById(cycleId) {
+      return cycles.find(cycle => cycle.id === cycleId);
+    }
+
+    function renderInspector() {
+      const inspector = document.getElementById("inspector");
+      const layout = document.getElementById("worklist-layout");
+      const cycle = cycleById(selectedCycleId);
+      if (!cycle) {
+        inspector.hidden = true;
+        layout.classList.remove("has-inspector");
+        inspector.innerHTML = "";
+        return;
+      }
+
+      const stage = cycleStage(cycle);
+      const meta = STATUS_META[stage];
+      const assessmentDone = assessmentComplete(cycle);
+      const icpDone = icpFormsComplete(cycle);
+      const encounterType = cycle.activeAssessment?.type || "ICP Ax";
+      const encounterMeta = cycle.activeAssessment
+        ? `${cycle.activeAssessment.id} · ${formatDate(cycle.activeAssessment.date, true)}`
+        : "尚未建立";
+
+      inspector.hidden = false;
+      inspector.tabIndex = -1;
+      inspector.setAttribute("aria-labelledby", "inspector-title");
+      layout.classList.add("has-inspector");
+      inspector.innerHTML = `
+        <header class="inspector-head">
+          <div>
+            <div class="inspector-kicker">
+              <span class="status-chip ${meta.className}">${meta.label}</span>
+              ${isOverdue(cycle) ? '<span class="overdue">逾期</span>' : ""}
+            </div>
+            <h2 id="inspector-title">${escapeHtml(cycle.bed)} · ${escapeHtml(cycle.name)}</h2>
+          </div>
+          <button class="inspector-close" type="button" data-action="close-cycle" aria-label="返回 ICP 清單">×</button>
+        </header>
+        <div class="inspector-body">
+          <section class="workspace-card">
+            <div class="workspace-card-head">
+              <h3>016 評估路徑</h3>
+              <span class="status-chip ${assessmentDone ? "status-filled" : cycle.activeAssessment ? "status-assessing" : "status-assess"}">${assessmentDone ? "已完成" : cycle.activeAssessment ? "評估中" : "待開始"}</span>
+            </div>
+            <button class="encounter-summary encounter-link" type="button" ${cycle.activeAssessment
+              ? `data-action="open-assessment" data-cycle-id="${cycle.id}" data-assessment-id="${cycle.activeAssessment.id}"`
+              : "disabled"}>
+              <div class="encounter-identity">
+                <strong>${escapeHtml(encounterType)}</strong>
+                <span>${escapeHtml(encounterMeta)}</span>
+              </div>
+            </button>
+          </section>
+
+          <section class="workspace-card" id="icp-date-section">
+            <div class="workspace-card-head">
+              <h3>下次 ICP</h3>
+              <span class="status-chip ${cycle.dueDate ? "status-filled" : "status-fill"}">${cycle.dueDate ? "已記錄" : "待輸入"}</span>
+            </div>
+            <div class="inline-form">
+              <select id="next-icp-type-input" aria-label="下次 ICP 性質">
+                <option value="1個月" ${cycle.nextIcpType === "1個月" ? "selected" : ""}>1 個月</option>
+                <option value="6個月" ${cycle.nextIcpType === "6個月" ? "selected" : ""}>6 個月</option>
+                <option value="1年" ${cycle.nextIcpType === "1年" ? "selected" : ""}>1 年</option>
+              </select>
+              <input id="next-icp-due-input" type="date" value="${cycle.dueDate || ""}" aria-label="下次 ICP 限期">
+              <button class="btn btn-primary" type="button" data-action="save-next-icp" data-cycle-id="${cycle.id}">儲存</button>
+            </div>
+          </section>
+
+          <section class="workspace-card" id="icp-meeting-section">
+            <div class="workspace-card-head">
+              <h3>ICP 會議日期</h3>
+              <span class="status-chip ${cycle.icpDate ? "status-filled" : "status-fill"}">${cycle.icpDate ? "已記錄" : "待輸入"}</span>
+            </div>
+            <div class="inline-form">
+              <input id="icp-date-input" type="date" value="${cycle.icpDate || ""}" aria-label="ICP 會議日期">
+              <button class="btn btn-primary" type="button" data-action="save-icp-date" data-cycle-id="${cycle.id}">儲存日期</button>
+            </div>
+          </section>
+
+          <section class="workspace-card" id="icp-form-section">
+            <div class="workspace-card-head">
+              <h3>標記 ICP 已填</h3>
+              <span class="status-chip ${icpDone ? "status-filled" : "status-fill"}">${icpDone ? "已完成" : "待完成"}</span>
+            </div>
+            <div class="mark-actions">
+              <button class="mark-button ${cycle.icpOtDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="icp" data-role="ot" data-cycle-id="${cycle.id}" aria-pressed="${cycle.icpOtDone}">
+                <span>OT</span>
+                <strong>${cycle.icpOtDone ? "已填" : "未填"}</strong>
+                <small>${cycle.icpOtCompletedAt ? formatDate(cycle.icpOtCompletedAt, true) : "—"}</small>
+              </button>
+              <button class="mark-button ${cycle.icpPtDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="icp" data-role="pt" data-cycle-id="${cycle.id}" aria-pressed="${cycle.icpPtDone}">
+                <span>PT</span>
+                <strong>${cycle.icpPtDone ? "已填" : "未填"}</strong>
+                <small>${cycle.icpPtCompletedAt ? formatDate(cycle.icpPtCompletedAt, true) : "—"}</small>
+              </button>
+            </div>
+          </section>
+        </div>
+      `;
+    }
+
+    function render() {
+      renderHeader();
+      renderTable();
+      renderInspector();
+    }
+
+    let icpColumnResize = null;
+
+    function applyIcpResize(table, currentKey, nextKey, currentWidth, nextWidth) {
+      const compact = table.classList.contains("compact-table");
+      const mode = compact ? "compact" : "full";
+      icpColumnWidths[`${mode}:${currentKey}`] = currentWidth;
+      icpColumnWidths[`${mode}:${nextKey}`] = nextWidth;
+      table.querySelector(`col[data-icp-col="${currentKey}"]`)?.setAttribute("style", `width:${currentWidth}px`);
+      table.querySelector(`col[data-icp-col="${nextKey}"]`)?.setAttribute("style", `width:${nextWidth}px`);
+      const columns = visibleIcpColumns(compact);
+      table.style.minWidth = `${columns.reduce((sum, column) => sum + column.width, 0)}px`;
+    }
+
+    document.addEventListener("pointerdown", event => {
+      const handle = event.target.closest(".icp-column-resizer");
+      if (!handle) return;
+      const th = handle.closest("th[data-icp-column]");
+      const table = handle.closest("table");
+      const nextTh = th?.nextElementSibling;
+      if (!th || !table || !nextTh?.matches("th[data-icp-column]")) return;
+      event.preventDefault();
+      const compact = table.classList.contains("compact-table");
+      const columns = visibleIcpColumns(compact);
+      const currentKey = th.dataset.icpColumn;
+      const nextKey = nextTh.dataset.icpColumn;
+      const currentColumn = columns.find(column => column.key === currentKey);
+      const nextColumn = columns.find(column => column.key === nextKey);
+      const headerCells = [...th.parentElement.children];
+      const mode = compact ? "compact" : "full";
+      let totalWidth = 0;
+      headerCells.forEach((header, index) => {
+        const column = columns[index];
+        const width = Math.round(header.getBoundingClientRect().width * 100) / 100;
+        icpColumnWidths[`${mode}:${column.key}`] = width;
+        totalWidth += width;
+        table.querySelector(`col[data-icp-col="${column.key}"]`)
+          ?.setAttribute("style", `width:${width}px`);
+      });
+      table.style.width = `${totalWidth}px`;
+      table.style.minWidth = `${totalWidth}px`;
+      icpColumnResize = {
+        table,
+        currentKey,
+        nextKey,
+        startX: event.clientX,
+        currentWidth: th.getBoundingClientRect().width,
+        nextWidth: nextTh.getBoundingClientRect().width,
+        currentMin: currentColumn.minWidth,
+        nextMin: nextColumn.minWidth
+      };
+      document.body.classList.add("icp-column-resizing");
+      handle.focus({ preventScroll: true });
+    });
+
+    document.addEventListener("pointermove", event => {
+      if (!icpColumnResize) return;
+      let delta = Math.round(event.clientX - icpColumnResize.startX);
+      delta = Math.max(icpColumnResize.currentMin - icpColumnResize.currentWidth, delta);
+      delta = Math.min(icpColumnResize.nextWidth - icpColumnResize.nextMin, delta);
+      applyIcpResize(
+        icpColumnResize.table,
+        icpColumnResize.currentKey,
+        icpColumnResize.nextKey,
+        icpColumnResize.currentWidth + delta,
+        icpColumnResize.nextWidth - delta
+      );
+    });
+
+    document.addEventListener("pointerup", () => {
+      if (!icpColumnResize) return;
+      icpColumnResize = null;
+      document.body.classList.remove("icp-column-resizing");
+      saveIcpColumnWidths();
+    });
+
+    function openCycle(cycleId) {
+      selectedCycleId = cycleId;
+      renderTable();
+      renderInspector();
+      requestAnimationFrame(() => document.getElementById("inspector")?.focus({ preventScroll: true }));
+    }
+
+    function closeCycle() {
+      const cycleId = selectedCycleId;
+      selectedCycleId = null;
+      render();
+      requestAnimationFrame(() => {
+        document.querySelector(`tr[data-cycle-id="${cycleId}"]`)?.focus();
+      });
+    }
+
+    function toggleCompletion(cycleId, role, area = "icp") {
+      const cycle = cycleById(cycleId);
+      if (!cycle || area !== "icp") return;
+      const doneKey = role === "ot" ? "icpOtDone" : "icpPtDone";
+      const next = !cycle[doneKey];
+      try {
+        OT_PROTOTYPE.setIcpRoleComplete(cycleId, role, next);
+        refreshCycles();
+      } catch (error) {
+        showToast(error.message);
+        return;
+      }
+      render();
+      showToast(`ICP · ${role.toUpperCase()} 完成狀態已更新。`);
+    }
+
+    function saveIcpDate(cycleId) {
+      const cycle = cycleById(cycleId);
+      const input = document.getElementById("icp-date-input");
+      if (!cycle || !input?.value) {
+        showToast("請先選擇 ICP 會議日期。");
+        return;
+      }
+      if (!assessmentComplete(cycle) || !cycle.activeAssessment) {
+        showToast("請先完成並連結 ICP Ax 的 016 評估。");
+        return;
+      }
+      const laterCompletion = [
+        cycle.icpOtCompletedAt,
+        cycle.icpPtCompletedAt
+      ].filter(Boolean).find(date => date > input.value);
+      if (laterCompletion) {
+        showToast("ICP 會議日期不可早於 OT 或 PT 的完成日期。");
+        return;
+      }
+      try {
+        OT_PROTOTYPE.updateCycle(cycle.id, { icpDate: input.value }, "記錄 ICP 會議日期");
+        refreshCycles();
+      } catch (error) {
+        showToast(error.message);
+        return;
+      }
+      render();
+      showToast("ICP 會議日期已記錄。");
+    }
+
+    function saveNextIcp(cycleId) {
+      const cycle = cycleById(cycleId);
+      const typeInput = document.getElementById("next-icp-type-input");
+      const dueInput = document.getElementById("next-icp-due-input");
+      if (!cycle || !typeInput?.value || !dueInput?.value) {
+        showToast("請選擇下次 ICP 性質及限期。");
+        return;
+      }
+      try {
+        OT_PROTOTYPE.updateCycle(cycle.id, {
+          nextIcpType: typeInput.value,
+          dueDate: dueInput.value
+        }, "修改下次 ICP");
+        refreshCycles();
+      } catch (error) {
+        showToast(error.message);
+        return;
+      }
+      render();
+      showToast("下次 ICP 性質及限期已更新。");
+    }
+
+    function startIcpAssessment(cycleId, origin = "icp") {
+      const cycle = cycleById(cycleId);
+      if (!cycle) return;
+      const params = new URLSearchParams({
+        embed: "1",
+        mode: "session",
+        origin,
+        residentId: cycle.residentId,
+        cycleId: cycle.id,
+        v: "icp-session"
+      });
+      window.location.href = `../assessment/paper-aligned.html?${params.toString()}`;
+    }
+
+    function openAssessment(cycleId, assessmentId) {
+      const cycle = cycleById(cycleId);
+      if (!cycle) return;
+      const params = new URLSearchParams({
+        embed: "1",
+        mode: "session",
+        origin: "icp",
+        residentId: cycle.residentId,
+        cycleId: cycle.id,
+        assessmentId: assessmentId || "",
+        v: "icp-session"
+      });
+      window.location.href = `../assessment/paper-aligned.html?${params.toString()}`;
+    }
+
+    function openUrgentDialog(cycleId = selectedCycleId) {
+      selectedCycleId = cycleId || selectedCycleId;
+      const select = document.getElementById("urgent-resident");
+      select.innerHTML = cycles.map(cycle => (
+        `<option value="${cycle.id}" ${cycle.id === selectedCycleId ? "selected" : ""}>${escapeHtml(cycle.bed)} ${escapeHtml(cycle.name)}</option>`
+      )).join("");
+      document.getElementById("urgent-date").value = TODAY_KEY;
+      document.getElementById("urgent-reason").value = "";
+      document.getElementById("urgent-impact").value = OT_HOME_SETTINGS.getHome().urgentIcpRule;
+      document.getElementById("urgent-assessment-source").value = "start";
+      updateUrgentPreview();
+      document.getElementById("urgent-dialog").showModal();
+    }
+
+    function updateUrgentPreview() {
+      const cycle = cycleById(document.getElementById("urgent-resident").value);
+      const impact = document.getElementById("urgent-impact").value;
+      const date = document.getElementById("urgent-date").value;
+      let due = cycle?.dueDate || "";
+      if (impact === "restart" && date) {
+        due = dateKey(addDays(addMonths(parseDate(date), 6), -1));
+      }
+      document.getElementById("impact-preview").textContent = impact === "restart" && due
+        ? `預覽：下次 ICP 限期將改為 ${formatDate(due, true)}`
+        : impact === "none"
+          ? "預覽：目前限期不變"
+          : "預覽：保留目前週期及限期";
+    }
+
+    function confirmUrgent() {
+      const cycle = cycleById(document.getElementById("urgent-resident").value);
+      const date = document.getElementById("urgent-date").value;
+      const reason = document.getElementById("urgent-reason").value.trim();
+      const impact = document.getElementById("urgent-impact").value;
+      const assessmentSource = document.getElementById("urgent-assessment-source").value;
+      if (!cycle || !date || !reason) {
+        showToast("請填寫日期及原因。");
+        return;
+      }
+      const impactLabel = impact === "restart" ? "重啟週期" : impact === "current" ? "維持本週期" : "沒有影響";
+      if (impact === "restart") {
+        cycle.dueDate = dateKey(addDays(addMonths(parseDate(date), 6), -1));
+      }
+      cycle.urgentEvents.push({ date, reason, impact, impactLabel });
+      selectedCycleId = cycle.id;
+      try {
+        OT_PROTOTYPE.updateCycle(cycle.id, {
+          dueDate: cycle.dueDate,
+          urgentEvents: cycle.urgentEvents
+        }, "建立緊急 ICP");
+        refreshCycles();
+      } catch (error) {
+        showToast(error.message);
+        return;
+      }
+      document.getElementById("urgent-dialog").close();
+      render();
+      showToast("緊急 ICP 已記錄。");
+      if (assessmentSource === "start") {
+        startIcpAssessment(cycle.id, "urgent-icp");
+      }
+    }
+
+    function clearFilters() {
+      statusFilter = "all";
+      disciplineFilter = "all";
+      customRange = { start: "", end: "" };
+      document.getElementById("status-filter").value = "all";
+      document.getElementById("discipline-filter").value = "all";
+      document.getElementById("range-start").value = "";
+      document.getElementById("range-end").value = "";
+      render();
+    }
+
+    document.getElementById("worklist-stack").addEventListener("click", event => {
+      const actionTarget = event.target.closest("[data-action]");
+      if (actionTarget) {
+        const action = actionTarget.dataset.action;
+        if (action === "toggle-completion") {
+          toggleCompletion(actionTarget.dataset.cycleId, actionTarget.dataset.role, actionTarget.dataset.area);
+          return;
+        }
+        if (action === "focus-assessment") {
+          openCycle(actionTarget.dataset.cycleId);
+          return;
+        }
+        if (action === "open-assessment") {
+          openAssessment(actionTarget.dataset.cycleId, actionTarget.dataset.assessmentId);
+          return;
+        }
+      }
+      const row = event.target.closest("[data-cycle-id]");
+      if (row) openCycle(row.dataset.cycleId);
+    });
+
+    document.getElementById("worklist-stack").addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const row = event.target.closest("tr[data-cycle-id]");
+      if (!row) return;
+      event.preventDefault();
+      openCycle(row.dataset.cycleId);
+    });
+
+    document.getElementById("worklist-stack").addEventListener("keydown", event => {
+      const handle = event.target.closest(".icp-column-resizer");
+      if (!handle || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
+      event.preventDefault();
+      const th = handle.closest("th[data-icp-column]");
+      const table = handle.closest("table");
+      const nextTh = th?.nextElementSibling;
+      if (!th || !table || !nextTh?.matches("th[data-icp-column]")) return;
+      const compact = table.classList.contains("compact-table");
+      const columns = visibleIcpColumns(compact);
+      const currentColumn = columns.find(column => column.key === th.dataset.icpColumn);
+      const nextColumn = columns.find(column => column.key === nextTh.dataset.icpColumn);
+      const delta = event.key === "ArrowRight" ? 10 : -10;
+      const bounded = Math.max(
+        currentColumn.minWidth - currentColumn.width,
+        Math.min(nextColumn.width - nextColumn.minWidth, delta)
+      );
+      applyIcpResize(
+        table,
+        currentColumn.key,
+        nextColumn.key,
+        currentColumn.width + bounded,
+        nextColumn.width - bounded
+      );
+      saveIcpColumnWidths();
+    });
+
+    document.getElementById("inspector").addEventListener("click", event => {
+      const actionTarget = event.target.closest("[data-action]");
+      if (!actionTarget) return;
+      const action = actionTarget.dataset.action;
+      if (action === "close-cycle") {
+        closeCycle();
+        return;
+      }
+      if (action === "save-icp-date") return saveIcpDate(actionTarget.dataset.cycleId);
+      if (action === "save-next-icp") return saveNextIcp(actionTarget.dataset.cycleId);
+      if (action === "start-icp-assessment") return startIcpAssessment(actionTarget.dataset.cycleId);
+      if (action === "open-assessment") return openAssessment(actionTarget.dataset.cycleId, actionTarget.dataset.assessmentId);
+      if (action === "toggle-completion") return toggleCompletion(actionTarget.dataset.cycleId, actionTarget.dataset.role, actionTarget.dataset.area);
+      if (action === "open-urgent") return openUrgentDialog(actionTarget.dataset.cycleId);
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && selectedCycleId) closeCycle();
+    });
+
+    document.addEventListener("click", event => {
+      const halfButton = event.target.closest("[data-half]");
+      if (halfButton) {
+        halfFilter = halfButton.dataset.half;
+        render();
+        return;
+      }
+      const actionTarget = event.target.closest("[data-action]");
+      if (actionTarget) {
+        const action = actionTarget.dataset.action;
+        if (action === "prev-month" || action === "next-month") {
+          visibleMonth = new Date(
+            visibleMonth.getFullYear(),
+            visibleMonth.getMonth() + (action === "prev-month" ? -1 : 1),
+            1
+          );
+          render();
+          return;
+        }
+        if (action === "current-month") {
+          visibleMonth = new Date(2026, 9, 1);
+          render();
+          return;
+        }
+        if (action === "toggle-filters") {
+          const popover = document.getElementById("filter-popover");
+          popover.hidden = !popover.hidden;
+          return;
+        }
+        if (action === "close-filters") {
+          document.getElementById("filter-popover").hidden = true;
+          return;
+        }
+        if (action === "clear-filters") return clearFilters();
+        if (action === "open-urgent") return openUrgentDialog(actionTarget.dataset.cycleId || selectedCycleId);
+        if (action === "close-urgent") {
+          document.getElementById("urgent-dialog").close();
+          return;
+        }
+      }
+      if (
+        !event.target.closest(".filter-wrap") &&
+        !document.getElementById("filter-popover").hidden
+      ) {
+        document.getElementById("filter-popover").hidden = true;
+      }
+    });
+
+    document.getElementById("search-input").addEventListener("input", event => {
+      searchTerm = event.target.value;
+      renderTable();
+    });
+
+    document.getElementById("filter-popover").addEventListener("submit", event => {
+      event.preventDefault();
+    });
+
+    document.getElementById("status-filter").addEventListener("change", event => {
+      statusFilter = event.target.value;
+      render();
+    });
+
+    document.getElementById("discipline-filter").addEventListener("change", event => {
+      disciplineFilter = event.target.value;
+      render();
+    });
+    document.getElementById("range-start").addEventListener("change", event => {
+      customRange.start = event.target.value;
+      render();
+    });
+    document.getElementById("range-end").addEventListener("change", event => {
+      customRange.end = event.target.value;
+      render();
+    });
+
+    document.getElementById("urgent-impact").addEventListener("change", updateUrgentPreview);
+    document.getElementById("urgent-date").addEventListener("change", updateUrgentPreview);
+    document.getElementById("urgent-resident").addEventListener("change", () => {
+      updateUrgentPreview();
+    });
+    document.getElementById("urgent-form").addEventListener("submit", event => {
+      event.preventDefault();
+      confirmUrgent();
+    });
+
+    applyHomeSettings();
+    refreshCycles();
+    render();
+
+    OT_PROTOTYPE.subscribe(() => {
+      refreshCycles();
+      render();
+    });
+    window.addEventListener("storage", event => {
+      if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
+    });
+  </script>
+  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+</body>
+</html>

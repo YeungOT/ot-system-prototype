@@ -1,0 +1,1224 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>工作台</title>
+  <script>
+    if (new URLSearchParams(location.search).has("embed")) {
+      document.documentElement.classList.add("embedded");
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #fff;
+      --line: #d8e1e7;
+      --line-soft: #edf1f4;
+      --ink: #111827;
+      --muted: #64748b;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --teal-soft: #e7f3f1;
+      --red: #b91c1c;
+      --red-soft: #fef2f2;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #15803d;
+      --green-soft: #f0fdf4;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .06);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app { min-height: 100vh; display: grid; grid-template-columns: 220px minmax(0, 1fr); }
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 2px 8px 14px; border-bottom: 1px solid var(--line); }
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--teal);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+    .brand-title { font-weight: 800; }
+    .brand-sub { color: var(--muted); font-size: 11px; }
+    .nav { display: grid; gap: 4px; }
+    .nav button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #334155;
+    }
+    .nav button:hover { background: #f1f5f9; }
+    .nav button.active { background: var(--teal-soft); color: var(--teal-dark); font-weight: 800; }
+
+    .main { min-width: 0; display: grid; grid-template-rows: 58px minmax(0, 1fr); }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 18px;
+    }
+    .home-pill {
+      min-width: 180px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      padding: 7px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .top-meta { color: var(--muted); }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .user-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      padding: 5px 10px 5px 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .content { padding: 14px; min-width: 0; }
+    .btn {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 6px 10px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+    .btn:hover { background: #f8fafc; }
+    .btn-primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn-quiet { border-color: transparent; background: transparent; box-shadow: none; color: var(--muted); }
+    .btn-quiet:hover { background: #eef2f6; color: var(--ink); }
+    .btn-danger { border-color: #fecaca; color: var(--red); }
+    .btn:focus-visible,
+    .segmented button:focus-visible,
+    .channel-button:focus-visible,
+    .task-main:focus-visible,
+    .todo-group summary:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(310px, .85fr);
+      gap: 12px;
+      align-items: start;
+    }
+    .panel {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-head {
+      min-height: 48px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .panel-head h2 { margin: 0; font-size: 15px; }
+    .todo-tools {
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .segmented {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+      padding: 2px;
+    }
+    .segmented button {
+      min-height: 28px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .segmented button.active { background: var(--surface); color: var(--teal-dark); box-shadow: var(--shadow); }
+
+    .todo-list { padding: 5px 12px 12px; }
+    .todo-group { border-bottom: 1px solid var(--line-soft); }
+    .todo-group:last-child { border-bottom: 0; }
+    .todo-group summary {
+      list-style: none;
+      min-height: 36px;
+      padding: 8px 0 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .todo-group summary::-webkit-details-marker { display: none; }
+    .todo-group summary::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      margin: 0 3px 3px 2px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      color: var(--muted);
+      transform: rotate(45deg);
+    }
+    .todo-group:not([open]) summary::before {
+      margin-bottom: 0;
+      transform: rotate(-45deg);
+    }
+    .todo-group h3 { margin: 0; color: #475569; font-size: 11px; letter-spacing: .03em; }
+    .todo-group.overdue h3 { color: var(--red); }
+    .todo-group.today h3 { color: var(--ink); }
+
+    .task-row {
+      min-height: 49px;
+      padding: 6px 0;
+      display: grid;
+      grid-template-columns: 19px minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+    }
+    .task-row + .task-row { border-top: 1px solid var(--line-soft); }
+    .task-check {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      display: block;
+    }
+    .task-check input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+    .task-check span {
+      width: 18px;
+      height: 18px;
+      border: 1px solid #b8c4ce;
+      border-radius: 4px;
+      background: #fff;
+      display: grid;
+      place-items: center;
+    }
+    .task-check:hover span { border-color: var(--teal); }
+    .task-check input:focus-visible + span { outline: 2px solid var(--teal); outline-offset: 2px; }
+    .task-check input:checked + span {
+      border-color: var(--green);
+      background: var(--green-soft);
+      color: var(--green);
+    }
+    .task-check input:checked + span::after { content: "✓"; font-size: 11px; font-weight: 900; }
+    .task-main {
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      padding: 0;
+      text-align: left;
+      display: block;
+    }
+    .task-title {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .task-main:hover .task-title { color: var(--teal-dark); }
+    .task-meta {
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .task-meta .resident { color: #475569; font-weight: 700; }
+    .task-meta .due { font-family: "Cascadia Mono", Consolas, monospace; }
+    .task-row.completed { grid-template-columns: 19px minmax(0, 1fr); }
+    .done-mark {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      border-radius: 4px;
+      background: var(--green-soft);
+      color: var(--green);
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .task-row.completed .task-title { color: var(--muted); text-decoration: line-through; }
+    .empty-list { padding: 30px 12px; color: var(--muted); text-align: center; }
+
+    .handover-panel {
+      position: sticky;
+      top: 0;
+      max-height: calc(100vh - 24px);
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+    }
+    .channel-bar {
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .channel-tabs { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; background: #f8fafc; padding: 2px; }
+    .channel-button {
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--muted);
+      padding: 5px 7px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .channel-button.active { background: var(--surface); color: var(--teal-dark); box-shadow: var(--shadow); }
+    .handover-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .handover-date input {
+      min-height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      color: var(--ink);
+      padding: 3px 5px;
+      font: inherit;
+    }
+    .handover-day-btn {
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      padding: 0;
+      font-weight: 900;
+    }
+    .handover-day-btn:hover { background: #f8fafc; }
+    .handover-body { min-height: 0; overflow: auto; padding: 0 12px 12px; }
+    .handover-block {
+      margin: 10px 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 10px 11px;
+    }
+    .handover-block-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+    .handover-block h3 { margin: 0; font-size: 12px; }
+    .handover-section { padding: 7px 0; }
+    .handover-section + .handover-section { border-top: 1px solid var(--line-soft); }
+    .handover-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .handover-section strong {
+      display: block;
+      margin-bottom: 2px;
+      color: #475569;
+      font-size: 10px;
+    }
+    .handover-section p { margin: 0; color: var(--ink); font-size: 11px; line-height: 1.55; }
+    .handover-copy {
+      border: 0;
+      background: transparent;
+      color: var(--teal-dark);
+      padding: 2px 0;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .handover-note {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 6px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      padding: 6px 7px;
+      color: var(--ink);
+      font: inherit;
+      font-size: 10px;
+    }
+    .feed-title {
+      margin: 10px 0 2px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+    .post {
+      margin: 8px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 10px 11px;
+    }
+    .post:last-child { margin-bottom: 0; }
+    .post-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .post-actor,
+    .post-assignee {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .post-actor strong,
+    .post-assignee strong { color: var(--ink); font-size: 11px; }
+    .post-assignee {
+      margin-top: 7px;
+      padding-top: 7px;
+      border-top: 1px solid var(--line-soft);
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .post-assignee .done { color: var(--green); font-weight: 800; }
+    .post p { margin: 4px 0 0; font-size: 11px; line-height: 1.55; }
+    dialog {
+      width: min(430px, calc(100vw - 24px));
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 0;
+      color: var(--ink);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, .24);
+    }
+    dialog::backdrop { background: rgba(15, 23, 42, .32); }
+    .dialog-head { padding: 13px 15px 10px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font-size: 16px; }
+    .dialog-head p { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
+    .dialog-body { padding: 12px 15px; display: grid; gap: 9px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .form-field { display: grid; gap: 3px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field[hidden] { display: none; }
+    .form-field label { color: var(--muted); font-size: 10px; font-weight: 800; }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      min-height: 35px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      padding: 6px 8px;
+      color: var(--ink);
+    }
+    .form-field textarea { min-height: 84px; resize: vertical; }
+    .post-type { display: flex; gap: 6px; }
+    .post-type label {
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+      padding: 7px 8px;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .dialog-actions {
+      padding: 10px 15px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+    .dialog-actions .spacer { margin-right: auto; }
+    .detail-list { display: grid; gap: 7px; }
+    .detail-line { display: flex; gap: 8px; font-size: 11px; }
+    .detail-line span { min-width: 56px; color: var(--muted); }
+    .detail-line strong { font-weight: 700; }
+    a.btn { display: inline-flex; align-items: center; text-decoration: none; }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 100;
+      max-width: min(360px, calc(100vw - 36px));
+      border-radius: 7px;
+      background: #17202a;
+      color: #fff;
+      padding: 9px 12px;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    html.embedded .sidebar,
+    html.embedded .topbar { display: none; }
+    html.embedded .app { display: block; }
+    html.embedded .main { display: block; }
+    html.embedded .content { padding: 12px; }
+
+    @media (max-width: 1120px) {
+      .app { grid-template-columns: 72px minmax(0, 1fr); }
+      .brand-title, .brand-sub { display: none; }
+    }
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: minmax(0, 1fr); }
+      .handover-panel { position: static; max-height: none; }
+    }
+    @media (max-width: 680px) {
+      .sidebar { display: none; }
+      .app, .main { display: block; }
+      .topbar { display: none; }
+      .content { padding: 10px; }
+      .todo-tools { align-items: flex-start; flex-direction: column; }
+      .form-grid { grid-template-columns: minmax(0, 1fr); }
+      .form-field.full { grid-column: auto; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+  <link rel="stylesheet" href="../shared/design-system.css?v=20261116-resident-cards">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">OT</div>
+        <div>
+          <div class="brand-title">OT System</div>
+          <div class="brand-sub">Workbench</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="系統模組">
+        <button class="active" type="button">工作台</button>
+        <button type="button">住客管理</button>
+        <button type="button">訓練時間表</button>
+        <button type="button">復康運動紀錄</button>
+        <button type="button">評估系統</button>
+        <button type="button">ICP</button>
+        <button type="button">院舍設定</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="home-pill">
+          <span><strong id="chrome-home-code">yt</strong> <span id="chrome-home-name">油塘康璟</span></span>
+          <span class="ui-chevron" aria-hidden="true"></span>
+        </div>
+        <div class="topbar-actions">
+          <div class="user-pill"><span class="avatar">T</span><span>OT</span></div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="workspace">
+          <section class="panel todo-panel" aria-labelledby="todo-title">
+            <header class="panel-head">
+              <h2 id="todo-title">待辦</h2>
+              <button class="btn btn-primary" type="button" data-action="new-task">＋ 新增待辦</button>
+            </header>
+            <div class="todo-tools">
+              <div class="segmented" role="tablist" aria-label="待辦範圍">
+                <button class="active" type="button" role="tab" aria-selected="true" data-view="mine">我的</button>
+                <button type="button" role="tab" aria-selected="false" data-view="home">全院</button>
+                <button type="button" role="tab" aria-selected="false" data-view="done">已完成</button>
+              </div>
+            </div>
+            <div class="todo-list" id="todo-list"></div>
+          </section>
+
+          <aside class="panel handover-panel" aria-labelledby="handover-title">
+            <header class="panel-head">
+              <h2 id="handover-title">交更</h2>
+              <button class="btn" type="button" data-action="new-post">＋ 貼文</button>
+            </header>
+            <div class="channel-bar">
+              <div class="channel-tabs segmented" role="tablist" aria-label="交更頻道">
+                <button class="channel-button active" type="button" role="tab" aria-selected="true" data-channel="home">院舍</button>
+                <button class="channel-button" type="button" role="tab" aria-selected="false" data-channel="announcement">公告</button>
+              </div>
+              <label class="handover-date">
+                <button class="handover-day-btn" type="button" data-action="prev-handover-day"
+                  title="前一日" aria-label="前一日交更">←</button>
+                <input id="handover-date" type="date" value="2026-10-23" aria-label="交更日期">
+                <button class="handover-day-btn" type="button" data-action="next-handover-day"
+                  title="後一日" aria-label="後一日交更">→</button>
+              </label>
+            </div>
+            <div class="handover-body" id="handover-body"></div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="task-dialog" aria-labelledby="task-dialog-title">
+    <form id="task-form">
+      <div class="dialog-head">
+        <h2 id="task-dialog-title">新增待辦</h2>
+      </div>
+      <div class="dialog-body">
+        <div class="form-field full">
+          <label for="task-title-input">待辦內容</label>
+          <input id="task-title-input" name="title" placeholder="例如：核對訓練紀錄" required>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="task-resident-input">住客</label>
+            <select id="task-resident-input" name="residentId">
+              <option value="">不指定住客</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="task-owner-input">負責人</label>
+            <select id="task-owner-input" name="owner">
+              <option value="">任何人</option>
+              <option value="T">本人</option>
+              <option value="OT">OT</option>
+              <option value="PT">PT</option>
+              <option value="OTA">OTA</option>
+              <option value="Ming">Ming</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="task-due-input">限期</label>
+            <input id="task-due-input" name="due" type="date">
+          </div>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn" type="button" data-action="close-task-dialog">取消</button>
+        <button class="btn btn-primary" type="submit">新增待辦</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="post-dialog" aria-labelledby="post-dialog-title">
+    <form id="post-form">
+      <div class="dialog-head">
+        <h2 id="post-dialog-title">新增貼文</h2>
+        <p>任務會同時出現在待辦；完成只在待辦進行。</p>
+      </div>
+      <div class="dialog-body">
+        <div class="post-type">
+          <label><input type="radio" name="postType" value="announcement" checked> 公告事項</label>
+          <label><input type="radio" name="postType" value="task"> 任務</label>
+        </div>
+        <div class="form-field full">
+          <label for="post-content">內容</label>
+          <textarea id="post-content" placeholder="輸入交更內容" required></textarea>
+        </div>
+        <div class="form-grid" id="post-task-fields" hidden>
+          <div class="form-field">
+            <label for="post-task-title">待辦內容</label>
+            <input id="post-task-title" placeholder="例如：補回訓練紀錄">
+          </div>
+          <div class="form-field">
+            <label for="post-resident">住客</label>
+            <select id="post-resident"></select>
+          </div>
+          <div class="form-field">
+            <label for="post-owner">負責人</label>
+            <select id="post-owner" required>
+              <option value="">請選擇</option>
+              <option value="T">本人</option>
+              <option value="OT">OT</option>
+              <option value="PT">PT</option>
+              <option value="OTA">OTA</option>
+              <option value="Ming">Ming</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="post-due">限期</label>
+            <input id="post-due" type="date" required>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn" type="button" data-action="close-post-dialog">取消</button>
+        <button class="btn btn-primary" type="submit">發佈</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="detail-dialog" aria-labelledby="detail-title">
+    <div class="dialog-head">
+      <h2 id="detail-title"></h2>
+      <p>待辦資料</p>
+    </div>
+    <div class="dialog-body">
+      <div class="detail-list" id="detail-list"></div>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn" id="edit-task-button" type="button" data-action="edit-task" hidden>修改待辦</button>
+      <button class="btn btn-danger" id="delete-task-button" type="button" data-action="delete-task" hidden>刪除待辦</button>
+      <button class="btn" type="button" data-action="close-detail">關閉</button>
+      <a class="btn btn-primary" id="open-source-link" href="#" hidden>開啟</a>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../shared/home-settings.js"></script>
+  <script src="../shared/prototype-catalog.js"></script>
+  <script src="../shared/mock-residents.js"></script>
+  <script src="../shared/prototype-domain.js"></script>
+  <script>
+    const TODAY_KEY = "2026-10-23";
+    const CURRENT_USER = OT_PROTOTYPE.currentUser();
+    const DAY_NAMES = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+    let residents = OT_PROTOTYPE.residents().map(({ id, bed, name }) => ({ id, bed, name }));
+    let residentById = new Map(residents.map(resident => [resident.id, resident]));
+
+    function applyHomeSettings() {
+      const home = OT_HOME_SETTINGS.getHome();
+      document.getElementById("chrome-home-code").textContent = home.code;
+      document.getElementById("chrome-home-name").textContent = home.name;
+    }
+
+    let tasks = OT_PROTOTYPE.tasks();
+    let posts = OT_PROTOTYPE.posts();
+
+    let activeView = "mine";
+    let activeChannel = "home";
+    let activeTaskId = null;
+    let editingTaskId = null;
+    let handoverDate = TODAY_KEY;
+    let toastTimer = null;
+
+    const escapeHtml = value => String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+    const parseDate = value => new Date(`${value}T00:00:00`);
+    const pad = value => String(value).padStart(2, "0");
+    const dateKey = date => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const addDays = (date, amount) => {
+      const copy = new Date(date);
+      copy.setDate(copy.getDate() + amount);
+      return copy;
+    };
+    const today = parseDate(TODAY_KEY);
+    const endOfWeek = addDays(today, 7 - today.getDay());
+
+    function refreshFromStore() {
+      tasks = OT_PROTOTYPE.tasks();
+      posts = OT_PROTOTYPE.posts();
+      residents = OT_PROTOTYPE.residents().map(({ id, bed, name }) => ({ id, bed, name }));
+      residentById = new Map(residents.map(resident => [resident.id, resident]));
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const fallback = document.createElement("textarea");
+        fallback.value = text;
+        fallback.style.position = "fixed";
+        fallback.style.opacity = "0";
+        document.body.append(fallback);
+        fallback.select();
+        document.execCommand("copy");
+        fallback.remove();
+      }
+      showToast("已複製交更內容。");
+    }
+
+    function groupFor(task) {
+      if (!task.due || task.due === TODAY_KEY) return "today";
+      const due = parseDate(task.due);
+      if (due < today) return "overdue";
+      if (due <= endOfWeek) return "week";
+      return "later";
+    }
+
+    function dueLabel(task, group) {
+      if (!task.due || group === "today" || group === "overdue") return "";
+      const due = parseDate(task.due);
+      if (group === "week") return `${DAY_NAMES[due.getDay()].replace("星期", "週")} ${pad(due.getMonth() + 1)}/${pad(due.getDate())}`;
+      return `${pad(due.getMonth() + 1)}/${pad(due.getDate())}`;
+    }
+
+    function visibleTasks() {
+      if (activeView === "done") return tasks.filter(task => task.status === "done");
+      return tasks.filter(task => {
+        if (task.status !== "open") return false;
+        if (activeView === "home") return true;
+        return !task.owner || task.owner === CURRENT_USER.role || task.owner === CURRENT_USER.name;
+      });
+    }
+
+    function taskMetaMarkup(task, group) {
+      const resident = residentById.get(task.residentId);
+      const items = [];
+      if (resident) items.push(`<span class="resident">${escapeHtml(resident.bed)} ${escapeHtml(resident.name)}</span>`);
+      if (task.owner) items.push(`<span>${escapeHtml(task.owner)}</span>`);
+      if (task.deferNote) items.push(`<span>${escapeHtml(task.deferNote)}</span>`);
+      const due = dueLabel(task, group);
+      if (due) items.push(`<span class="due">${escapeHtml(due)}</span>`);
+      if (task.status === "done" && task.completedAt) items.push(`<span>${escapeHtml(task.completedAt.slice(5, 16))}</span>`);
+      return items.length ? `<span class="task-meta">${items.join("<span>·</span>")}</span>` : "";
+    }
+
+    function taskRowMarkup(task, group) {
+      const done = task.status === "done";
+      const check = done
+        ? '<span class="done-mark" aria-hidden="true">✓</span>'
+        : `<label class="task-check" title="完成待辦">
+             <input type="checkbox" data-complete-task="${task.id}" aria-label="完成：${escapeHtml(task.title)}">
+             <span aria-hidden="true"></span>
+           </label>`;
+      return `
+        <div class="task-row ${done ? "completed" : ""}" data-task-id="${task.id}">
+          ${check}
+          <button class="task-main" type="button" data-action="open-task" data-task-id="${task.id}">
+            <span class="task-title">${escapeHtml(task.title)}</span>
+            ${taskMetaMarkup(task, group)}
+          </button>
+        </div>
+      `;
+    }
+
+    function renderTodos() {
+      const list = document.getElementById("todo-list");
+      const visible = visibleTasks();
+      if (!visible.length) {
+        list.innerHTML = `<div class="empty-list">${activeView === "done" ? "還沒有完成的待辦。" : "目前沒有待辦。"}</div>`;
+        return;
+      }
+      if (activeView === "done") {
+        list.innerHTML = `<div class="todo-group" open>${visible
+          .sort((a, b) => (b.completedAt || "").localeCompare(a.completedAt || ""))
+          .map(task => taskRowMarkup(task, "done"))
+          .join("")}</div>`;
+        return;
+      }
+
+      const groups = [
+        ["overdue", "逾期"],
+        ["today", "今日"],
+        ["week", "本週"],
+        ["later", "之後"]
+      ];
+      list.innerHTML = groups.map(([key, label]) => {
+        const rows = visible
+          .filter(task => groupFor(task) === key)
+          .sort((a, b) => (a.due || TODAY_KEY).localeCompare(b.due || TODAY_KEY));
+        if (!rows.length) return "";
+        return `
+          <details class="todo-group ${key}" ${key === "later" ? "" : "open"}>
+            <summary><h3>${label}</h3></summary>
+            ${rows.map(task => taskRowMarkup(task, key)).join("")}
+          </details>
+        `;
+      }).join("");
+    }
+
+    function renderHandover() {
+      const body = document.getElementById("handover-body");
+      const generatedHandover = OT_PROTOTYPE.generatedHandover(handoverDate);
+      const generated = activeChannel === "home"
+        ? `
+          <section class="handover-block">
+            <div class="handover-block-head">
+              <h3>${handoverDate === TODAY_KEY ? "今日交更" : `${handoverDate.replaceAll("-", "/")} 交更`}</h3>
+              <button class="handover-copy" type="button" data-action="copy-handover" data-handover-id="all">複製全部</button>
+            </div>
+            ${generatedHandover.sections.map(section => `
+              <div class="handover-section" data-handover-section="${escapeHtml(section.id)}">
+                <div class="handover-section-head">
+                  <strong>${escapeHtml(section.title)}</strong>
+                  <button class="handover-copy" type="button" data-action="copy-handover" data-handover-id="${escapeHtml(section.id)}">複製</button>
+                </div>
+                <p>${escapeHtml(section.text).replaceAll("\n", "<br>")}</p>
+                <textarea class="handover-note" data-handover-note="${escapeHtml(section.id)}"
+                  placeholder="加入本段備註" aria-label="${escapeHtml(section.title)}備註">${escapeHtml(OT_PROTOTYPE.handoverNote(handoverDate, section.id))}</textarea>
+              </div>
+            `).join("")}
+          </section>
+        `
+        : "";
+      const channelPosts = posts.filter(post => post.channel === activeChannel);
+      body.innerHTML = `
+        ${generated}
+        <div class="feed-title">跟進</div>
+        ${channelPosts.length
+          ? channelPosts.map(post => `
+              <article class="post">
+                <div class="post-meta">
+                  <span class="post-actor"><span>發文者</span><strong>${escapeHtml(post.author)}</strong></span>
+                  <span>${escapeHtml(post.time)}</span>
+                </div>
+                <p>${escapeHtml(post.text)}</p>
+                ${post.taskId
+                  ? (() => {
+                      const task = tasks.find(item => item.id === post.taskId);
+                      return task
+                        ? `<div class="post-assignee">
+                             <span>執行負責人</span>
+                             <strong>${escapeHtml(task.owner || "未指派")}</strong>
+                             ${task.due ? `<span>· 限期 ${escapeHtml(task.due.replaceAll("-", "/"))}</span>` : ""}
+                             <span class="${task.status === "done" ? "done" : ""}">· ${task.status === "done" ? "已完成" : "待完成"}</span>
+                           </div>`
+                        : "";
+                    })()
+                  : ""}
+              </article>
+            `).join("")
+          : '<div class="empty-list">這個頻道還沒有貼文。</div>'}
+      `;
+    }
+
+    function renderViewButtons() {
+      document.querySelectorAll("[data-view]").forEach(button => {
+        const active = button.dataset.view === activeView;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+      });
+    }
+
+    function renderChannelButtons() {
+      document.querySelectorAll("[data-channel]").forEach(button => {
+        const active = button.dataset.channel === activeChannel;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+      });
+      const newPostButton = document.querySelector('[data-action="new-post"]');
+      const canPost = activeChannel !== "announcement" || CURRENT_USER.senior;
+      newPostButton.disabled = !canPost;
+      newPostButton.title = canPost ? "" : "只有資深同事可在公告頻道發文。";
+    }
+
+    function render() {
+      document.getElementById("handover-date").value = handoverDate;
+      renderViewButtons();
+      renderTodos();
+      renderChannelButtons();
+      renderHandover();
+    }
+
+    function completeTask(taskId) {
+      OT_PROTOTYPE.completeTask(taskId);
+      refreshFromStore();
+      render();
+      showToast("待辦已完成。");
+    }
+
+    function openTaskDetail(taskId) {
+      const task = tasks.find(item => item.id === taskId);
+      if (!task) return;
+      activeTaskId = taskId;
+      const resident = residentById.get(task.residentId);
+      const lines = [];
+      if (resident) lines.push(["住客", `${resident.bed} ${resident.name}`]);
+      if (task.owner) lines.push(["負責人", task.owner]);
+      if (task.due) lines.push(["限期", task.due.replaceAll("-", "/")]);
+      if (task.source) lines.push(["來源", task.source]);
+      if (task.completedAt) lines.push(["完成", `${task.completedBy || ""} · ${task.completedAt}`]);
+      document.getElementById("detail-title").textContent = task.title;
+      document.getElementById("detail-list").innerHTML = lines
+        .map(([label, value]) => `<div class="detail-line"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`)
+        .join("");
+      document.getElementById("delete-task-button").hidden =
+        !(task.kind === "manual" && task.createdBy === CURRENT_USER.name);
+      document.getElementById("edit-task-button").hidden =
+        !(task.kind === "manual" && task.createdBy === CURRENT_USER.name);
+      const sourceLink = document.getElementById("open-source-link");
+      sourceLink.hidden = !task.sourceLink;
+      if (task.sourceLink) {
+        sourceLink.href = task.sourceLink;
+        sourceLink.textContent = "開啟 ICP";
+      }
+      document.getElementById("detail-dialog").showModal();
+    }
+
+    function populateResidentOptions() {
+      const options = residents.map(resident => (
+        `<option value="${resident.id}">${escapeHtml(resident.bed)} ${escapeHtml(resident.name)}</option>`
+      )).join("");
+      document.getElementById("task-resident-input").insertAdjacentHTML("beforeend", options);
+      document.getElementById("post-resident").innerHTML = `<option value="">不指定住客</option>${options}`;
+    }
+
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", () => {
+        activeView = button.dataset.view;
+        render();
+      });
+    });
+
+    document.querySelectorAll("[data-channel]").forEach(button => {
+      button.addEventListener("click", () => {
+        activeChannel = button.dataset.channel;
+        render();
+      });
+    });
+
+    document.getElementById("handover-date").addEventListener("change", event => {
+      handoverDate = event.target.value || TODAY_KEY;
+      renderHandover();
+    });
+    document.getElementById("handover-body").addEventListener("change", event => {
+      const note = event.target.closest("[data-handover-note]");
+      if (!note) return;
+      OT_PROTOTYPE.setHandoverNote(handoverDate, note.dataset.handoverNote, note.value);
+      showToast("交更備註已儲存。");
+    });
+
+    document.getElementById("todo-list").addEventListener("change", event => {
+      const checkbox = event.target.closest("[data-complete-task]");
+      if (checkbox) completeTask(checkbox.dataset.completeTask);
+    });
+
+    document.addEventListener("click", event => {
+      const actionTarget = event.target.closest("[data-action]");
+      if (!actionTarget) return;
+      const action = actionTarget.dataset.action;
+      if (action === "prev-handover-day" || action === "next-handover-day") {
+        const date = parseDate(handoverDate);
+        date.setDate(date.getDate() + (action === "next-handover-day" ? 1 : -1));
+        handoverDate = dateKey(date);
+        renderHandover();
+        document.getElementById("handover-date").value = handoverDate;
+        return;
+      }
+      if (action === "copy-handover") {
+        const handover = OT_PROTOTYPE.generatedHandover(handoverDate);
+        const id = actionTarget.dataset.handoverId;
+        const text = id === "all"
+          ? handover.sections.map(section => `${section.title}\n${section.text}`).join("\n\n")
+          : handover.sections.find(section => section.id === id)?.text || "";
+        copyText(text);
+        return;
+      }
+      if (action === "new-task") {
+        editingTaskId = null;
+        document.getElementById("task-form").reset();
+        document.getElementById("task-dialog-title").textContent = "新增待辦";
+        document.getElementById("task-dialog").showModal();
+        return;
+      }
+      if (action === "edit-task") {
+        const task = tasks.find(item => item.id === activeTaskId);
+        if (!task) return;
+        editingTaskId = task.id;
+        document.getElementById("detail-dialog").close();
+        document.getElementById("task-dialog-title").textContent = "修改待辦";
+        document.getElementById("task-title-input").value = task.title;
+        document.getElementById("task-resident-input").value = task.residentId || "";
+        document.getElementById("task-owner-input").value = task.owner || "";
+        document.getElementById("task-due-input").value = task.due || "";
+        document.getElementById("task-dialog").showModal();
+        return;
+      }
+      if (action === "close-task-dialog") {
+        document.getElementById("task-dialog").close();
+        return;
+      }
+      if (action === "new-post") {
+        document.getElementById("post-form").reset();
+        document.getElementById("post-task-fields").hidden = true;
+        document.getElementById("post-owner").required = false;
+        document.getElementById("post-due").required = false;
+        document.getElementById("post-dialog").showModal();
+        return;
+      }
+      if (action === "close-post-dialog") {
+        document.getElementById("post-dialog").close();
+        return;
+      }
+      if (action === "open-task") {
+        const taskId = actionTarget.dataset.taskId;
+        openTaskDetail(taskId);
+        return;
+      }
+      if (action === "close-detail") {
+        document.getElementById("detail-dialog").close();
+        return;
+      }
+      if (action === "delete-task") {
+        try {
+          OT_PROTOTYPE.deleteTask(activeTaskId);
+          refreshFromStore();
+        } catch (error) {
+          showToast(error.message);
+          return;
+        }
+        document.getElementById("detail-dialog").close();
+        render();
+        showToast("待辦已刪除。");
+        return;
+      }
+    });
+
+    document.getElementById("task-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const title = document.getElementById("task-title-input").value.trim();
+      if (!title) return;
+      const values = {
+        title,
+        residentId: document.getElementById("task-resident-input").value || null,
+        owner: document.getElementById("task-owner-input").value,
+        due: document.getElementById("task-due-input").value || null
+      };
+      if (editingTaskId) {
+        try {
+          OT_PROTOTYPE.updateTask(editingTaskId, values);
+        } catch (error) {
+          showToast(error.message);
+          return;
+        }
+      } else {
+        OT_PROTOTYPE.createTask({ ...values, source: "工作台" });
+      }
+      refreshFromStore();
+      editingTaskId = null;
+      document.getElementById("task-dialog").close();
+      if (activeView === "done") activeView = "home";
+      render();
+      showToast("待辦已儲存。");
+    });
+
+    document.querySelectorAll('input[name="postType"]').forEach(input => {
+      input.addEventListener("change", () => {
+        const isTask = document.querySelector('input[name="postType"]:checked').value === "task";
+        document.getElementById("post-task-fields").hidden = !isTask;
+        document.getElementById("post-owner").required = isTask;
+        document.getElementById("post-due").required = isTask;
+      });
+    });
+
+    document.getElementById("post-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const type = document.querySelector('input[name="postType"]:checked').value;
+      const text = document.getElementById("post-content").value.trim();
+      if (!text) return;
+      OT_PROTOTYPE.createPost({
+        channel: activeChannel,
+        type,
+        text,
+        taskTitle: document.getElementById("post-task-title").value.trim(),
+        residentId: document.getElementById("post-resident").value || null,
+        owner: document.getElementById("post-owner").value,
+        due: document.getElementById("post-due").value || null
+      });
+      refreshFromStore();
+      document.getElementById("post-dialog").close();
+      activeView = type === "task" ? "home" : activeView;
+      render();
+      showToast(type === "task" ? "貼文及待辦已建立。" : "貼文已發佈。");
+    });
+
+    populateResidentOptions();
+    applyHomeSettings();
+    refreshFromStore();
+    render();
+
+    OT_PROTOTYPE.subscribe(() => {
+      refreshFromStore();
+      render();
+    });
+    window.addEventListener("storage", event => {
+      if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
+    });
+  </script>
+  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+</body>
+</html>

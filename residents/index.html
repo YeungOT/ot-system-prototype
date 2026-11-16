@@ -1,0 +1,3862 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>住客管理 UI Mock</title>
+  <script>
+    if (new URLSearchParams(location.search).has("embed")) {
+      document.documentElement.classList.add("embedded");
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --line: #d8e1e7;
+      --ink: #111827;
+      --muted: #64748b;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --teal-soft: #e7f3f1;
+      --amber: #b45309;
+      --amber-soft: #fff7ed;
+      --green: #15803d;
+      --green-soft: #f0fdf4;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid rgba(15, 118, 110, .25);
+      outline-offset: 2px;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+    }
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid var(--line);
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 2px 8px 14px; border-bottom: 1px solid var(--line); }
+    .brand-mark {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: var(--teal); color: #fff; display: grid; place-items: center; font-weight: 800;
+    }
+    .brand-title { font-weight: 800; }
+    .brand-sub { color: var(--muted); font-size: 11px; }
+    .nav { display: grid; gap: 4px; }
+    .nav button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #334155;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .nav button:hover { background: #f1f5f9; }
+    .nav button.active { background: var(--teal-soft); color: var(--teal-dark); font-weight: 800; }
+    .nav small { color: var(--muted); font-size: 10px; }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 58px minmax(0, 1fr);
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 18px;
+    }
+    .home-pill {
+      min-width: 180px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      padding: 7px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      padding: 5px 10px 5px 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .avatar {
+      width: 26px; height: 26px; border-radius: 999px;
+      background: #111827; color: #fff; display: grid; place-items: center;
+      font-size: 11px; font-weight: 800;
+    }
+    .top-meta { color: var(--muted); }
+
+    .content { padding: 18px; min-width: 0; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .screen-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+    h1 { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 700; letter-spacing: 0; }
+    .sub { color: var(--muted); margin-top: 4px; }
+    .breadcrumbs { color: var(--muted); font-size: 12px; }
+    .breadcrumbs button { border: 0; background: transparent; color: var(--teal-dark); padding: 0; font-weight: 800; }
+    .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      padding: 7px 11px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+    .btn:hover { background: #f8fafc; }
+    .btn-primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: end;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      margin-bottom: 12px;
+    }
+    .field { display: grid; gap: 4px; min-width: 140px; }
+    .field label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .field input, .field select {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 7px 9px;
+      background: #fff;
+      min-height: 34px;
+      color: var(--ink);
+    }
+    .field-wide { min-width: 240px; flex: 1; }
+    .table-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    dialog {
+      width: min(430px, calc(100vw - 24px));
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 0;
+      color: var(--ink);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, .24);
+    }
+    dialog::backdrop { background: rgba(15, 23, 42, .35); }
+    .dialog-head { padding: 13px 15px 10px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font-size: 16px; }
+    .dialog-head p { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
+    .dialog-body { padding: 12px 15px; display: grid; gap: 9px; }
+    .dialog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .dialog-field.full { grid-column: 1 / -1; }
+    .dialog-field { display: grid; gap: 3px; }
+    .dialog-field label { color: var(--muted); font-size: 10px; font-weight: 800; }
+    .dialog-field input,
+    .dialog-field select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+    .form-error {
+      margin: 0;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      background: #fef2f2;
+      color: #b91c1c;
+      padding: 7px 8px;
+      font-size: 10px;
+    }
+    .form-error[hidden] { display: none; }
+    .dialog-actions {
+      padding: 10px 15px 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+    th {
+      background: #f8fafc;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 800;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .mono { font-family: "Cascadia Mono", Consolas, monospace; font-size: 12px; }
+    .muted { color: var(--muted); }
+
+    .detail-grid {
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 0 16px;
+    }
+    .record-section { padding: 16px 0; border-bottom: 1px solid var(--line); }
+    .record-section:last-child { border-bottom: 0; }
+    .record-section h2 { margin: 0 0 12px; font-size: 14px; }
+    .panel-grid { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .span2 { grid-column: span 2; }
+    .span3 { grid-column: span 3; }
+    .form-grid { display: grid; gap: 8px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .form-grid input, .form-grid select {
+      border: 0;
+      border-bottom: 1px solid #94a3b8;
+      border-radius: 0;
+      padding: 5px 0 3px;
+      min-height: 27px;
+      background: transparent;
+      color: var(--ink);
+    }
+    .form-grid label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .opt { display: flex; align-items: center; gap: 6px; min-height: 24px; color: #24303d; }
+    .opt span { min-width: 0; overflow-wrap: anywhere; }
+    .dot {
+      display: inline-block;
+      width: 7px; height: 7px; border-radius: 999px; background: var(--green); margin-right: 6px;
+    }
+    .dot-red { background: var(--amber); }
+    .status-list { display: grid; }
+    .status-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .status-row:last-child { border-bottom: 0; }
+    .status-row strong { font-size: 12px; }
+
+    .screen-head.resident-page-head {
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .resident-page-head h1 { margin: 0; }
+    .resident-page-head .sub { margin-top: 3px; }
+    .roster-shell {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .roster-controls {
+      min-height: 52px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .roster-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .roster-search {
+      min-width: 230px;
+      flex: 1;
+      min-height: 35px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 9px;
+      color: var(--muted);
+    }
+    .roster-search input {
+      min-width: 0;
+      flex: 1;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 11px;
+    }
+    .roster-filter {
+      min-height: 35px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #334155;
+      padding: 5px 8px;
+      font-size: 11px;
+    }
+    .roster-filter:focus,
+    .roster-search:focus-within {
+      outline: 2px solid #a9ddd5;
+      outline-offset: 1px;
+      border-color: #72b9ae;
+    }
+    .roster-reset {
+      min-height: 35px;
+      border: 0;
+      background: transparent;
+      color: var(--teal-dark);
+      padding: 5px 8px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .roster-view-tools {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .roster-tool {
+      min-height: 35px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #334155;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .roster-tool:hover { background: #f8fafc; }
+    .roster-tool[aria-expanded="true"] {
+      border-color: #72b9ae;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+    .roster-column-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      z-index: 40;
+      width: 230px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: 0 14px 34px rgba(15, 23, 42, .16);
+      padding: 8px;
+    }
+    .roster-column-menu[hidden] { display: none; }
+    .roster-column-menu-head {
+      padding: 4px 6px 7px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .roster-column-options {
+      display: grid;
+      gap: 2px;
+      max-height: 260px;
+      overflow: auto;
+    }
+    .roster-column-option {
+      min-height: 31px;
+      border-radius: 6px;
+      padding: 5px 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: 11px;
+      cursor: grab;
+    }
+    .roster-column-option:hover { background: #f8fafc; }
+    .roster-column-option input { accent-color: var(--teal); }
+    .roster-column-option small {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 9px;
+    }
+    .roster-column-reset {
+      width: 100%;
+      min-height: 32px;
+      margin-top: 6px;
+      border: 0;
+      border-top: 1px solid var(--line);
+      background: transparent;
+      color: var(--teal-dark);
+      padding: 8px 6px 3px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .roster-table {
+      min-width: 760px;
+      table-layout: fixed;
+    }
+    .roster-shell .table-scroll { overflow-x: auto; }
+    .roster-table th {
+      position: relative;
+      padding: 0;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 9px;
+      letter-spacing: .03em;
+    }
+    .roster-sort-button {
+      width: 100%;
+      min-height: 34px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      padding: 8px 18px 8px 11px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      text-align: left;
+      font: inherit;
+      font-weight: 800;
+    }
+    .roster-sort-button:hover { background: #f1f5f9; }
+    .roster-sort-indicator {
+      width: 8px;
+      height: 10px;
+      flex: 0 0 8px;
+      opacity: .45;
+      background:
+        linear-gradient(45deg, transparent 50%, currentColor 50%) 0 1px / 4px 4px no-repeat,
+        linear-gradient(135deg, currentColor 50%, transparent 50%) 4px 1px / 4px 4px no-repeat;
+    }
+    .roster-table th[aria-sort="ascending"] .roster-sort-indicator {
+      opacity: 1;
+      transform: rotate(180deg);
+    }
+    .roster-table th[aria-sort="descending"] .roster-sort-indicator { opacity: 1; }
+    .roster-column-resizer {
+      position: absolute;
+      inset: 0 0 0 auto;
+      z-index: 2;
+      width: 9px;
+      cursor: col-resize;
+      touch-action: none;
+    }
+    .roster-column-resizer::after {
+      content: "";
+      position: absolute;
+      top: 7px;
+      right: 0;
+      bottom: 7px;
+      width: 1px;
+      background: var(--line);
+      transition: background-color .12s ease, width .12s ease;
+    }
+    .roster-column-resizer:hover::after,
+    .roster-column-resizer:focus-visible::after,
+    body.roster-resizing .roster-column-resizer::after {
+      width: 2px;
+      background: var(--teal);
+    }
+    body.roster-resizing { cursor: col-resize; user-select: none; }
+    .roster-table td {
+      padding: 9px 11px;
+      font-size: 11px;
+    }
+    .resident-identity { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .resident-bed-badge {
+      min-width: 37px;
+      border-radius: 5px;
+      background: #eef2f6;
+      color: #334155;
+      padding: 4px 5px;
+      text-align: center;
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 10px;
+      font-weight: 900;
+    }
+    .resident-name-block { min-width: 0; }
+    .resident-name-block strong { display: block; font-size: 12px; }
+    .resident-name-block span { display: block; margin-top: 1px; color: var(--muted); font-size: 9px; }
+    .resident-date { white-space: nowrap; font-family: "Cascadia Mono", Consolas, monospace; font-size: 10px; }
+    .resident-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: var(--green);
+      padding: 3px 7px;
+      font-size: 9px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .resident-status.hospital {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+    .resident-status::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .roster-empty { padding: 32px 14px; color: var(--muted); text-align: center; }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+    .resident-summary-card {
+      position: sticky;
+      top: 0;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--teal);
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: visible;
+    }
+    .resident-summary-main { padding: 16px 42px 16px 15px; }
+    .resident-more {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      z-index: 4;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1;
+    }
+    .resident-more:hover { background: #f1f5f9; color: var(--ink); }
+    .resident-more-menu {
+      position: absolute;
+      top: 42px;
+      right: 9px;
+      z-index: 8;
+      min-width: 142px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, .14);
+      padding: 4px;
+    }
+    .resident-more-menu[hidden] { display: none; }
+    .resident-more-menu button {
+      width: 100%;
+      min-height: 32px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--ink);
+      padding: 6px 8px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .resident-more-menu button:hover { background: #f8fafc; }
+    .bed-conflict-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .bed-move-matrix {
+      display: grid;
+      gap: 6px;
+    }
+    .bed-move-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 1fr) 70px 20px minmax(120px, 1fr) 28px;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #f8fafc;
+      padding: 7px;
+      font-size: 11px;
+    }
+    .bed-move-row strong { min-width: 0; }
+    .bed-move-bed {
+      border-radius: 5px;
+      background: #e8eef3;
+      padding: 4px 6px;
+      text-align: center;
+      font-weight: 900;
+    }
+    .bed-move-row select {
+      min-height: 31px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      padding: 4px 6px;
+    }
+    .bed-move-row button {
+      width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--muted);
+    }
+    .bed-move-row button:hover { background: #eef2f6; color: var(--ink); }
+    .bed-move-summary {
+      margin-top: 10px;
+      border-top: 1px solid var(--line);
+      padding-top: 9px;
+      display: grid;
+      gap: 5px;
+      font-size: 11px;
+    }
+    .bed-move-summary strong { font-size: 11px; }
+    .bed-move-summary-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .bed-move-summary-list span {
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      background: #fff;
+      padding: 3px 7px;
+    }
+    .resident-summary-bed {
+      width: max-content;
+      border-radius: 6px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      padding: 4px 8px;
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .resident-summary-main h2 { margin: 9px 0 3px; font-size: 20px; line-height: 1.25; }
+    .resident-summary-main p { margin: 0; color: var(--muted); font-size: 10px; }
+    .summary-status-editor {
+      margin-top: 9px;
+      display: grid;
+      gap: 3px;
+    }
+    .summary-status-editor label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .summary-status-editor input {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 7px 9px;
+      color: var(--ink);
+      font-size: 12px;
+    }
+    .resident-summary-facts {
+      padding: 0 15px 14px;
+      display: grid;
+      gap: 6px;
+    }
+    .summary-fact {
+      display: grid;
+      gap: 3px;
+      border: 1px solid #e6ecef;
+      border-radius: 8px;
+      background: #f8fafb;
+      padding: 8px 9px;
+    }
+    .summary-fact span { color: var(--muted); font-size: 10px; }
+    .summary-fact strong { text-align: left; font-size: 12px; line-height: 1.35; }
+    .summary-status-card { background: #f3f8f7; }
+    .summary-status-card .summary-status-editor { margin-top: 4px; }
+    .summary-status-card .summary-status-editor input { min-height: 30px; background: #fff; }
+    .resident-summary-actions {
+      border-top: 1px solid var(--line);
+      padding: 10px 12px;
+      display: grid;
+      gap: 6px;
+    }
+    .resident-summary-actions .btn { width: 100%; text-align: center; }
+
+    .detail-main { display: grid; gap: 14px; min-width: 0; }
+    .detail-section {
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--section-accent, #64748b);
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, .07);
+      overflow: hidden;
+    }
+    .detail-section--clinical { --section-accent: #2563eb; }
+    .detail-section--icp { --section-accent: #b45309; }
+    .detail-section--training { --section-accent: #15803d; }
+    .detail-section--history { --section-accent: #64748b; }
+    .detail-section-head {
+      min-height: 43px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .detail-section-head h2 { margin: 0; font-size: 13px; }
+    .detail-section-body { padding: 11px 12px 13px; display: grid; gap: 11px; }
+    .detail-section-body[hidden] { display: none; }
+    .detail-fields {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px 14px;
+    }
+    .detail-field { min-width: 0; display: grid; gap: 3px; }
+    .detail-field.span-2 { grid-column: span 2; }
+    .detail-field.span-3 { grid-column: 1 / -1; }
+    .detail-field label,
+    .detail-label { color: var(--muted); font-size: 9px; font-weight: 800; }
+    .detail-field input,
+    .detail-field select {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      border-radius: 5px;
+      background: #f8fafc;
+      color: var(--ink);
+      padding: 7px 8px;
+      font-size: 11px;
+    }
+    .detail-field input:hover,
+    .detail-field select:hover { background: #f1f5f9; }
+    .detail-field input:focus,
+    .detail-field select:focus {
+      outline: 2px solid #99d8cf;
+      outline-offset: 1px;
+      background: #fff;
+    }
+    .detail-field input:disabled,
+    .detail-field select:disabled {
+      opacity: 1;
+      color: var(--ink);
+      cursor: default;
+    }
+    .detail-field input:disabled:hover,
+    .detail-field select:disabled:hover { background: #f8fafc; }
+    .readonly-value {
+      min-height: 31px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 5px;
+      background: #f8fafc;
+      color: var(--ink);
+      padding: 7px 8px;
+      font-size: 11px;
+    }
+    .readonly-value::after {
+      content: "";
+      width: 5px;
+      height: 5px;
+      margin-left: auto;
+      border-radius: 50%;
+      background: #cbd5e1;
+    }
+    .section-actions { display: flex; align-items: center; gap: 6px; }
+    .section-action {
+      min-height: 27px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--teal-dark);
+      padding: 4px 9px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .section-action:hover { background: var(--teal-soft); }
+    .section-action.secondary { color: var(--muted); }
+    .section-action.primary {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+    .section-action.primary:hover { background: var(--teal-dark); }
+    .section-action[hidden] { display: none; }
+    .detail-section.is-editing {
+      border-color: #9ccbc5;
+      box-shadow: 0 0 0 2px rgba(15, 118, 110, .08);
+    }
+    .detail-section.is-editing .detail-section-head { background: #f4fbfa; }
+    .orientation-strip {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 31px;
+      border-radius: 5px;
+      background: #f8fafc;
+      padding: 4px 7px;
+    }
+    .orientation-cell {
+      min-width: 0;
+      padding: 0;
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+    .orientation-cell:not(:first-child) {
+      border-left: 1px solid #d8e1e7;
+      padding-left: 10px;
+    }
+    .orientation-cell span { color: var(--muted); font-size: 9px; font-weight: 800; }
+    .orientation-cell strong {
+      min-width: 0;
+      overflow: hidden;
+      color: #334155;
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .orientation-cell strong.positive { color: var(--green); }
+    .orientation-cell strong.negative { color: #b45309; }
+    .multi-choice { display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; }
+    .multi-choice button {
+      border: 1px solid #d9e3e8;
+      border-radius: 999px;
+      background: #fff;
+      color: #475569;
+      min-height: 28px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .multi-choice button[aria-pressed="true"] {
+      border-color: #77b8af;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+    .multi-choice button:disabled { cursor: default; opacity: 1; }
+    .language-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px 14px;
+    }
+    .language-row {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      align-items: start;
+      gap: 10px;
+    }
+    .language-row > span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      padding-top: 7px;
+    }
+    .language-other {
+      width: min(240px, 100%);
+      margin-top: 5px;
+      border: 1px solid #d9e3e8;
+      border-radius: 6px;
+      background: #fff;
+      padding: 5px 8px;
+      font-size: 10px;
+    }
+    .language-other[hidden] { display: none; }
+    .training-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .training-link small {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 700;
+    }
+    .resident-toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 100;
+      max-width: min(340px, calc(100vw - 32px));
+      border: 1px solid #b7ddd7;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--teal-dark);
+      box-shadow: 0 14px 38px rgba(15, 23, 42, .16);
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity .16s ease, transform .16s ease;
+    }
+    .resident-toast.show { opacity: 1; transform: translateY(0); }
+    .resident-toast.error {
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .resident-toast { transition: none; }
+    }
+    .clinical-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+    }
+    .clinical-metric {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: #fbfcfd;
+      padding: 8px 9px;
+      display: grid;
+      gap: 2px;
+    }
+    .clinical-metric span { color: var(--muted); font-size: 9px; font-weight: 700; }
+    .clinical-metric strong { font-size: 14px; }
+    .clinical-metric small {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 700;
+    }
+    .clinical-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+    .clinical-tag {
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 3px 7px;
+      font-size: 9px;
+      font-weight: 700;
+    }
+    .clinical-tag.alert { background: var(--amber-soft); color: var(--amber); }
+    .record-timeline { display: grid; gap: 0; }
+    .timeline-item {
+      position: relative;
+      padding: 0 0 11px 16px;
+      display: grid;
+      gap: 1px;
+      color: #334155;
+      font-size: 10px;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 5px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 0 2px #dff4ef;
+    }
+    .timeline-item:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 13px;
+      bottom: 0;
+      width: 1px;
+      background: #dbe5ea;
+    }
+    .timeline-item span { color: var(--muted); font-size: 9px; }
+    .detail-section--icp .icp-view-tabs {
+      width: max-content;
+      display: flex;
+      gap: 2px;
+      margin: 10px 12px 0;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #edf1f4;
+    }
+    .detail-section--icp .icp-view-tab {
+      min-height: 30px;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      padding: 0 12px;
+      font-size: 11px;
+      font-weight: 600;
+      transition: background-color .14s ease, color .14s ease, box-shadow .14s ease;
+    }
+    .detail-section--icp .icp-view-tab:hover {
+      background: rgba(255, 255, 255, .58);
+      color: var(--ink);
+    }
+    .detail-section--icp .icp-view-tab.active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .12);
+    }
+    .icp-history-list { display: grid; gap: 7px; }
+    .icp-history-row {
+      display: grid;
+      grid-template-columns: 120px minmax(150px, 1fr) 92px;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      background: #fbfcfd;
+      padding: 9px 10px;
+    }
+    .icp-history-row strong { font-size: 11px; }
+    .icp-history-row span,
+    .icp-history-row small { color: var(--muted); font-size: 9px; }
+    .icp-history-more {
+      width: 100%;
+      min-height: 34px;
+      border: 1px dashed #b8c5ce;
+      border-radius: 7px;
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 800;
+    }
+    .icp-history-more:hover { background: #f1f5f9; }
+    .icp-history-state {
+      justify-self: start;
+      border-radius: 999px;
+      background: var(--amber-soft);
+      color: var(--amber) !important;
+      padding: 3px 7px;
+      font-weight: 800;
+    }
+    .icp-history-state.complete {
+      background: var(--green-soft);
+      color: var(--green) !important;
+    }
+    .icp-role-status {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .icp-role-status span {
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: var(--muted);
+      padding: 3px 7px;
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .icp-role-status span.done {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+    .record-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .record-month-controls,
+    .record-filters {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .record-month-label {
+      min-width: 88px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .record-control {
+      min-height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: #475569;
+      padding: 4px 8px;
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .record-control.active {
+      border-color: #77b8af;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+    .record-calendar-scroll { overflow-x: auto; }
+    .record-calendar {
+      min-width: 700px;
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    .record-weekday {
+      background: #f8fafc;
+      color: var(--muted);
+      padding: 4px;
+      text-align: center;
+      font-size: 8px;
+      font-weight: 800;
+    }
+    .record-day {
+      height: auto;
+      min-height: 50px;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      background: #fff;
+      text-align: left;
+      vertical-align: top;
+    }
+    .record-day:nth-child(7n) { border-right: 0; }
+    .record-day.other-month { background: #fafbfc; color: #94a3b8; }
+    .record-day.today .record-day-number { color: var(--teal); }
+    .record-day-header {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      padding: 2px 5px 1px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      text-align: left;
+    }
+    .record-day-number { font-size: 11px; font-weight: 800; }
+    .record-day-count {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 700;
+    }
+    .record-state-stack {
+      display: grid;
+      gap: 3px;
+      padding: 0;
+    }
+    .record-state-bar {
+      height: 12px;
+      width: 100%;
+      border: 0;
+      border-radius: 2px;
+      background: #e2e8f0;
+    }
+    .record-state-bar.hospital {
+      background: #fecaca;
+    }
+    .record-state-bar.icp-window {
+      background: #fde4b4;
+    }
+    button.record-state-bar {
+      cursor: pointer;
+      text-align: left;
+    }
+    button.record-state-bar:hover,
+    button.record-state-bar:focus-visible {
+      box-shadow: inset 0 0 0 1px #b91c1c;
+    }
+    .record-state-bar.start {
+      height: 12px;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      color: #7c2d12;
+      font-size: 8.5px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .record-icp-aligned {
+      position: relative;
+      height: 18px;
+      display: grid;
+      align-items: center;
+    }
+    .record-icp-aligned .record-state-bar {
+      position: absolute;
+      inset: 3px 0;
+      height: 12px;
+    }
+    .record-icp-aligned .record-icp-deadline-chip {
+      position: relative;
+      z-index: 1;
+      width: auto;
+      min-height: 16px;
+      margin: 0 3px;
+      box-shadow: 0 0 0 1px #f2c87e;
+    }
+    .record-event-stack {
+      flex: 1;
+      display: grid;
+      align-content: start;
+      gap: 1px;
+      padding: 0 4px 2px;
+    }
+    .record-event-chip {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      border-left: 2px solid #94a3b8;
+      border-radius: 4px;
+      background: #f8fafc;
+      color: #334155;
+      min-height: 15px;
+      padding: 2px 3px;
+      text-align: left;
+      font-size: 10px;
+      line-height: 1.1;
+    }
+    .record-event-chip {
+      display: block;
+    }
+    .record-event-chip:hover,
+    .record-event-chip:focus-visible {
+      background: #eef4f6;
+    }
+    .record-event-chip .event-time {
+      color: var(--muted);
+      margin-right: 3px;
+      font-size: 9px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+    .record-event-chip .event-label {
+      min-width: 0;
+      font-weight: 700;
+      line-height: 1.1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .record-event-chip.icp {
+      border-left-color: var(--amber);
+      background: #fff8ed;
+      color: #8a4307;
+    }
+    .record-event-chip.training {
+      border-left-color: var(--green);
+      background: #f3fbf5;
+      color: #166534;
+    }
+    .record-event-chip.hospital,
+    .record-event-chip.discharge {
+      border-left-color: #dc2626;
+      background: #fff5f5;
+      color: #991b1b;
+    }
+    .record-event-chip.status,
+    .record-event-chip.admission {
+      border-left-color: var(--blue);
+      background: #f4f7ff;
+      color: #1d4ed8;
+    }
+    .record-event-popover {
+      position: fixed;
+      z-index: 120;
+      width: min(300px, calc(100vw - 24px));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 16px 44px rgba(15, 23, 42, .2);
+      padding: 10px;
+      color: var(--ink);
+    }
+    .record-event-popover[hidden] { display: none; }
+    .record-event-popover h3 { margin: 0 0 4px; font-size: 12px; }
+    .record-event-popover p { margin: 0; color: var(--muted); font-size: 10px; }
+    .record-event-popover-action {
+      margin-top: 8px;
+      border: 0;
+      background: transparent;
+      color: var(--teal-dark);
+      padding: 0;
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .record-calendar.agenda {
+      min-width: 0;
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .record-calendar.agenda .record-weekday { display: none; }
+    .record-calendar.agenda .record-day {
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+      border-right: 0;
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      align-items: start;
+    }
+    .record-calendar.agenda .record-day-header {
+      align-self: stretch;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      border-right: 1px solid var(--line);
+    }
+    .record-calendar.agenda .record-event-stack {
+      padding: 6px;
+    }
+    .record-empty { color: var(--muted); font-size: 9px; }
+    .status-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+    }
+    .resident-manual-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 2px 6px;
+      font-size: 9px;
+      font-weight: 700;
+    }
+    .resident-manual-status::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .detail-save-row {
+      display: flex;
+      justify-content: flex-end;
+      padding: 2px 0;
+    }
+
+    @media (max-width: 980px) {
+      .detail-layout { grid-template-columns: minmax(0, 1fr); }
+      .resident-summary-card {
+        position: static;
+        display: grid;
+        grid-template-columns: minmax(220px, .8fr) minmax(0, 2fr);
+        align-items: stretch;
+      }
+      .resident-summary-facts {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-content: start;
+        padding: 16px 15px;
+      }
+    }
+    @media (max-width: 700px) {
+      .roster-controls { align-items: stretch; }
+      .roster-search { min-width: 100%; }
+      .roster-actions {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-end;
+      }
+      .roster-filter { flex: 1; min-width: 110px; }
+      .roster-table { min-width: 680px; }
+      .detail-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .detail-field.span-3 { grid-column: 1 / -1; }
+      .clinical-metrics { grid-template-columns: minmax(0, 1fr); }
+      .orientation-strip { grid-template-columns: minmax(0, 1fr); }
+      .language-grid { grid-template-columns: minmax(0, 1fr); }
+      .icp-history-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .screen-head.resident-page-head { flex-direction: column; }
+      .resident-summary-card { display: block; }
+      .resident-summary-facts { padding: 0 15px 14px; }
+    }
+    @media (max-width: 480px) {
+      .resident-summary-facts,
+      .detail-fields { grid-template-columns: minmax(0, 1fr); }
+      .detail-field.span-2 { grid-column: auto; }
+      .resident-summary-actions { grid-template-columns: minmax(0, 1fr); }
+      .dialog-grid { grid-template-columns: minmax(0, 1fr); }
+      .dialog-field.full { grid-column: auto; }
+    }
+
+    html.embedded .sidebar,
+    html.embedded .topbar { display: none; }
+    html.embedded .app { display: block; }
+    html.embedded .main { display: block; }
+    html.embedded .content { padding: 16px; }
+
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: 72px minmax(0, 1fr); }
+      .brand-title, .brand-sub, .nav small { display: none; }
+      .content { padding: 12px; }
+      .panel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .span3 { grid-column: span 2; }
+      .form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 780px) {
+      .panel-grid, .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .span2, .span3 { grid-column: span 2; }
+    }
+  </style>
+  <link rel="stylesheet" href="../shared/design-system.css?v=20261116-resident-cards">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">OT</div>
+        <div>
+          <div class="brand-title">OT System</div>
+          <div class="brand-sub">住客管理 UI mock</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button><span>工作台</span><small>首頁</small></button>
+        <button class="active" onclick="showScreen('list')"><span>住客管理</span><small>007</small></button>
+        <button><span>訓練時間表</span><small>006</small></button>
+        <button><span>復康運動紀錄</span><small>007a / 007c</small></button>
+        <button><span>評估系統</span><small>016 / MOCA</small></button>
+        <button><span>ICP</span><small>週期</small></button>
+        <button><span>院舍設定</span><small>設定</small></button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="home-pill">
+          <span><strong id="chrome-home-code">yt</strong> <span id="chrome-home-name">油塘康璟</span></span>
+          <span class="ui-chevron" aria-hidden="true"></span>
+        </div>
+        <div class="actions">
+          <span class="top-meta">2026年10月</span>
+          <span class="top-meta">Testing</span>
+          <div class="user-pill"><span class="avatar">T</span><span>OT</span></div>
+        </div>
+      </header>
+
+      <div class="content">
+        <section id="screen-list" class="screen active">
+          <div class="roster-shell">
+            <div class="roster-controls" aria-label="住客篩選">
+              <label class="console-search roster-search">
+                <svg class="console-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <path d="m20 20-4-4"></path>
+                </svg>
+                <input id="roster-search" type="search" placeholder="搜尋姓名、床號或宿位" aria-label="搜尋住客" autocomplete="off">
+              </label>
+              <div class="roster-actions" role="group" aria-label="住客清單操作">
+                <select class="roster-filter" id="filter-floor" aria-label="樓層">
+                  <option value="all">全部樓層</option>
+                  <option value="1">1樓</option>
+                  <option value="2">2樓</option>
+                </select>
+                <select class="roster-filter" id="filter-place" aria-label="宿位">
+                  <option value="all">全部宿位</option>
+                  <option value="券位">券位</option>
+                  <option value="買位">買位</option>
+                  <option value="私位">私位</option>
+                  <option value="暫託">暫託</option>
+                </select>
+                <select class="roster-filter" id="filter-status" aria-label="住客狀態">
+                  <option value="all">全部狀態</option>
+                  <option value="active">Active</option>
+                  <option value="hospital">留醫中</option>
+                  <option value="discharged">已退住</option>
+                </select>
+                <select class="roster-filter" id="filter-icp" aria-label="ICP 限期">
+                  <option value="all">全部 ICP</option>
+                  <option value="month">本月</option>
+                  <option value="next">下月</option>
+                  <option value="overdue">逾期</option>
+                </select>
+                <button class="roster-reset" id="reset-roster-filters" type="button">重設</button>
+                <div class="roster-view-tools">
+                  <button class="roster-tool" id="roster-columns-toggle" type="button"
+                    aria-expanded="false" aria-controls="roster-columns-menu">顯示欄位</button>
+                  <div class="roster-column-menu" id="roster-columns-menu" hidden></div>
+                </div>
+                <button class="btn btn-primary" id="add-resident-button" type="button">＋ 新增住客</button>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table class="roster-table">
+                <colgroup id="roster-colgroup"></colgroup>
+                <thead id="roster-table-head"></thead>
+                <tbody id="resident-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-detail" class="screen">
+          <div class="detail-layout">
+            <aside class="resident-summary-card">
+              <button class="resident-more" id="resident-more-button" type="button"
+                aria-label="更多住客操作" aria-expanded="false" aria-controls="resident-more-menu">⋮</button>
+              <div class="resident-more-menu" id="resident-more-menu" role="menu" hidden>
+                <button id="discharge-resident-button" type="button" role="menuitem" data-resident-action="discharge">退住</button>
+                <button id="cancel-discharge-button" type="button" role="menuitem" data-resident-action="cancel-discharge" hidden>取消退住</button>
+              </div>
+              <div class="resident-summary-main">
+                <span class="resident-summary-bed" id="summary-bed">A12</span>
+                <h2 id="summary-name">陳大文</h2>
+              </div>
+              <div class="resident-summary-facts">
+                <div class="summary-fact summary-status-card">
+                  <span>住客狀態</span>
+                  <strong id="summary-status">Active</strong>
+                  <div class="summary-status-editor">
+                    <label for="summary-status-input">手動狀態</label>
+                    <input id="summary-status-input" value="" placeholder="例如：Covid">
+                  </div>
+                </div>
+                <div class="summary-fact"><span>感染控制</span><strong id="summary-infection">VRE</strong></div>
+                <div class="summary-fact"><span>活動現況</span><strong id="summary-mobility">IW</strong></div>
+                <div class="summary-fact"><span>下次 ICP</span><strong id="summary-icp">2026/11/14</strong></div>
+              </div>
+            </aside>
+
+            <div class="detail-main">
+              <section class="detail-section" data-detail-section="basic">
+                <header class="detail-section-head">
+                  <h2>基本資料</h2>
+                  <div class="section-actions">
+                    <button class="section-action secondary" type="button" data-section-cancel="basic" hidden>取消</button>
+                    <button class="section-action" type="button" data-section-save="basic">編輯</button>
+                  </div>
+                </header>
+                <div class="detail-section-body">
+                  <div class="detail-fields">
+                    <div class="detail-field">
+                      <label for="detail-place">宿位</label>
+                      <select id="detail-place" data-edit-control data-resident-field="place" disabled>
+                        <option value="券位">券位</option>
+                        <option value="買位">買位</option>
+                        <option value="私位">私位</option>
+                        <option value="暫託">暫託</option>
+                      </select>
+                    </div>
+                    <div class="detail-field">
+                      <label for="detail-floor">樓層</label>
+                      <select id="detail-floor" data-edit-control data-resident-field="floor" disabled>
+                        <option value="A">A · 1樓</option>
+                        <option value="B">B · 2樓</option>
+                        <option value="C">C · 3樓</option>
+                        <option value="D">D · 4樓</option>
+                      </select>
+                    </div>
+                    <div class="detail-field">
+                      <label for="detail-bed">床位號碼</label>
+                      <input id="detail-bed" data-edit-control value="12" maxlength="8" disabled>
+                    </div>
+                    <div class="detail-field">
+                      <label for="detail-sex">性別</label>
+                      <select id="detail-sex" data-edit-control data-resident-field="sex" disabled>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                      </select>
+                    </div>
+                    <div class="detail-field"><span class="detail-label">年齡</span><div class="readonly-value" id="detail-age">78</div></div>
+                    <div class="detail-field"><label for="detail-dob">出生日期</label><input id="detail-dob" data-edit-control data-resident-field="dob" type="date" value="1948-03-12" disabled></div>
+                    <div class="detail-field">
+                      <label for="detail-education">學歷</label>
+                      <select id="detail-education" data-edit-control data-resident-field="education" disabled>
+                        <option value="0–3 年">0–3 年</option>
+                        <option value="4–6 年">4–6 年</option>
+                        <option value="7–9 年">7–9 年</option>
+                        <option value="10–12 年">10–12 年</option>
+                        <option value=">12 年">&gt;12 年</option>
+                      </select>
+                    </div>
+                    <div class="detail-field span-3">
+                      <span class="detail-label">溝通</span>
+                      <div class="language-grid">
+                        <div class="language-row">
+                          <span>語言</span>
+                          <div>
+                            <div class="multi-choice" id="detail-language" data-multi-field="language"></div>
+                            <input class="language-other" id="detail-language-other" data-edit-control placeholder="其他語言" hidden disabled>
+                          </div>
+                        </div>
+                        <div class="language-row">
+                          <span>接收</span>
+                          <div class="multi-choice" id="detail-receptive" data-multi-field="receptive" data-readonly-choice></div>
+                        </div>
+                        <div class="language-row">
+                          <span>表達</span>
+                          <div class="multi-choice" id="detail-expressive" data-multi-field="expressive" data-readonly-choice></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="detail-field span-3">
+                      <span class="detail-label">最近床位變更</span>
+                      <div class="readonly-value" id="detail-bed-history">尚無床位變更</div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="detail-section detail-section--clinical" data-detail-section="clinical">
+                <header class="detail-section-head">
+                  <h2>臨床概況</h2>
+                  <div class="section-actions">
+                    <button class="section-action clinical-file-link" type="button" id="open-latest-assessment">查看 Ax 檔案 →</button>
+                  </div>
+                </header>
+                <div class="detail-section-body">
+                  <div class="clinical-metrics">
+                    <div class="clinical-metric"><span>MBI</span><strong id="detail-mbi">72 / 100</strong></div>
+                    <div class="clinical-metric"><span>HK-MoCA</span><strong id="detail-moca">21 / 30</strong><small id="detail-moca-percentile">—</small></div>
+                    <div class="clinical-metric"><span>活動現況</span><strong id="detail-mobility">IW</strong></div>
+                  </div>
+                  <div class="detail-fields">
+                    <div class="detail-field"><span class="detail-label">Ax 編號</span><div class="readonly-value" id="detail-ax-code">—</div></div>
+                    <div class="detail-field"><span class="detail-label">Ax 日期</span><div class="readonly-value" id="detail-ax-date">—</div></div>
+                    <div class="detail-field"><span class="detail-label">Ax 評估性質</span><div class="readonly-value" id="detail-ax-purpose">—</div></div>
+                  </div>
+                  <div class="detail-fields">
+                    <div class="detail-field span-2"><span class="detail-label">病歷</span><div class="readonly-value" id="detail-history">HT · DM</div></div>
+                    <div class="detail-field">
+                      <span class="detail-label">感染控制</span>
+                      <div class="multi-choice" id="detail-infection" data-multi-field="infectionList"></div>
+                    </div>
+                    <div class="detail-field span-3">
+                      <span class="detail-label">現實導向</span>
+                      <div class="orientation-strip" id="detail-orientation">
+                        <div class="orientation-cell"><span>時</span><strong>v</strong></div>
+                        <div class="orientation-cell"><span>地</span><strong>v</strong></div>
+                        <div class="orientation-cell"><span>人</span><strong>x</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="detail-section detail-section--icp" data-detail-section="icp">
+                <header class="detail-section-head">
+                  <h2>ICP 週期</h2>
+                  <div class="section-actions">
+                    <button class="section-action" type="button" id="summary-open-icp">開啟 ICP</button>
+                    <button class="section-action secondary" type="button" data-section-cancel="icp" hidden>取消</button>
+                    <button class="section-action" type="button" data-section-save="icp">編輯</button>
+                  </div>
+                </header>
+                <div class="icp-view-tabs" role="tablist" aria-label="ICP 檢視">
+                  <button class="icp-view-tab active" type="button" data-icp-view="current" role="tab" aria-selected="true">目前週期</button>
+                  <button class="icp-view-tab" type="button" data-icp-view="history" role="tab" aria-selected="false">歷次 ICP</button>
+                </div>
+                <div class="detail-section-body" id="icp-current-view">
+                  <div class="detail-fields">
+                    <div class="detail-field"><label for="detail-last-icp">上次 ICP 會議</label><input id="detail-last-icp" data-edit-control data-resident-field="lastIcp" type="date" value="2026-05-14" disabled></div>
+                    <div class="detail-field">
+                      <label for="detail-icp-type">下次 ICP 性質</label>
+                      <select id="detail-icp-type" data-edit-control data-resident-field="icpType" disabled>
+                        <option value="1個月">1 個月</option>
+                        <option value="6個月">6 個月</option>
+                        <option value="1年">1 年</option>
+                      </select>
+                    </div>
+                    <div class="detail-field"><label for="detail-next-icp">下次 ICP 限期</label><input id="detail-next-icp" data-edit-control data-resident-field="icpDue" type="date" value="2026-11-14" disabled></div>
+                  </div>
+                </div>
+                <div class="detail-section-body" id="icp-history-view" hidden>
+                  <div class="icp-history-list" id="icp-history-list"></div>
+                </div>
+              </section>
+
+              <section class="detail-section detail-section--training" data-detail-section="training">
+                <header class="detail-section-head">
+                  <h2>訓練安排</h2>
+                  <div class="section-actions">
+                    <button class="section-action training-link" id="summary-open-training" type="button">
+                      <span id="summary-training-label">查看本週安排</span>
+                      <small id="summary-training-progress"></small>
+                    </button>
+                    <button class="section-action secondary" type="button" data-section-cancel="training" hidden>取消</button>
+                    <button class="section-action" type="button" data-section-save="training">編輯</button>
+                  </div>
+                </header>
+                <div class="detail-section-body">
+                  <div class="detail-fields">
+                    <div class="detail-field"><span class="detail-label">訓練次數</span><div class="readonly-value" id="detail-training-frequency">2次/星期</div></div>
+                    <div class="detail-field"><label for="detail-extra-services">額外復康服務次數（每月）</label><input id="detail-extra-services" data-edit-control data-resident-field="extraServices" type="number" min="0" step="1" value="1" disabled></div>
+                    <div class="detail-field span-3">
+                      <span class="detail-label">建議活動性質／內容</span>
+                      <div class="readonly-value" id="detail-activities">腳單車 · 站立 · 現實環境導向活動</div>
+                      <input id="detail-activities-input" data-edit-control type="text" value="" disabled hidden>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="detail-section detail-section--history" data-detail-section="status">
+                <header class="detail-section-head">
+                  <h2>住客紀錄</h2>
+                </header>
+                <div class="detail-section-body">
+                  <div class="record-toolbar">
+                    <div class="record-month-controls">
+                      <button class="record-control" type="button" data-record-action="prev" aria-label="上個月"><span class="ui-chevron left" aria-hidden="true"></span></button>
+                      <span class="record-month-label" id="record-month-label">2026 年 10 月</span>
+                      <button class="record-control" type="button" data-record-action="next" aria-label="下個月"><span class="ui-chevron right" aria-hidden="true"></span></button>
+                      <button class="record-control" type="button" data-record-action="today">今天</button>
+                    </div>
+                  </div>
+                  <div class="record-calendar-scroll">
+                    <div class="record-calendar" id="record-calendar"></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="add-resident-dialog" aria-labelledby="add-resident-title">
+    <form id="add-resident-form">
+      <div class="dialog-head">
+        <h2 id="add-resident-title">新增住客</h2>
+        <p>建立住客檔案後會開始初次 016 評估。</p>
+      </div>
+      <div class="dialog-body">
+        <div class="dialog-grid">
+          <div class="dialog-field">
+            <label for="new-bed">床號</label>
+            <input id="new-bed" value="F01" required>
+          </div>
+          <div class="dialog-field">
+            <label for="new-name">姓名</label>
+            <input id="new-name" value="新住客" required>
+          </div>
+          <div class="dialog-field full">
+            <label for="new-place">宿位</label>
+            <select id="new-place">
+              <option>券位</option>
+              <option>買位</option>
+              <option>私位</option>
+              <option>暫託</option>
+            </select>
+          </div>
+        </div>
+        <p class="form-error" id="resident-form-error" hidden></p>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn" type="button" id="cancel-add-resident">取消</button>
+        <button class="btn btn-primary" type="submit">建立住客並開始 016</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="training-scope-dialog" aria-labelledby="training-scope-title">
+    <div class="dialog-head">
+      <h2 id="training-scope-title">儲存訓練建議</h2>
+    </div>
+    <div class="dialog-body">
+      <p class="dialog-copy">請選擇修改範圍。</p>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn" type="button" data-training-save-scope="resident">只改住客詳情</button>
+      <button class="btn btn-primary" type="button" data-training-save-scope="ax">同時改 Ax 內容</button>
+      <button class="btn" type="button" data-action="cancel-training-scope">取消</button>
+    </div>
+  </dialog>
+
+  <dialog id="discharge-resident-dialog" aria-labelledby="discharge-resident-title">
+    <form id="discharge-resident-form">
+      <div class="dialog-head">
+        <h2 id="discharge-resident-title">確認退住</h2>
+        <p>系統會結束進行中的 ICP、取消未完成待辦，並只保留文件夾 E 交回院舍的待辦。</p>
+      </div>
+      <div class="dialog-body">
+        <div class="dialog-grid">
+          <div class="dialog-field">
+            <label for="discharge-date">退住日期</label>
+            <input id="discharge-date" type="date" value="2026-10-23" required>
+          </div>
+          <div class="dialog-field full">
+            <label for="discharge-reason">原因</label>
+            <input id="discharge-reason" value="轉往其他院舍" required>
+          </div>
+        </div>
+        <p class="form-error" id="discharge-form-error" hidden></p>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn" type="button" id="cancel-discharge-dialog">取消</button>
+        <button class="btn btn-danger" type="submit">確認退住</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="bed-conflict-dialog" aria-labelledby="bed-conflict-title">
+    <div class="dialog-head">
+      <h2 id="bed-conflict-title">床位已被佔用</h2>
+    </div>
+    <div class="dialog-body">
+      <p class="bed-conflict-copy" id="bed-conflict-copy"></p>
+      <p class="form-error" id="bed-conflict-error" hidden></p>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn" id="bed-conflict-back" type="button">返回修改</button>
+      <button class="btn" id="bed-conflict-multi" type="button">多人調床</button>
+      <button class="btn btn-primary" id="bed-conflict-swap" type="button">交換床位</button>
+    </div>
+  </dialog>
+
+  <dialog id="bed-rotation-dialog" aria-labelledby="bed-rotation-title">
+    <div class="dialog-head">
+      <h2 id="bed-rotation-title">調床安排</h2>
+      <p>選擇目標床位；如目標已有住客，會自動加入調床鏈。</p>
+    </div>
+    <div class="dialog-body">
+      <div class="bed-move-matrix">
+        <div class="bed-move-row" aria-hidden="true">
+          <strong>住客</strong><span>目前</span><span></span><strong>新床位</strong><span></span>
+        </div>
+        <div id="bed-rotation-rows"></div>
+      </div>
+      <div class="bed-move-summary">
+        <strong>最終安排</strong>
+        <div class="bed-move-summary-list" id="bed-rotation-summary"></div>
+      </div>
+      <p class="form-error" id="bed-rotation-error" hidden></p>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn" id="bed-rotation-cancel" type="button">取消</button>
+      <button class="btn btn-primary" id="bed-rotation-confirm" type="button">確認調床</button>
+    </div>
+  </dialog>
+
+  <div class="resident-toast" id="resident-toast" role="status" aria-live="polite"></div>
+  <div class="record-event-popover" id="record-event-popover" role="dialog" aria-modal="false" hidden></div>
+
+  <script src="../shared/home-settings.js"></script>
+  <script src="../shared/prototype-catalog.js"></script>
+  <script src="../shared/mock-residents.js"></script>
+  <script src="../shared/prototype-domain.js"></script>
+  <script>
+    const TODAY_KEY = "2026-10-23";
+    let currentResidentId = "r1";
+    let currentIcpView = "current";
+    let icpHistoryExpanded = false;
+    let recordMonth = new Date(2026, 9, 1);
+    let recordFilter = "all";
+    let recordSelectedDate = TODAY_KEY;
+    let summaryStatusTimer = null;
+    let pendingTrainingSave = null;
+    let pendingBedResolution = null;
+    let bedRotationDraft = null;
+    let residentData = [];
+
+    function parseOrientation(value) {
+      const parts = String(value || "").split("·").map(part => part.trim());
+      return {
+        time: parts.find(part => part.startsWith("時"))?.split(/\s+/).at(-1) || "",
+        place: parts.find(part => part.startsWith("地"))?.split(/\s+/).at(-1) || "",
+        person: parts.find(part => part.startsWith("人"))?.split(/\s+/).at(-1) || ""
+      };
+    }
+
+    function refreshResidentData({ includeDischarged = true } = {}) {
+      residentData = OT_PROTOTYPE.residents({ includeDischarged }).map(resident => {
+        const orientation = parseOrientation(resident.orientation);
+        return {
+          ...resident,
+          statusLabel: resident.status === "active"
+            ? "Active"
+            : resident.statusLabel || (resident.status === "hospital" ? "留醫中" : "已退住"),
+          orientationTime: orientation.time,
+          orientationPlace: orientation.place,
+          orientationPerson: orientation.person,
+          infectionList: resident.infectionList || (
+            resident.infection && resident.infection !== "Nil"
+              ? resident.infection.split(" · ").filter(Boolean)
+              : []
+          ),
+          language: resident.language || resident.languageExpression || ["廣東話"],
+          languageOther: resident.languageOther || "",
+          receptive: resident.receptive || ["Verbal"],
+          expressive: resident.expressive || ["Verbal"],
+          manualStatusLabel: resident.manualStatusLabel || "",
+          admissionDate: resident.admissionDate || (
+            resident.timeline?.find(([label]) => label === "入院")?.[1] || ""
+          )
+        };
+      });
+    }
+
+    refreshResidentData();
+
+    const MULTI_CHOICE_OPTIONS = {
+      infectionList: [...OT_PROTOTYPE_CATALOG.infections],
+      language: ["廣東話", "普通話", "英文", "其他"],
+      receptive: ["Nil.", "Verbal", "Gesture", "Written", "Others"],
+      expressive: ["Nil.", "Verbal", "Gesture", "Written", "Others"]
+    };
+    const DEFAULT_TRAINING_COUNTS = {
+      r1: { week: 1, total: 1 },
+      r2: { week: 1, total: 1 },
+      r3: { week: 1, total: 1 },
+      r4: { week: 1, total: 1 },
+      r5: { week: 2, total: 2 },
+      r6: { week: 2, total: 2 }
+    };
+    const TRAINING_EVENT_DATES = {
+      r1: [
+        { date: "2026-10-07", time: "09:00" },
+        { date: "2026-10-14", time: "09:00" },
+        { date: "2026-10-21", time: "09:00" }
+      ],
+      r2: [
+        { date: "2026-10-08", time: "09:30" },
+        { date: "2026-10-15", time: "09:30" },
+        { date: "2026-10-22", time: "09:30" }
+      ],
+      r3: [
+        { date: "2026-10-09", time: "10:00" },
+        { date: "2026-10-16", time: "10:00" },
+        { date: "2026-10-23", time: "10:00" }
+      ],
+      r4: [
+        { date: "2026-10-09", time: "10:00" },
+        { date: "2026-10-16", time: "10:00" },
+        { date: "2026-10-23", time: "10:00" }
+      ],
+      r5: [
+        { date: "2026-10-07", time: "14:00" },
+        { date: "2026-10-21", time: "14:30" }
+      ],
+      r6: [
+        { date: "2026-10-08", time: "14:00" },
+        { date: "2026-10-22", time: "14:00" }
+      ]
+    };
+    const ASSESSMENT_COMPLETION = {
+      r1: { ot: true, pt: false },
+      r2: { ot: true, pt: true },
+      r3: { ot: false, pt: false },
+      r4: { ot: true, pt: true },
+      r5: { ot: true, pt: true },
+      r6: { ot: true, pt: true }
+    };
+    let residentToastTimer = null;
+
+    function applyHomeSettings() {
+      const home = OT_HOME_SETTINGS.getHome();
+      document.getElementById("chrome-home-code").textContent = home.code;
+      document.getElementById("chrome-home-name").textContent = home.name;
+      renderResidentDetail();
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+      const target = document.getElementById('screen-' + id);
+      if (target) target.classList.add('active');
+      document.querySelectorAll('.nav button').forEach(button => button.classList.remove('active'));
+      document.querySelector('.nav button:nth-child(2)')?.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    const slashDate = value => value ? value.replaceAll("-", "/") : "—";
+
+    const ROSTER_COLUMN_STORAGE_KEY = "ot.residents.columns.v1";
+    const ROSTER_WIDTH_STORAGE_KEY = "ot.residents.column-widths.v1";
+    const ROSTER_SORT_STORAGE_KEY = "ot.residents.sort.v1";
+    const rosterCollator = new Intl.Collator("zh-Hant", {
+      numeric: true,
+      sensitivity: "base"
+    });
+    const ROSTER_COLUMNS = [
+      {
+        key: "bed",
+        label: "床號",
+        width: 68,
+        minWidth: 40,
+        required: true,
+        sortValue: resident => resident.bed
+      },
+      {
+        key: "name",
+        label: "姓名",
+        width: 132,
+        minWidth: 64,
+        required: true,
+        sortValue: resident => resident.name
+      },
+      {
+        key: "place",
+        label: "宿位",
+        width: 76,
+        minWidth: 44,
+        sortValue: resident => resident.place
+      },
+      {
+        key: "floor",
+        label: "樓層",
+        width: 92,
+        minWidth: 70,
+        sortValue: resident => resident.floor
+      },
+      {
+        key: "admissionDate",
+        label: "入住日期",
+        width: 118,
+        minWidth: 96,
+        sortValue: resident => resident.admissionDate
+      },
+      {
+        key: "sex",
+        label: "性別",
+        width: 72,
+        minWidth: 60,
+        sortValue: resident => resident.sex
+      },
+      {
+        key: "age",
+        label: "年齡",
+        width: 72,
+        minWidth: 60,
+        sortValue: resident => Number(resident.age)
+      },
+      {
+        key: "dob",
+        label: "出生日期",
+        width: 122,
+        minWidth: 100,
+        sortValue: resident => resident.dob
+      },
+      {
+        key: "education",
+        label: "學歷",
+        width: 98,
+        minWidth: 76,
+        sortValue: resident => resident.education
+      },
+      {
+        key: "icpDue",
+        label: "下次 ICP",
+        width: 118,
+        minWidth: 96,
+        sortValue: resident => resident.icpDue
+      },
+      {
+        key: "lastAssessment",
+        label: "最近評估",
+        width: 118,
+        minWidth: 96,
+        sortValue: resident => resident.lastAssessment
+      },
+      {
+        key: "status",
+        label: "狀態",
+        width: 128,
+        minWidth: 104,
+        sortValue: resident => resident.statusLabel
+      },
+      {
+        key: "mobility",
+        label: "步行",
+        width: 82,
+        minWidth: 64,
+        sortValue: resident => resident.mobility
+      },
+      {
+        key: "trainingFrequency",
+        label: "訓練頻率",
+        width: 108,
+        minWidth: 86,
+        sortValue: resident => resident.trainingFrequency
+      },
+      {
+        key: "icpState",
+        label: "ICP 狀態",
+        width: 112,
+        minWidth: 88,
+        sortValue: resident => resident.icpState
+      },
+      {
+        key: "lastIcp",
+        label: "上次 ICP",
+        width: 112,
+        minWidth: 92,
+        sortValue: resident => resident.lastIcp
+      }
+    ];
+    const ROSTER_DEFAULT_COLUMNS = [
+      "bed",
+      "name",
+      "place",
+      "floor",
+      "admissionDate",
+      "icpDue",
+      "lastAssessment",
+      "status"
+    ];
+    const rosterColumnByKey = new Map(ROSTER_COLUMNS.map(column => [column.key, column]));
+
+    function readRosterPreference(key, fallback) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key));
+        return value ?? fallback;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function writeRosterPreference(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (error) {
+        // Preferences remain active for the current session.
+      }
+    }
+
+    let rosterVisibleColumns = (() => {
+      const saved = readRosterPreference(ROSTER_COLUMN_STORAGE_KEY, ROSTER_DEFAULT_COLUMNS);
+      const savedColumns = Array.isArray(saved) ? [...saved] : [];
+      const migratedCombinedColumn = savedColumns.includes("resident");
+      const valid = Array.isArray(saved)
+        ? saved.filter(key => rosterColumnByKey.has(key))
+        : [];
+      const required = ROSTER_COLUMNS.filter(column => column.required).map(column => column.key);
+      if (migratedCombinedColumn) {
+        valid.push("bed", "name", "place");
+      }
+      return ROSTER_COLUMNS
+        .map(column => column.key)
+        .filter(key => valid.includes(key) || required.includes(key));
+    })();
+
+    let rosterColumnWidths = (() => {
+      const saved = readRosterPreference(ROSTER_WIDTH_STORAGE_KEY, {});
+      return Object.fromEntries(ROSTER_COLUMNS.map(column => {
+        const value = Number(saved?.[column.key]);
+        return [
+          column.key,
+          Number.isFinite(value)
+            ? Math.max(column.minWidth, value)
+            : column.width
+        ];
+      }));
+    })();
+
+    let rosterSort = (() => {
+      const saved = readRosterPreference(ROSTER_SORT_STORAGE_KEY, null);
+      const column = rosterColumnByKey.get(saved?.key);
+      if (!column || column.sortable === false) {
+        return { key: null, direction: "ascending" };
+      }
+      return {
+        key: column.key,
+        direction: saved.direction === "descending" ? "descending" : "ascending"
+      };
+    })();
+
+    function rosterVisibleDefinitions() {
+      return ROSTER_COLUMNS.filter(column => rosterVisibleColumns.includes(column.key));
+    }
+
+    function saveRosterPreferences() {
+      writeRosterPreference(ROSTER_COLUMN_STORAGE_KEY, rosterVisibleColumns);
+      writeRosterPreference(ROSTER_WIDTH_STORAGE_KEY, rosterColumnWidths);
+      writeRosterPreference(ROSTER_SORT_STORAGE_KEY, rosterSort.key ? rosterSort : null);
+    }
+
+    function sortedResidents(rows) {
+      const column = rosterColumnByKey.get(rosterSort.key);
+      if (!column?.sortValue) return rows;
+      const direction = rosterSort.direction === "descending" ? -1 : 1;
+      return [...rows].sort((left, right) => {
+        const leftValue = column.sortValue(left);
+        const rightValue = column.sortValue(right);
+        const comparison = typeof leftValue === "number" && typeof rightValue === "number"
+          ? leftValue - rightValue
+          : rosterCollator.compare(String(leftValue ?? ""), String(rightValue ?? ""));
+        return comparison * direction;
+      });
+    }
+
+    function filteredResidents() {
+      const query = document.getElementById("roster-search").value.trim().toLowerCase();
+      const floor = document.getElementById("filter-floor").value;
+      const place = document.getElementById("filter-place").value;
+      const status = document.getElementById("filter-status").value;
+      const icp = document.getElementById("filter-icp").value;
+      const rows = residentData.filter(resident => {
+        if (query && !`${resident.name} ${resident.bed} ${resident.place}`.toLowerCase().includes(query)) return false;
+        if (floor !== "all" && resident.floor !== `${floor}樓`) return false;
+        if (place !== "all" && resident.place !== place) return false;
+        if (status === "all" && resident.status === "discharged") return false;
+        if (status !== "all" && resident.status !== status) return false;
+        if (icp === "month" && !resident.icpDue.startsWith(TODAY_KEY.slice(0, 7))) return false;
+        if (icp === "next" && !resident.icpDue.startsWith("2026-11")) return false;
+        if (icp === "overdue" && !(resident.icpDue < TODAY_KEY && resident.icpState !== "已完成")) return false;
+        return true;
+      });
+      return sortedResidents(rows);
+    }
+
+    function applyRosterColumnWidths() {
+      const table = document.querySelector(".roster-table");
+      const colgroup = document.getElementById("roster-colgroup");
+      const columns = rosterVisibleDefinitions();
+      colgroup.innerHTML = columns.map(column => (
+        `<col data-column="${column.key}" style="width:${rosterColumnWidths[column.key]}px">`
+      )).join("");
+      const totalWidth = columns.reduce((sum, column) => sum + rosterColumnWidths[column.key], 0);
+      table.style.minWidth = `${Math.max(760, totalWidth)}px`;
+    }
+
+    function renderRosterHeader() {
+      const head = document.getElementById("roster-table-head");
+      const columns = rosterVisibleDefinitions();
+      head.innerHTML = `
+        <tr>
+          ${columns.map(column => {
+            const sortable = column.sortable !== false;
+            const sortState = rosterSort.key === column.key ? rosterSort.direction : "none";
+            const ariaSort = sortable ? ` aria-sort="${sortState}"` : "";
+            const label = column.label || column.key;
+            const headerContent = sortable
+              ? `<button class="roster-sort-button" type="button" data-roster-sort="${column.key}">
+                   <span>${escapeHtml(label)}</span>
+                   <span class="roster-sort-indicator" aria-hidden="true"></span>
+                 </button>`
+              : `<span class="visually-hidden">${escapeHtml(label)}</span>`;
+            return `<th scope="col" data-column="${column.key}"${ariaSort}>
+              ${headerContent}
+              <span class="roster-column-resizer" role="separator" aria-orientation="vertical"
+                aria-label="調整${escapeHtml(label)}欄寬" tabindex="0"
+                data-column-resize="${column.key}"
+                aria-valuemin="${column.minWidth}"
+                aria-valuenow="${rosterColumnWidths[column.key]}"></span>
+            </th>`;
+          }).join("")}
+        </tr>
+      `;
+      applyRosterColumnWidths();
+    }
+
+    function renderRosterColumnMenu() {
+      const menu = document.getElementById("roster-columns-menu");
+      menu.innerHTML = `
+        <div class="roster-column-menu-head">顯示於住客清單</div>
+        <div class="roster-column-options">
+          ${ROSTER_COLUMNS.map(column => `
+            <label class="roster-column-option" draggable="true" data-column-option="${column.key}">
+              <input type="checkbox" data-roster-column="${column.key}"
+                ${rosterVisibleColumns.includes(column.key) ? "checked" : ""}
+                ${column.required ? "disabled" : ""}>
+              <span>${escapeHtml(column.label)}</span>
+              ${column.required ? "<small>固定</small>" : ""}
+            </label>
+          `).join("")}
+        </div>
+        <button class="roster-column-reset" id="reset-roster-columns" type="button">恢復預設欄位</button>
+      `;
+    }
+
+    function rosterCellMarkup(resident, key) {
+      if (key === "bed") return `<span class="resident-bed-badge">${escapeHtml(resident.bed)}</span>`;
+      if (key === "name") return `<strong class="resident-name-cell">${escapeHtml(resident.name)}</strong>`;
+      if (key === "place") return `<span class="resident-place-cell">${escapeHtml(resident.place)}</span>`;
+      if (key === "status") {
+        return `
+          <div class="status-stack">
+            <span class="resident-status ${resident.status === "hospital" ? "hospital" : ""}">${escapeHtml(resident.statusLabel)}</span>
+            ${resident.manualStatusLabel ? `<span class="resident-manual-status">${escapeHtml(resident.manualStatusLabel)}</span>` : ""}
+          </div>
+        `;
+      }
+      if (["admissionDate", "icpDue", "lastAssessment", "dob", "lastIcp"].includes(key)) {
+        return `<span class="resident-date">${slashDate(resident[key])}</span>`;
+      }
+      return escapeHtml(resident[key] ?? "—");
+    }
+
+    function renderRoster() {
+      const rows = filteredResidents();
+      const body = document.getElementById("resident-table-body");
+      const columns = rosterVisibleDefinitions();
+      renderRosterHeader();
+      body.innerHTML = rows.length
+        ? rows.map(resident => `
+            <tr data-resident-id="${resident.id}" tabindex="0" aria-label="開啟 ${escapeHtml(resident.name)} 住客檔案">
+              ${columns.map(column => `<td>${rosterCellMarkup(resident, column.key)}</td>`).join("")}
+            </tr>
+          `).join("")
+        : `<tr><td colspan="${columns.length}"><div class="roster-empty">沒有符合目前條件的住客。</div></td></tr>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function showResidentToast(message, error = false) {
+      const toast = document.getElementById("resident-toast");
+      toast.textContent = message;
+      toast.classList.toggle("error", error);
+      toast.classList.add("show");
+      clearTimeout(residentToastTimer);
+      residentToastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    function selectedChoices(field) {
+      const resident = residentData.find(item => item.id === currentResidentId);
+      return Array.isArray(resident?.[field]) ? resident[field] : [];
+    }
+
+    function renderMultiChoice(elementId, field, editable) {
+      const container = document.getElementById(elementId);
+      const selected = selectedChoices(field);
+      container.innerHTML = MULTI_CHOICE_OPTIONS[field].map(option => `
+        <button
+          type="button"
+          data-choice="${escapeHtml(option)}"
+          aria-pressed="${selected.includes(option)}"
+          ${editable ? "" : "disabled"}>${escapeHtml(option)}</button>
+      `).join("");
+    }
+
+    function syncLanguageOtherInput(editing = false) {
+      const input = document.getElementById("detail-language-other");
+      const selectedOther = Boolean(
+        document.querySelector('#detail-language button[data-choice="其他"][aria-pressed="true"]')
+      );
+      input.hidden = !selectedOther;
+      input.disabled = !editing || !selectedOther;
+    }
+
+    function sectionElement(sectionKey) {
+      return document.querySelector(`[data-detail-section="${sectionKey}"]`);
+    }
+
+    function setSectionEditing(sectionKey, editing) {
+      const section = sectionElement(sectionKey);
+      if (!section) return;
+      section.classList.toggle("is-editing", editing);
+      section.querySelectorAll("[data-edit-control]").forEach(control => {
+        control.disabled = !editing;
+      });
+      section.querySelectorAll("[data-multi-field]").forEach(container => {
+        const canEdit = editing && !container.hasAttribute("data-readonly-choice");
+        renderMultiChoice(container.id, container.dataset.multiField, canEdit);
+      });
+      if (sectionKey === "training") {
+        const activities = document.getElementById("detail-activities");
+        const activitiesInput = document.getElementById("detail-activities-input");
+        activities.hidden = editing;
+        activitiesInput.hidden = !editing;
+      }
+      if (sectionKey === "basic") syncLanguageOtherInput(editing);
+      const saveButton = section.querySelector(`[data-section-save="${sectionKey}"]`);
+      const cancelButton = section.querySelector(`[data-section-cancel="${sectionKey}"]`);
+      if (saveButton) saveButton.textContent = editing ? "儲存" : "編輯";
+      if (cancelButton) cancelButton.hidden = !editing;
+    }
+
+    function closeAllSections() {
+      document.querySelectorAll("[data-detail-section]").forEach(section => {
+        setSectionEditing(section.dataset.detailSection, false);
+      });
+    }
+
+    function calculateAge(dob) {
+      if (!dob) return "";
+      const birth = new Date(`${dob}T00:00:00`);
+      const today = new Date(`${TODAY_KEY}T00:00:00`);
+      if (Number.isNaN(birth.getTime())) return "";
+      let age = today.getFullYear() - birth.getFullYear();
+      const beforeBirthday =
+        today.getMonth() < birth.getMonth() ||
+        (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate());
+      if (beforeBirthday) age -= 1;
+      return String(Math.max(0, age));
+    }
+
+    // Prototype score bands for display. Production should use the validated
+    // HK-MoCA age and education norm table.
+    function mocaPercentileForScore(value) {
+      const score = Number.parseFloat(String(value || "").split("/")[0]);
+      if (!Number.isFinite(score)) return "—";
+      if (score >= 26) return ">16th";
+      if (score >= 22) return "≤16th";
+      if (score >= 18) return "≤7th";
+      return "≤2nd";
+    }
+
+    function parseDateKey(value) {
+      const [year, month, day] = String(value).split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function toDateKey(date) {
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function addDaysToKey(value, days) {
+      const date = parseDateKey(value);
+      date.setDate(date.getDate() + days);
+      return toDateKey(date);
+    }
+
+    function addMonthsToKey(value, months) {
+      const date = parseDateKey(value);
+      date.setMonth(date.getMonth() + months);
+      return toDateKey(date);
+    }
+
+    function icpIntervalMonths(value) {
+      return value === "1個月" ? 1 : value === "1年" ? 12 : 6;
+    }
+
+    function icpHistoryFor(resident) {
+      const interval = icpIntervalMonths(resident.icpType);
+      const currentCompletion = ASSESSMENT_COMPLETION[resident.id] || {
+        ot: resident.icpState !== "待評估",
+        pt: resident.icpState !== "待評估"
+      };
+      return Array.from({ length: 8 }, (_, index) => {
+        const meetingDate = addMonthsToKey(resident.lastIcp, -index * interval);
+        const dueDate = index === 0
+          ? resident.icpDue
+          : addMonthsToKey(meetingDate, interval);
+        const otComplete = index === 0 ? currentCompletion.ot : true;
+        const ptComplete = index === 0 ? currentCompletion.pt : true;
+        const status = index === 0
+          ? !otComplete && !ptComplete
+            ? "待評估"
+            : !otComplete || !ptComplete
+              ? "評估中"
+              : resident.icpState
+          : "已完成";
+        return {
+          meetingDate,
+          dueDate,
+          assessmentWindow: `${slashDate(addDaysToKey(meetingDate, -15))}–${slashDate(addDaysToKey(meetingDate, -1))}`,
+          linkedAssessment: `016-${resident.bed}-${meetingDate.slice(2, 4)}${meetingDate.slice(5, 7)}`,
+          otComplete,
+          ptComplete,
+          status
+        };
+      });
+    }
+
+    function nextIcpAssessmentWindow(resident) {
+      if (!resident.icpDue) return null;
+      const due = parseDateKey(resident.icpDue);
+      const day = due.getDate();
+      let start;
+      let end;
+      if (day <= 15) {
+        const previousMonthEnd = new Date(due.getFullYear(), due.getMonth(), 0);
+        start = new Date(previousMonthEnd);
+        start.setDate(16);
+        end = previousMonthEnd;
+      } else {
+        start = new Date(due.getFullYear(), due.getMonth(), 1);
+        end = new Date(due.getFullYear(), due.getMonth(), 15);
+      }
+      return {
+        start: toDateKey(start),
+        end: toDateKey(due),
+        dueDate: resident.icpDue
+      };
+    }
+
+    function residentHospitalStates(resident) {
+      const hospitalEvent = [...resident.timeline]
+        .reverse()
+        .find(([label]) => label === "留醫中");
+      if (!hospitalEvent) return [];
+      const dischargeEvent = resident.timeline.find(([label, date]) =>
+        ["出院", "退住"].includes(label) && date >= hospitalEvent[1]
+      );
+      const end = dischargeEvent
+        ? addDaysToKey(dischargeEvent[1], -1)
+        : TODAY_KEY;
+      return [{
+          type: "hospital",
+          label: resident.status === "hospital" ? "留醫中" : "留醫紀錄",
+          start: hospitalEvent[1],
+          end
+      }];
+    }
+
+    function residentRecordStates(resident) {
+      const states = [...residentHospitalStates(resident)];
+      const window = nextIcpAssessmentWindow(resident);
+      if (window) {
+        states.push({
+          type: "icp-window",
+          label: "ICP 評估窗口",
+          start: window.start,
+          end: window.end,
+          detail: `ICP 限期 ${slashDate(window.dueDate)}`
+        });
+      }
+      return states;
+    }
+
+    function residentRecordEvents(resident) {
+      const timelineTypes = {
+        "入院": "admission",
+        "留醫中": "hospital",
+        "退住": "discharge"
+      };
+      const events = resident.timeline
+        .filter(([title]) => title !== "最近更新")
+        .filter(([title]) => title !== "留醫中")
+        .map(([title, date]) => ({
+          date,
+          type: timelineTypes[title] || "status",
+          title,
+          detail: "住客狀態變更"
+        }));
+      events.push({
+        date: resident.lastAssessment,
+        type: "assessment",
+        title: "016 評估完成",
+        detail: `MBI ${resident.mbi} · HK-MoCA ${resident.moca}`
+      });
+      icpHistoryFor(resident).forEach(item => {
+        events.push({
+          date: item.meetingDate,
+          type: "icp",
+          title: "ICP 會議",
+          detail: `限期 ${slashDate(item.dueDate)} · ${item.status}`
+        });
+      });
+      events.push({
+        date: resident.icpDue,
+        type: "icp",
+        title: "ICP 限期",
+        detail: resident.icpState
+      });
+      const hospitalStates = residentHospitalStates(resident);
+      (TRAINING_EVENT_DATES[resident.id] || []).forEach(slot => {
+        const duringHospital = hospitalStates.some(state =>
+          slot.date >= state.start && slot.date <= state.end
+        );
+        if (duringHospital) return;
+        events.push({
+          date: slot.date,
+          time: slot.time,
+          type: "training",
+          title: "訓練",
+          detail: resident.activities.split(" · ")[0] || "已安排訓練"
+        });
+      });
+      if (resident.manualStatusLabel) {
+        events.push({
+          date: TODAY_KEY,
+          type: "status",
+          title: resident.manualStatusLabel,
+          detail: "手動狀態標籤"
+        });
+      }
+      return events
+        .sort((a, b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`))
+        .map((event, index) => ({ ...event, id: `${resident.id}-event-${index}` }));
+    }
+
+    function eventMatchesFilter(event) {
+      if (recordFilter === "all") return true;
+      if (recordFilter === "status") {
+        return ["admission", "discharge", "status"].includes(event.type);
+      }
+      return event.type === recordFilter;
+    }
+
+    function stateMatchesFilter(state) {
+      if (recordFilter === "all") return true;
+      if (recordFilter === "icp") return state.type === "icp-window";
+      if (recordFilter === "status" || recordFilter === "hospital") {
+        return state.type === "hospital";
+      }
+      return false;
+    }
+
+    function renderIcpHistory(resident) {
+      const list = document.getElementById("icp-history-list");
+      const history = icpHistoryFor(resident).slice(1);
+      const visible = icpHistoryExpanded ? history : history.slice(0, 5);
+      const hiddenCount = history.length - 5;
+      list.innerHTML = visible.map(item => `
+        <div class="icp-history-row">
+          <div>
+            <strong>${slashDate(item.meetingDate)}</strong>
+          </div>
+          <div>
+            <strong>${escapeHtml(item.linkedAssessment)}</strong>
+            <small>ICP Ax</small>
+          </div>
+          <span class="icp-history-state">下次 ${escapeHtml(resident.icpType)} · ${slashDate(item.dueDate)}</span>
+        </div>
+      `).join("") + (history.length > 5
+        ? `<button class="icp-history-more" type="button" data-action="show-more-icp">${icpHistoryExpanded ? "收起" : `顯示更多（${hiddenCount}）`}</button>`
+        : "");
+    }
+
+    function setIcpView(view) {
+      currentIcpView = view === "history" ? "history" : "current";
+      document.querySelectorAll("[data-icp-view]").forEach(button => {
+        const active = button.dataset.icpView === currentIcpView;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+      });
+      document.getElementById("icp-current-view").hidden = currentIcpView !== "current";
+      document.getElementById("icp-history-view").hidden = currentIcpView !== "history";
+      const section = sectionElement("icp");
+      if (currentIcpView === "history") setSectionEditing("icp", false);
+      section.querySelector('[data-section-save="icp"]').hidden = currentIcpView === "history";
+      section.querySelector('[data-section-cancel="icp"]').hidden = true;
+      document.getElementById("summary-open-icp").hidden = false;
+    }
+
+    function recordEventLabel(event) {
+      if (event.type === "training") return `${event.title} · ${event.detail}`;
+      return event.title;
+    }
+
+    function hideRecordEventPopover() {
+      document.getElementById("record-event-popover").hidden = true;
+    }
+
+    function showRecordEventPopover(anchor, content) {
+      const popover = document.getElementById("record-event-popover");
+      popover.innerHTML = content;
+      popover.hidden = false;
+      const rect = anchor.getBoundingClientRect();
+      const width = Math.min(300, window.innerWidth - 24);
+      popover.style.width = `${width}px`;
+      popover.style.left = `${Math.max(12, Math.min(rect.left, window.innerWidth - width - 12))}px`;
+      popover.style.top = `${rect.bottom + 6}px`;
+      const popRect = popover.getBoundingClientRect();
+      if (popRect.bottom > window.innerHeight - 12) {
+        popover.style.top = `${Math.max(12, rect.top - popRect.height - 6)}px`;
+      }
+    }
+
+    function renderRecordCalendar(resident) {
+      hideRecordEventPopover();
+      const year = recordMonth.getFullYear();
+      const month = recordMonth.getMonth();
+      document.getElementById("record-month-label").textContent =
+        `${year} 年 ${month + 1} 月`;
+      document.querySelectorAll("[data-record-filter]").forEach(button => {
+        button.classList.toggle("active", button.dataset.recordFilter === recordFilter);
+      });
+
+      const allEvents = residentRecordEvents(resident).filter(eventMatchesFilter);
+      const activeStates = residentRecordStates(resident).filter(stateMatchesFilter);
+      const eventsByDate = new Map();
+      allEvents.forEach(event => {
+        if (!eventsByDate.has(event.date)) eventsByDate.set(event.date, []);
+        eventsByDate.get(event.date).push(event);
+      });
+
+      const calendar = document.getElementById("record-calendar");
+      const isAgenda = window.matchMedia("(max-width: 700px)").matches;
+      calendar.classList.toggle("agenda", isAgenda);
+      const weekdays = ["一", "二", "三", "四", "五", "六", "日"];
+      const dates = [];
+      if (isAgenda) {
+        const selected = parseDateKey(recordSelectedDate);
+        const mondayOffset = (selected.getDay() + 6) % 7;
+        const weekStart = new Date(selected);
+        weekStart.setDate(selected.getDate() - mondayOffset);
+        for (let index = 0; index < 7; index += 1) {
+          const date = new Date(weekStart);
+          date.setDate(weekStart.getDate() + index);
+          dates.push(date);
+        }
+      } else {
+        const first = new Date(year, month, 1);
+        const mondayOffset = (first.getDay() + 6) % 7;
+        const gridStart = new Date(year, month, 1 - mondayOffset);
+        for (let index = 0; index < 42; index += 1) {
+          const date = new Date(gridStart);
+          date.setDate(gridStart.getDate() + index);
+          dates.push(date);
+        }
+      }
+
+      const cells = isAgenda
+        ? []
+        : weekdays.map(day => `<div class="record-weekday">${day}</div>`);
+      dates.forEach(date => {
+        const key = toDateKey(date);
+        const dayEvents = eventsByDate.get(key) || [];
+        const icpDeadlineEvent = dayEvents.find(event => (
+          event.type === "icp" && event.title === "ICP 限期"
+        ));
+        const regularDayEvents = dayEvents.filter(event => event !== icpDeadlineEvent);
+        const dayStates = activeStates.filter(state =>
+          key >= state.start && key <= state.end
+        );
+        const classes = [
+          "record-day",
+          date.getMonth() !== month ? "other-month" : "",
+          key === TODAY_KEY ? "today" : ""
+        ].filter(Boolean).join(" ");
+        const weekday = weekdays[(date.getDay() + 6) % 7];
+        const headerLabel = isAgenda
+          ? `${date.getMonth() + 1}/${date.getDate()} 週${weekday}`
+          : String(date.getDate());
+        cells.push(`
+          <article class="${classes}">
+            <div class="record-day-header">
+              <span class="record-day-number">${headerLabel}</span>
+              ${dayEvents.length ? `<span class="record-day-count">${dayEvents.length} 項</span>` : ""}
+            </div>
+            ${dayStates.length ? `
+              <div class="record-state-stack">
+                ${dayStates.map(state => {
+                  if (state.type === "icp-window" && icpDeadlineEvent) {
+                    return `
+                      <div class="record-icp-aligned">
+                        <div class="record-state-bar icp-window ${key === state.start ? "start" : ""}">
+                          ${key === state.start ? escapeHtml(state.label) : ""}
+                        </div>
+                        <button class="record-event-chip icp record-icp-deadline-chip" type="button"
+                          data-record-event="${icpDeadlineEvent.id}"
+                          title="${escapeHtml(icpDeadlineEvent.detail)}"
+                          aria-label="開啟 ${escapeHtml(recordEventLabel(icpDeadlineEvent))}">
+                          <span class="event-label">${escapeHtml(recordEventLabel(icpDeadlineEvent))}</span>
+                        </button>
+                      </div>
+                    `;
+                  }
+                  return `${state.type === "hospital"
+                    ? `<button
+                        class="record-state-bar ${state.type} ${key === state.start ? "start" : ""}"
+                        type="button"
+                        data-record-hospital="${state.start}"
+                        title="${escapeHtml(state.label)} · 點擊查看 007 留醫紀錄"
+                        aria-label="${escapeHtml(state.label)}，查看 007 留醫紀錄">
+                        ${key === state.start ? escapeHtml(state.label) : ""}
+                      </button>`
+                    : `<div
+                        class="record-state-bar ${state.type} ${key === state.start ? "start" : ""}"
+                        title="${escapeHtml(state.label)}${state.detail ? ` · ${escapeHtml(state.detail)}` : ""}">
+                        ${key === state.start ? escapeHtml(state.label) : ""}
+                      </div>`}
+                `;
+                }).join("")}
+              </div>
+            ` : ""}
+            <div class="record-event-stack">
+              ${regularDayEvents.map(event => `
+                <button class="record-event-chip ${event.type}" type="button" data-record-event="${event.id}" title="${escapeHtml(event.detail)}" aria-label="開啟 ${escapeHtml(recordEventLabel(event))}">
+                  <span class="event-label">
+                    ${event.time ? `<span class="event-time">${escapeHtml(event.time)}</span>` : ""}
+                    ${escapeHtml(recordEventLabel(event))}
+                  </span>
+                </button>
+              `).join("")}
+            </div>
+          </article>
+        `);
+      });
+      calendar.innerHTML = cells.join("");
+    }
+
+    function calculateIcpDue(lastIcp, icpType) {
+      if (!lastIcp || !icpType) return "";
+      const due = new Date(`${lastIcp}T00:00:00`);
+      if (Number.isNaN(due.getTime())) return "";
+      const months = icpType === "1個月" ? 1 : icpType === "1年" ? 12 : 6;
+      due.setMonth(due.getMonth() + months);
+      return [
+        due.getFullYear(),
+        String(due.getMonth() + 1).padStart(2, "0"),
+        String(due.getDate()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function trainingFrequencyForPlace(place) {
+      return place === "券位" || place === "買位" ? "2次/星期" : "2次/月";
+    }
+
+    function trainingNeed(resident) {
+      return Number.parseInt(String(resident.trainingFrequency).match(/\d+/)?.[0] || "0", 10);
+    }
+
+    function trainingProgress(resident) {
+      const fallback = DEFAULT_TRAINING_COUNTS[resident.id] || { week: 0, total: 0 };
+      const fallbackCount = resident.trainingFrequency.includes("星期")
+        ? fallback.week
+        : fallback.total;
+      try {
+        const stored = JSON.parse(localStorage.getItem(OT_MOCK_STORAGE_KEYS.trainingSchedule));
+        if (!Array.isArray(stored?.sessions)) {
+          const need = trainingNeed(resident);
+          return need ? `${fallbackCount} / ${need} 節` : "";
+        }
+        const residentSessions = stored.sessions.filter(session =>
+          session.memberIds?.includes(resident.id)
+        );
+        const count = resident.trainingFrequency.includes("星期")
+          ? residentSessions.filter(session => session.week === 3).length
+          : residentSessions.length;
+        const need = trainingNeed(resident);
+        return need ? `${count} / ${need} 節` : "";
+      } catch (error) {
+        const need = trainingNeed(resident);
+        return need ? `${fallbackCount} / ${need} 節` : "";
+      }
+    }
+
+    function orientationMarkup(resident) {
+      return [
+        ["時", resident.orientationTime],
+        ["地", resident.orientationPlace],
+        ["人", resident.orientationPerson]
+      ].map(([label, value]) => {
+        const display = value || "未記錄";
+        const stateClass = value === "v" ? "positive" : value === "x" ? "negative" : "";
+        return `
+          <div class="orientation-cell">
+            <span>${label}</span>
+            <strong class="${stateClass}">${escapeHtml(display)}</strong>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderTrainingAction(resident) {
+      const weekly = resident.trainingFrequency.includes("星期");
+      const hospitalised = residentHospitalStates(resident).some(state =>
+        TODAY_KEY >= state.start && TODAY_KEY <= state.end
+      );
+      document.getElementById("summary-training-label").textContent =
+        hospitalised ? "留醫期間暫停訓練" : weekly ? "查看本週安排" : "查看本月安排";
+      document.getElementById("summary-training-progress").textContent =
+        hospitalised ? "" : trainingProgress(resident);
+      const button = document.getElementById("summary-open-training");
+      button.disabled = resident.status === "discharged" || hospitalised;
+      button.title = hospitalised
+        ? "留醫期間不可安排訓練"
+        : button.disabled
+          ? "退住住客不設訓練安排"
+          : "";
+    }
+
+    function renderResidentDetail() {
+      const resident = residentData.find(item => item.id === currentResidentId) || residentData[0];
+      if (!resident) return;
+      document.getElementById("summary-bed").textContent = resident.bed;
+      document.getElementById("summary-name").textContent = resident.name;
+      document.getElementById("summary-status").textContent = resident.statusLabel;
+      document.getElementById("summary-infection").textContent = resident.infection || "Nil";
+      document.getElementById("summary-mobility").textContent = resident.mobility;
+      document.getElementById("summary-icp").textContent = slashDate(resident.icpDue);
+      document.getElementById("discharge-resident-button").hidden = resident.status === "discharged";
+      document.getElementById("cancel-discharge-button").hidden = resident.status !== "discharged";
+      const parsedBed = OT_PROTOTYPE.parseBedCode(resident.bed);
+      document.getElementById("detail-floor").value = parsedBed?.floorLetter || "A";
+      document.getElementById("detail-bed").value = parsedBed?.bedNumber || "";
+      document.getElementById("detail-bed-history").textContent =
+        (resident.bedHistory || []).slice(-3).reverse().map(entry => (
+          `${slashDate(entry.effectiveDate)} ${entry.from ? `${entry.from} → ` : ""}${entry.to}`
+        )).join(" · ") || "尚無床位變更";
+      document.getElementById("detail-sex").value = resident.sex;
+      document.getElementById("detail-dob").value = resident.dob;
+      document.getElementById("detail-age").textContent = resident.age;
+      document.getElementById("detail-education").value = resident.education;
+      document.getElementById("detail-place").value = resident.place;
+      document.getElementById("detail-mbi").textContent = resident.mbi;
+      document.getElementById("detail-moca").textContent = resident.moca;
+      document.getElementById("detail-moca-percentile").textContent =
+        `Percentile ${mocaPercentileForScore(resident.moca)}`;
+      document.getElementById("detail-mobility").textContent = resident.mobility;
+      document.getElementById("detail-ax-code").textContent =
+        resident.lastAssessmentCode || `AX-${resident.bed}-${resident.lastAssessment.slice(2, 4)}${resident.lastAssessment.slice(5, 7)}`;
+      document.getElementById("detail-ax-date").textContent = slashDate(resident.lastAssessment);
+      document.getElementById("detail-ax-purpose").textContent =
+        resident.lastAssessmentPurpose || (resident.icpState === "待評估" ? "Initial Ax" : "Re-Ax · ICP Ax");
+      document.getElementById("detail-history").textContent = resident.history;
+      document.getElementById("detail-orientation").innerHTML = orientationMarkup(resident);
+      document.getElementById("detail-last-icp").value = resident.lastIcp;
+      document.getElementById("detail-icp-type").value = resident.icpType;
+      document.getElementById("detail-next-icp").value = resident.icpDue;
+      document.getElementById("detail-training-frequency").textContent = resident.trainingFrequency;
+      document.getElementById("detail-extra-services").value = resident.extraServices;
+      document.getElementById("detail-activities").textContent = resident.activities;
+      document.getElementById("detail-activities-input").value = resident.activities;
+      document.getElementById("detail-language-other").value = resident.languageOther || "";
+      document.getElementById("summary-status-input").value = resident.manualStatusLabel || "";
+      renderMultiChoice("detail-infection", "infectionList", sectionElement("clinical").classList.contains("is-editing"));
+      renderMultiChoice("detail-language", "language", sectionElement("basic").classList.contains("is-editing"));
+      renderMultiChoice("detail-receptive", "receptive", false);
+      renderMultiChoice("detail-expressive", "expressive", false);
+      syncLanguageOtherInput(sectionElement("basic").classList.contains("is-editing"));
+      renderTrainingAction(resident);
+      renderIcpHistory(resident);
+      setIcpView(currentIcpView);
+      renderRecordCalendar(resident);
+    }
+
+    function openResident(residentId) {
+      currentResidentId = residentId;
+      currentIcpView = "current";
+      icpHistoryExpanded = false;
+      recordFilter = "all";
+      recordMonth = new Date(2026, 9, 1);
+      const resident = residentData.find(item => item.id === residentId);
+      const monthEvents = resident
+        ? residentRecordEvents(resident).filter(event => event.date.startsWith("2026-10"))
+        : [];
+      recordSelectedDate = monthEvents.at(-1)?.date || TODAY_KEY;
+      closeAllSections();
+      renderResidentDetail();
+      showScreen("detail");
+    }
+
+    function basicDraftFromInputs() {
+      const resident = residentData.find(item => item.id === currentResidentId);
+      if (!resident) return null;
+      const floorLetter = document.getElementById("detail-floor").value;
+      const bedNumber = document.getElementById("detail-bed").value
+        .toUpperCase()
+        .replace(/[^0-9A-Z]/g, "")
+        .slice(0, 8);
+      const parsedBed = OT_PROTOTYPE.parseBedCode(`${floorLetter}${bedNumber}`);
+      if (!parsedBed) {
+        showResidentToast("床位號碼必須以數字開始，可有一個結尾字母。", true);
+        document.getElementById("detail-bed").focus();
+        return null;
+      }
+      const dob = document.getElementById("detail-dob").value;
+      const language = [...document.querySelectorAll("#detail-language button[aria-pressed='true']")]
+        .map(button => button.dataset.choice);
+      return {
+        residentId: resident.id,
+        expectedResidentVersion: resident.version || 1,
+        originalBedCode: resident.bed,
+        targetBedCode: parsedBed.bedCode,
+        patch: {
+          sex: document.getElementById("detail-sex").value,
+          dob,
+          age: calculateAge(dob),
+          education: document.getElementById("detail-education").value,
+          place: document.getElementById("detail-place").value,
+          language,
+          languageOther: language.includes("其他")
+            ? document.getElementById("detail-language-other").value.trim()
+            : "",
+          trainingFrequency: trainingFrequencyForPlace(document.getElementById("detail-place").value)
+        }
+      };
+    }
+
+    function persistBasicDraft(draft) {
+      OT_PROTOTYPE.updateResident(draft.residentId, draft.patch, "修改住客基本資料");
+      setSectionEditing("basic", false);
+      refreshResidentData();
+      renderResidentDetail();
+      renderRoster();
+      showResidentToast("住客資料已更新。");
+    }
+
+    function completeBedResolution(moves) {
+      const draft = pendingBedResolution;
+      if (!draft) return;
+      try {
+        const result = OT_PROTOTYPE.moveResidents(moves, { effectiveDate: TODAY_KEY });
+        persistBasicDraft(draft);
+        if (result.groupConflicts?.length) {
+          showResidentToast(
+            `調床完成，但 ${result.groupConflicts.length} 個已編排小組現時跨樓層，請到 006 處理。`,
+            true
+          );
+        }
+        pendingBedResolution = null;
+        document.getElementById("bed-conflict-dialog").close();
+        document.getElementById("bed-rotation-dialog").close();
+      } catch (error) {
+        const target = document.getElementById("bed-conflict-dialog").open
+          ? document.getElementById("bed-conflict-error")
+          : document.getElementById("bed-rotation-error");
+        target.textContent = error.message;
+        target.hidden = false;
+      }
+    }
+
+    function beginBasicSave() {
+      const draft = basicDraftFromInputs();
+      if (!draft) return;
+      if (draft.targetBedCode === draft.originalBedCode) {
+        try {
+          persistBasicDraft(draft);
+        } catch (error) {
+          showResidentToast(error.message, true);
+        }
+        return;
+      }
+      const occupant = OT_PROTOTYPE.residents({ includeDischarged: false }).find(resident => (
+        resident.id !== draft.residentId &&
+        resident.bed === draft.targetBedCode
+      ));
+      if (!occupant) {
+        try {
+          OT_PROTOTYPE.moveResidents([{
+            residentId: draft.residentId,
+            targetBedCode: draft.targetBedCode,
+            expectedResidentVersion: draft.expectedResidentVersion
+          }], { effectiveDate: TODAY_KEY });
+          persistBasicDraft(draft);
+        } catch (error) {
+          showResidentToast(error.message, true);
+        }
+        return;
+      }
+      pendingBedResolution = { ...draft, occupant };
+      document.getElementById("bed-conflict-copy").textContent =
+        `${draft.targetBedCode} 現由 ${occupant.name} 使用。可交換床位，或把佔用者加入多人調床。`;
+      document.getElementById("bed-conflict-error").hidden = true;
+      document.getElementById("bed-conflict-dialog").showModal();
+    }
+
+    function saveSection(sectionKey, options = {}) {
+      const resident = residentData.find(item => item.id === currentResidentId);
+      if (!resident) return;
+
+      if (sectionKey === "basic") {
+        beginBasicSave();
+        return;
+      }
+
+      if (sectionKey === "clinical") {
+        resident.infectionList = [...document.querySelectorAll("#detail-infection button[aria-pressed='true']")]
+          .map(button => button.dataset.choice);
+        resident.infection = resident.infectionList.join(" · ") || "Nil";
+      }
+
+      if (sectionKey === "icp") {
+        resident.lastIcp = document.getElementById("detail-last-icp").value;
+        resident.icpType = document.getElementById("detail-icp-type").value;
+        resident.icpDue = document.getElementById("detail-next-icp").value ||
+          calculateIcpDue(resident.lastIcp, resident.icpType);
+      }
+
+      if (sectionKey === "training") {
+        const extraServices = Number.parseInt(document.getElementById("detail-extra-services").value, 10);
+        const activities = document.getElementById("detail-activities-input").value.trim();
+        const changed = activities !== resident.activities;
+        if (changed && !options.suggestionScope) {
+          pendingTrainingSave = { residentId: resident.id, activities, extraServices };
+          document.getElementById("training-scope-dialog").showModal();
+          return;
+        }
+        resident.extraServices = String(Number.isFinite(extraServices) ? Math.max(0, extraServices) : 0);
+        resident.activities = activities;
+        resident.suggestionEditScope = options.suggestionScope || resident.suggestionEditScope;
+      }
+
+      try {
+        OT_PROTOTYPE.updateResident(resident.id, resident);
+        if (sectionKey === "icp") {
+          const cycle = OT_PROTOTYPE.cycles().find(item => item.residentId === resident.id && !item.endedAt);
+          if (cycle) {
+            OT_PROTOTYPE.updateCycle(cycle.id, {
+              dueDate: resident.icpDue,
+              nextIcpType: resident.icpType,
+              icpDate: resident.lastIcp
+            });
+          }
+        }
+        if (sectionKey === "training" && options.suggestionScope === "ax") {
+          const latest = OT_PROTOTYPE.assessments(resident.id)
+            .filter(record => record.status === "completed")
+            .sort((left, right) => right.date.localeCompare(left.date))[0];
+          if (latest) {
+            OT_PROTOTYPE.updateAssessment(latest.id, {
+              clinical: {
+                ...(latest.clinical || {}),
+                activities: resident.activities,
+                extraServices: resident.extraServices
+              }
+            }, "修改評估建議活動");
+          }
+        }
+      } catch (error) {
+        showResidentToast(error.message, true);
+        return;
+      }
+
+      setSectionEditing(sectionKey, false);
+      refreshResidentData();
+      renderResidentDetail();
+      renderRoster();
+      showResidentToast("住客資料已更新。");
+    }
+
+    function openAssessmentForResident() {
+      const resident = residentData.find(item => item.id === currentResidentId);
+      if (!resident) return;
+      const params = new URLSearchParams({
+        embed: "1", mode: "session", origin: "reassessment",
+        residentId: resident.id, v: "resident-session"
+      });
+      window.location.href = `../assessment/paper-aligned.html?${params.toString()}`;
+    }
+
+    function openLatestAssessment() {
+      const resident = residentData.find(item => item.id === currentResidentId);
+      if (!resident) return;
+      const params = new URLSearchParams({
+        embed: "1",
+        residentId: resident.id,
+        view: "ax-list",
+        v: "resident-ax-list"
+      });
+      window.location.href = `../assessment/paper-aligned.html?${params.toString()}`;
+    }
+
+    function recordEventNavigation(recordEvent) {
+      if (!recordEvent) return null;
+      if (recordEvent.type === "assessment") {
+        return { label: "查看 Ax 檔案", action: "assessment" };
+      }
+      if (recordEvent.type === "training") {
+        return { label: "查看 006 安排", action: "training" };
+      }
+      if (recordEvent.type === "icp") {
+        return { label: "查看 ICP 歷史", action: "icp" };
+      }
+      if (["admission", "discharge", "status", "hospital"].includes(recordEvent.type)) {
+        return { label: "查看住客狀態", action: "resident" };
+      }
+      return null;
+    }
+
+    function openResidentRecords(date = null) {
+      const resident = residentData.find(item => item.id === currentResidentId);
+      if (!resident) return;
+      const params = new URLSearchParams({
+        embed: "1",
+        residentId: resident.id,
+        v: "resident-record-focus"
+      });
+      if (date) params.set("date", date);
+      const source = `records/index.html?${params.toString()}`;
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: "ot-open-module", module: "records", source }, "*");
+      } else {
+        window.location.href = `../${source}`;
+      }
+    }
+
+    function openRecordEventDestination(recordEvent) {
+      const navigation = recordEventNavigation(recordEvent);
+      if (!navigation) return false;
+      if (navigation.action === "assessment") {
+        openLatestAssessment();
+      } else if (navigation.action === "training") {
+        openResidentTraining();
+      } else if (navigation.action === "icp") {
+        setIcpView("history");
+        sectionElement("icp").scrollIntoView({ block: "start", behavior: "smooth" });
+      } else {
+        document.querySelector(".resident-summary-card")
+          ?.scrollIntoView({ block: "start", behavior: "smooth" });
+        if (recordEvent.type === "status") {
+          document.getElementById("summary-status-input")?.focus({ preventScroll: true });
+        }
+      }
+      return true;
+    }
+
+    document.getElementById("resident-table-body").addEventListener("click", event => {
+      const row = event.target.closest("tr[data-resident-id]");
+      if (row) openResident(row.dataset.residentId);
+    });
+    document.getElementById("resident-table-body").addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const row = event.target.closest("tr[data-resident-id]");
+      if (!row) return;
+      event.preventDefault();
+      openResident(row.dataset.residentId);
+    });
+
+    const rosterTableHead = document.getElementById("roster-table-head");
+    rosterTableHead.addEventListener("click", event => {
+      const sortButton = event.target.closest("[data-roster-sort]");
+      if (!sortButton) return;
+      const key = sortButton.dataset.rosterSort;
+      rosterSort = {
+        key,
+        direction:
+          rosterSort.key === key && rosterSort.direction === "ascending"
+            ? "descending"
+            : "ascending"
+      };
+      saveRosterPreferences();
+      renderRoster();
+    });
+
+    let rosterResize = null;
+    rosterTableHead.addEventListener("pointerdown", event => {
+      const handle = event.target.closest("[data-column-resize]");
+      if (!handle) return;
+      event.preventDefault();
+      const key = handle.dataset.columnResize;
+      const columns = rosterVisibleDefinitions();
+      const columnIndex = columns.findIndex(column => column.key === key);
+      const nextColumn = columns[columnIndex + 1];
+      rosterResize = {
+        key,
+        nextKey: nextColumn?.key || null,
+        startX: event.clientX,
+        startWidth: rosterColumnWidths[key],
+        nextStartWidth: nextColumn ? rosterColumnWidths[nextColumn.key] : null
+      };
+      document.body.classList.add("roster-resizing");
+      handle.focus({ preventScroll: true });
+    });
+
+    document.addEventListener("pointermove", event => {
+      if (!rosterResize) return;
+      const column = rosterColumnByKey.get(rosterResize.key);
+      const nextColumn = rosterColumnByKey.get(rosterResize.nextKey);
+      let delta = Math.round(event.clientX - rosterResize.startX);
+      delta = Math.max(column.minWidth - rosterResize.startWidth, delta);
+      if (nextColumn) {
+        delta = Math.min(
+          rosterResize.nextStartWidth - nextColumn.minWidth,
+          delta
+        );
+      }
+      rosterColumnWidths[rosterResize.key] = rosterResize.startWidth + delta;
+      if (nextColumn) {
+        rosterColumnWidths[nextColumn.key] = rosterResize.nextStartWidth - delta;
+      }
+      applyRosterColumnWidths();
+      document.querySelector(`[data-column-resize="${rosterResize.key}"]`)
+        ?.setAttribute("aria-valuenow", String(rosterColumnWidths[rosterResize.key]));
+    });
+
+    document.addEventListener("pointerup", () => {
+      if (!rosterResize) return;
+      rosterResize = null;
+      document.body.classList.remove("roster-resizing");
+      saveRosterPreferences();
+    });
+
+    rosterTableHead.addEventListener("keydown", event => {
+      const handle = event.target.closest("[data-column-resize]");
+      if (!handle || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
+      event.preventDefault();
+      const key = handle.dataset.columnResize;
+      const column = rosterColumnByKey.get(key);
+      const columns = rosterVisibleDefinitions();
+      const nextColumn = columns[columns.findIndex(item => item.key === key) + 1];
+      const delta = event.key === "ArrowRight" ? 12 : -12;
+      const boundedDelta = Math.max(
+        column.minWidth - rosterColumnWidths[key],
+        nextColumn ? Math.min(rosterColumnWidths[nextColumn.key] - nextColumn.minWidth, delta) : delta
+      );
+      rosterColumnWidths[key] = rosterColumnWidths[key] + boundedDelta;
+      if (nextColumn) {
+        rosterColumnWidths[nextColumn.key] = rosterColumnWidths[nextColumn.key] - boundedDelta;
+      }
+      applyRosterColumnWidths();
+      handle.setAttribute("aria-valuenow", String(rosterColumnWidths[key]));
+      saveRosterPreferences();
+    });
+
+    const rosterColumnsToggle = document.getElementById("roster-columns-toggle");
+    const rosterColumnsMenu = document.getElementById("roster-columns-menu");
+    let draggedRosterColumn = null;
+
+    function setRosterColumnsMenuOpen(open) {
+      rosterColumnsMenu.hidden = !open;
+      rosterColumnsToggle.setAttribute("aria-expanded", String(open));
+    }
+
+    rosterColumnsToggle.addEventListener("click", () => {
+      setRosterColumnsMenuOpen(rosterColumnsMenu.hidden);
+    });
+
+    rosterColumnsMenu.addEventListener("change", event => {
+      const checkbox = event.target.closest("[data-roster-column]");
+      if (!checkbox) return;
+      const key = checkbox.dataset.rosterColumn;
+      const selected = new Set(rosterVisibleColumns);
+      if (checkbox.checked) selected.add(key);
+      else selected.delete(key);
+      rosterVisibleColumns = ROSTER_COLUMNS
+        .map(column => column.key)
+        .filter(columnKey => selected.has(columnKey) || rosterColumnByKey.get(columnKey).required);
+      saveRosterPreferences();
+      renderRoster();
+      renderRosterColumnMenu();
+    });
+
+    rosterColumnsMenu.addEventListener("dragstart", event => {
+      const option = event.target.closest("[data-column-option]");
+      if (!option) return;
+      draggedRosterColumn = option.dataset.columnOption;
+      event.dataTransfer.effectAllowed = "move";
+    });
+    rosterColumnsMenu.addEventListener("dragover", event => {
+      if (!draggedRosterColumn || !event.target.closest("[data-column-option]")) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+    });
+    rosterColumnsMenu.addEventListener("drop", event => {
+      const target = event.target.closest("[data-column-option]");
+      if (!target || !draggedRosterColumn || target.dataset.columnOption === draggedRosterColumn) return;
+      event.preventDefault();
+      const next = rosterVisibleColumns.filter(key => key !== draggedRosterColumn);
+      const targetIndex = next.indexOf(target.dataset.columnOption);
+      next.splice(Math.max(0, targetIndex), 0, draggedRosterColumn);
+      rosterVisibleColumns = [...new Set(["resident", ...next])]
+        .filter(key => rosterColumnByKey.has(key));
+      draggedRosterColumn = null;
+      saveRosterPreferences();
+      renderRoster();
+      renderRosterColumnMenu();
+    });
+    rosterColumnsMenu.addEventListener("dragend", () => {
+      draggedRosterColumn = null;
+    });
+
+    rosterColumnsMenu.addEventListener("click", event => {
+      if (!event.target.closest("#reset-roster-columns")) return;
+      rosterVisibleColumns = [...ROSTER_DEFAULT_COLUMNS];
+      saveRosterPreferences();
+      renderRoster();
+      renderRosterColumnMenu();
+    });
+
+    document.addEventListener("click", event => {
+      if (rosterColumnsMenu.hidden || event.target.closest(".roster-view-tools")) return;
+      setRosterColumnsMenuOpen(false);
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Escape" || rosterColumnsMenu.hidden) return;
+      setRosterColumnsMenuOpen(false);
+      rosterColumnsToggle.focus();
+    });
+
+    ["roster-search", "filter-floor", "filter-place", "filter-status", "filter-icp"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderRoster);
+      document.getElementById(id).addEventListener("change", renderRoster);
+    });
+    document.getElementById("reset-roster-filters").addEventListener("click", () => {
+      document.getElementById("roster-search").value = "";
+      document.getElementById("filter-floor").value = "all";
+      document.getElementById("filter-place").value = "all";
+      document.getElementById("filter-status").value = "all";
+      document.getElementById("filter-icp").value = "all";
+      renderRoster();
+    });
+    document.getElementById("open-latest-assessment").addEventListener("click", openLatestAssessment);
+    document.getElementById("summary-open-icp").addEventListener("click", () => {
+      window.location.href = "../icp/worklist.html?embed=1&v=20261023-9";
+    });
+    function openResidentTraining() {
+      const resident = residentData.find(item => item.id === currentResidentId);
+      if (!resident) return;
+      const hospitalised = residentHospitalStates(resident).some(state =>
+        TODAY_KEY >= state.start && TODAY_KEY <= state.end
+      );
+      if (hospitalised) {
+        showResidentToast("留醫期間不可安排訓練。", true);
+        return;
+      }
+      const weekly = resident.trainingFrequency.includes("星期");
+      const params = new URLSearchParams({
+        embed: "1",
+        residentId: resident.id,
+        focus: "resident",
+        period: weekly ? "week" : "month",
+        v: "resident-focus"
+      });
+      const source = `training/index.html?${params.toString()}`;
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: "ot-open-module", module: "training", source }, "*");
+      } else {
+        window.location.href = `../${source}`;
+      }
+    }
+    document.getElementById("summary-open-training").addEventListener("click", openResidentTraining);
+    const residentMoreButton = document.getElementById("resident-more-button");
+    const residentMoreMenu = document.getElementById("resident-more-menu");
+    function setResidentMenuOpen(open) {
+      residentMoreMenu.hidden = !open;
+      residentMoreButton.setAttribute("aria-expanded", String(open));
+    }
+    residentMoreButton.addEventListener("click", () => {
+      setResidentMenuOpen(residentMoreMenu.hidden);
+    });
+    residentMoreMenu.addEventListener("click", () => {
+      setResidentMenuOpen(false);
+    });
+    document.addEventListener("click", event => {
+      if (residentMoreMenu.hidden || event.target.closest("#resident-more-button, #resident-more-menu")) return;
+      setResidentMenuOpen(false);
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Escape" || residentMoreMenu.hidden) return;
+      setResidentMenuOpen(false);
+      residentMoreButton.focus();
+    });
+    function saveManualStatus(value, notify = false) {
+      const resident = residentData.find(item => item.id === currentResidentId);
+      if (!resident) return;
+      resident.manualStatusLabel = value.trim();
+      OT_PROTOTYPE.updateResident(resident.id, {
+        manualStatusLabel: resident.manualStatusLabel
+      }, "修改住客狀態");
+      refreshResidentData();
+      renderResidentDetail();
+      renderRoster();
+      if (notify) showResidentToast("狀態已更新。");
+    }
+    document.getElementById("summary-status-input").addEventListener("change", event => {
+      saveManualStatus(event.target.value, true);
+    });
+    document.getElementById("summary-status-input").addEventListener("input", event => {
+      const value = event.target.value.trim();
+      clearTimeout(summaryStatusTimer);
+      summaryStatusTimer = setTimeout(() => {
+        saveManualStatus(value);
+      }, 150);
+    });
+
+    document.querySelectorAll("[data-section-save]").forEach(button => {
+      button.addEventListener("click", () => {
+        const sectionKey = button.dataset.sectionSave;
+        const section = sectionElement(sectionKey);
+        if (!section.classList.contains("is-editing")) {
+          setSectionEditing(sectionKey, true);
+          section.querySelector("[data-edit-control]:not(:disabled), .multi-choice button")?.focus();
+          return;
+        }
+        saveSection(sectionKey);
+      });
+    });
+
+    document.querySelectorAll("[data-section-cancel]").forEach(button => {
+      button.addEventListener("click", () => {
+        const sectionKey = button.dataset.sectionCancel;
+        setSectionEditing(sectionKey, false);
+        renderResidentDetail();
+      });
+    });
+
+    document.addEventListener("click", event => {
+      const choice = event.target.closest(".multi-choice button[data-choice]");
+      if (!choice || choice.disabled) return;
+      choice.setAttribute("aria-pressed", choice.getAttribute("aria-pressed") === "true" ? "false" : "true");
+      if (choice.closest("#detail-language")) {
+        syncLanguageOtherInput(sectionElement("basic").classList.contains("is-editing"));
+      }
+    });
+
+    document.querySelectorAll("[data-icp-view]").forEach(button => {
+      button.addEventListener("click", () => setIcpView(button.dataset.icpView));
+    });
+
+    document.getElementById("icp-history-list").addEventListener("click", event => {
+      if (!event.target.closest('[data-action="show-more-icp"]')) return;
+      icpHistoryExpanded = !icpHistoryExpanded;
+      const resident = residentData.find(item => item.id === currentResidentId);
+      if (resident) renderIcpHistory(resident);
+    });
+
+    document.querySelectorAll("[data-training-save-scope]").forEach(button => {
+      button.addEventListener("click", () => {
+        if (!pendingTrainingSave || pendingTrainingSave.residentId !== currentResidentId) return;
+        const scope = button.dataset.trainingSaveScope;
+        document.getElementById("training-scope-dialog").close();
+        saveSection("training", { suggestionScope: scope });
+        pendingTrainingSave = null;
+      });
+    });
+
+    document.getElementById("training-scope-dialog").addEventListener("cancel", () => {
+      pendingTrainingSave = null;
+    });
+
+    document.querySelector('[data-action="cancel-training-scope"]').addEventListener("click", () => {
+      document.getElementById("training-scope-dialog").close();
+      pendingTrainingSave = null;
+    });
+
+    document.addEventListener("click", event => {
+      const resident = residentData.find(item => item.id === currentResidentId);
+      if (!resident) return;
+
+      const destinationAction = event.target.closest("[data-record-open-destination]");
+      if (destinationAction) {
+        hideRecordEventPopover();
+        const recordEvent = residentRecordEvents(resident)
+          .find(item => item.id === destinationAction.dataset.recordOpenDestination);
+        openRecordEventDestination(recordEvent);
+        return;
+      }
+
+      const hospitalDestination = event.target.closest("[data-record-open-hospital]");
+      if (hospitalDestination) {
+        hideRecordEventPopover();
+        openResidentRecords(hospitalDestination.dataset.recordOpenHospital);
+        return;
+      }
+
+      const hospitalBar = event.target.closest("[data-record-hospital]");
+      if (hospitalBar) {
+        const start = hospitalBar.dataset.recordHospital;
+        showRecordEventPopover(hospitalBar, `
+          <h3>留醫紀錄</h3>
+          <p>${slashDate(start)} 起</p>
+          <button class="record-event-popover-action" type="button" data-record-open-hospital="${start}">查看 007 留醫紀錄 →</button>
+        `);
+        return;
+      }
+
+      const recordEventButton = event.target.closest("[data-record-event]");
+      if (recordEventButton) {
+        const recordEvent = residentRecordEvents(resident)
+          .find(item => item.id === recordEventButton.dataset.recordEvent);
+        if (recordEvent) {
+          const navigation = recordEventNavigation(recordEvent);
+          showRecordEventPopover(recordEventButton, `
+            <h3>${escapeHtml(recordEvent.title)}</h3>
+            <p>${slashDate(recordEvent.date)}${recordEvent.time ? ` · ${escapeHtml(recordEvent.time)}` : ""}</p>
+            <p>${escapeHtml(recordEvent.detail)}</p>
+            ${navigation ? `<button class="record-event-popover-action" type="button" data-record-open-destination="${recordEvent.id}">${escapeHtml(navigation.label)} →</button>` : ""}
+          `);
+        }
+        return;
+      }
+
+      const recordFilterButton = event.target.closest("[data-record-filter]");
+      if (recordFilterButton) {
+        hideRecordEventPopover();
+        recordFilter = recordFilterButton.dataset.recordFilter;
+        renderRecordCalendar(resident);
+        return;
+      }
+
+      const recordAction = event.target.closest("[data-record-action]");
+      if (!recordAction) {
+        if (!event.target.closest("#record-event-popover")) hideRecordEventPopover();
+        return;
+      }
+      hideRecordEventPopover();
+      if (recordAction.dataset.recordAction === "today") {
+        recordMonth = new Date(2026, 9, 1);
+        recordSelectedDate = TODAY_KEY;
+      } else {
+        const direction = recordAction.dataset.recordAction === "next" ? 1 : -1;
+        recordMonth = new Date(
+          recordMonth.getFullYear(),
+          recordMonth.getMonth() + direction,
+          1
+        );
+        recordSelectedDate = toDateKey(recordMonth);
+      }
+      renderRecordCalendar(resident);
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") hideRecordEventPopover();
+    });
+
+    function rotationResidents() {
+      return bedRotationDraft
+        ? bedRotationDraft.selectedIds
+            .map(id => OT_PROTOTYPE.resident(id))
+            .filter(Boolean)
+        : [];
+    }
+
+    function renderBedRotation() {
+      if (!bedRotationDraft) return;
+      const residents = rotationResidents();
+      const options = OT_PROTOTYPE.residents({ includeDischarged: false })
+        .map(resident => resident.bed)
+        .sort((left, right) => {
+          const leftParts = OT_PROTOTYPE.parseBedCode(left);
+          const rightParts = OT_PROTOTYPE.parseBedCode(right);
+          return leftParts.floorLetter.localeCompare(rightParts.floorLetter) ||
+            leftParts.numeric - rightParts.numeric ||
+            leftParts.suffix.localeCompare(rightParts.suffix);
+        });
+      document.getElementById("bed-rotation-rows").innerHTML = residents.map(resident => `
+        <div class="bed-move-row" data-rotation-resident="${resident.id}">
+          <strong>${escapeHtml(resident.name)}</strong>
+          <span class="bed-move-bed">${escapeHtml(resident.bed)}</span>
+          <span>→</span>
+          <select data-rotation-target="${resident.id}" aria-label="${escapeHtml(resident.name)} 的新床位">
+            <option value="">選擇床位</option>
+            ${options.map(bed => `<option value="${bed}" ${bed === bedRotationDraft.targets[resident.id] ? "selected" : ""}>${bed}</option>`).join("")}
+          </select>
+          <button type="button" data-rotation-remove="${resident.id}"
+            aria-label="移除 ${escapeHtml(resident.name)}" ${residents.length <= 1 ? "disabled" : ""}>×</button>
+        </div>
+      `).join("");
+      const assignments = residents
+        .map(resident => ({
+          resident,
+          target: bedRotationDraft.targets[resident.id]
+        }))
+        .filter(item => item.target);
+      const finalByBed = new Map();
+      assignments.forEach(({ resident, target }) => {
+        if (finalByBed.has(target)) finalByBed.set(target, null);
+        else finalByBed.set(target, resident);
+      });
+      document.getElementById("bed-rotation-summary").innerHTML = finalByBed.size
+        ? [...finalByBed.entries()]
+            .filter(([, resident]) => resident)
+            .sort(([left], [right]) => left.localeCompare(right, "en", { numeric: true }))
+            .map(([bed, resident]) => `<span><strong>${bed}</strong> ${escapeHtml(resident.name)}</span>`)
+            .join("")
+        : "<span>完成床位選擇後顯示最終安排。</span>";
+      const valid =
+        assignments.length === residents.length &&
+        new Set(assignments.map(item => item.target)).size === assignments.length &&
+        assignments.every(({ target }) => options.includes(target));
+      document.getElementById("bed-rotation-confirm").disabled = !valid;
+      document.getElementById("bed-rotation-error").hidden = true;
+    }
+
+    function changeBedRotationTarget(residentId, targetBed) {
+      if (!bedRotationDraft) return;
+      const resident = OT_PROTOTYPE.resident(residentId);
+      const occupant = OT_PROTOTYPE.residents({ includeDischarged: false })
+        .find(item => item.bed === targetBed && item.id !== residentId);
+      bedRotationDraft.targets[residentId] = targetBed;
+      if (occupant && !bedRotationDraft.selectedIds.includes(occupant.id)) {
+        bedRotationDraft.selectedIds.push(occupant.id);
+        const root = pendingBedResolution?.originalBedCode;
+        if (root) bedRotationDraft.targets[occupant.id] = root;
+      }
+      renderBedRotation();
+    }
+
+    function removeBedRotationResident(residentId) {
+      if (!bedRotationDraft || bedRotationDraft.selectedIds.length <= 1) return;
+      const resident = OT_PROTOTYPE.resident(residentId);
+      bedRotationDraft.selectedIds = bedRotationDraft.selectedIds.filter(id => id !== residentId);
+      delete bedRotationDraft.targets[residentId];
+      Object.entries(bedRotationDraft.targets).forEach(([id, bed]) => {
+        if (bed === resident.bed) delete bedRotationDraft.targets[id];
+      });
+      renderBedRotation();
+    }
+
+    const bedConflictDialog = document.getElementById("bed-conflict-dialog");
+    const bedRotationDialog = document.getElementById("bed-rotation-dialog");
+    document.getElementById("bed-conflict-back").addEventListener("click", () => {
+      bedConflictDialog.close();
+    });
+    document.getElementById("bed-conflict-swap").addEventListener("click", () => {
+      const draft = pendingBedResolution;
+      if (!draft?.occupant) return;
+      completeBedResolution([
+        {
+          residentId: draft.residentId,
+          targetBedCode: draft.targetBedCode,
+          expectedResidentVersion: draft.expectedResidentVersion
+        },
+        {
+          residentId: draft.occupant.id,
+          targetBedCode: draft.originalBedCode,
+          expectedResidentVersion: draft.occupant.version
+        }
+      ]);
+    });
+    document.getElementById("bed-conflict-multi").addEventListener("click", () => {
+      const draft = pendingBedResolution;
+      if (!draft?.occupant) return;
+      bedRotationDraft = {
+        selectedIds: [draft.residentId, draft.occupant.id],
+        targets: {
+          [draft.residentId]: draft.targetBedCode,
+          [draft.occupant.id]: draft.originalBedCode
+        }
+      };
+      bedConflictDialog.close();
+      renderBedRotation();
+      bedRotationDialog.showModal();
+    });
+    document.getElementById("bed-rotation-rows").addEventListener("change", event => {
+      const select = event.target.closest("[data-rotation-target]");
+      if (!select || !select.value) return;
+      changeBedRotationTarget(select.dataset.rotationTarget, select.value);
+    });
+    document.getElementById("bed-rotation-rows").addEventListener("click", event => {
+      const remove = event.target.closest("[data-rotation-remove]");
+      if (!remove) return;
+      removeBedRotationResident(remove.dataset.rotationRemove);
+    });
+    document.getElementById("bed-rotation-cancel").addEventListener("click", () => {
+      bedRotationDialog.close();
+      bedConflictDialog.showModal();
+    });
+    document.getElementById("bed-rotation-confirm").addEventListener("click", () => {
+      if (!bedRotationDraft) return;
+      const moves = bedRotationDraft.selectedIds.map(id => {
+        const resident = OT_PROTOTYPE.resident(id);
+        return {
+          residentId: id,
+          targetBedCode: bedRotationDraft.targets[id],
+          expectedResidentVersion: resident.version
+        };
+      });
+      completeBedResolution(moves);
+    });
+
+    const addResidentDialog = document.getElementById("add-resident-dialog");
+    document.getElementById("add-resident-button").addEventListener("click", () => {
+      document.getElementById("resident-form-error").hidden = true;
+      addResidentDialog.showModal();
+    });
+    document.getElementById("cancel-add-resident").addEventListener("click", () => {
+      addResidentDialog.close();
+    });
+    document.getElementById("add-resident-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const error = document.getElementById("resident-form-error");
+      try {
+        const result = OT_PROTOTYPE.admitResident({
+          name: document.getElementById("new-name").value,
+          bed: document.getElementById("new-bed").value,
+          place: document.getElementById("new-place").value
+        });
+        const params = new URLSearchParams({
+          embed: "1",
+          mode: "session",
+          origin: "initial",
+          residentId: result.resident.id,
+          assessmentId: result.assessment.id,
+          cycleId: result.cycle.id,
+          v: "initial-session"
+        });
+        window.location.href = `../assessment/paper-aligned.html?${params.toString()}`;
+      } catch (storeError) {
+        error.textContent = storeError.message;
+        error.hidden = false;
+      }
+    });
+
+    const dischargeDialog = document.getElementById("discharge-resident-dialog");
+    document.getElementById("discharge-resident-button").addEventListener("click", () => {
+      document.getElementById("discharge-date").value = TODAY_KEY;
+      document.getElementById("discharge-form-error").hidden = true;
+      dischargeDialog.showModal();
+    });
+    document.getElementById("cancel-discharge-dialog").addEventListener("click", () => {
+      dischargeDialog.close();
+    });
+    document.getElementById("discharge-resident-form").addEventListener("submit", event => {
+      event.preventDefault();
+      try {
+        OT_PROTOTYPE.dischargeResident(currentResidentId, {
+          date: document.getElementById("discharge-date").value,
+          reason: document.getElementById("discharge-reason").value.trim()
+        });
+        dischargeDialog.close();
+        refreshResidentData();
+        renderRoster();
+        renderResidentDetail();
+        showResidentToast("住客已退住，相關待辦及 ICP 已按規則更新。");
+      } catch (error) {
+        const message = document.getElementById("discharge-form-error");
+        message.textContent = error.message;
+        message.hidden = false;
+      }
+    });
+    document.getElementById("cancel-discharge-button").addEventListener("click", () => {
+      OT_PROTOTYPE.cancelDischarge(currentResidentId);
+      refreshResidentData();
+      renderRoster();
+      renderResidentDetail();
+      showResidentToast("已取消退住並保留審計紀錄。");
+    });
+
+    renderRosterColumnMenu();
+    refreshResidentData();
+    renderRoster();
+    renderResidentDetail();
+    applyHomeSettings();
+    OT_PROTOTYPE.subscribe(() => {
+      refreshResidentData();
+      renderRoster();
+      renderResidentDetail();
+    });
+    window.addEventListener("storage", event => {
+      if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
+    });
+    let recordResizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(recordResizeTimer);
+      recordResizeTimer = setTimeout(() => {
+        const resident = residentData.find(item => item.id === currentResidentId);
+        if (resident) renderRecordCalendar(resident);
+      }, 100);
+    });
+  </script>
+  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+</body>
+</html>

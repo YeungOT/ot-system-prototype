@@ -1,0 +1,3400 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>評估系統 UI Mock - Paper-aligned Hybrid</title>
+  <script>
+    if (new URLSearchParams(location.search).has("embed")) {
+      document.documentElement.classList.add("embedded");
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #f3f6f7;
+      --line: #d8e1e7;
+      --strong-line: #94a3b8;
+      --ink: #17202a;
+      --muted: #64748b;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --teal-soft: #e7f3f1;
+      --green: #15803d;
+      --green-soft: #f0fdf4;
+      --amber: #b45309;
+      --amber-soft: #fff7ed;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --na: #4338ca;
+      --na-soft: #eef2ff;
+      --shadow: 0 1px 2px rgba(15, 23, 42, .06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+    }
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid var(--line);
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 2px 8px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand-mark {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      background: var(--teal);
+      color: #fff;
+      display: grid; place-items: center;
+      font-weight: 800;
+    }
+    .brand-title { font-weight: 800; }
+    .brand-sub { color: var(--muted); font-size: 11px; }
+    .derived-note { margin-left: 6px; color: var(--muted); font-size: 9px; font-weight: 400; }
+    .nav { display: grid; gap: 4px; }
+    .nav button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #334155;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .nav button:hover { background: #f1f5f9; }
+    .nav button.active {
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-weight: 800;
+    }
+    .nav small { color: var(--muted); font-size: 10px; }
+    .sidebar-note {
+      margin-top: auto;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdfe;
+      color: var(--muted);
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 58px minmax(0, 1fr);
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 18px;
+    }
+    .home-pill {
+      min-width: 180px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      padding: 7px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      padding: 5px 10px 5px 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .avatar {
+      width: 26px; height: 26px;
+      border-radius: 999px;
+      background: #17202a;
+      color: #fff;
+      display: grid; place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .top-meta { color: var(--muted); }
+
+    .content { padding: 18px; min-width: 0; }
+    .screen-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    h1 { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 700; letter-spacing: 0; }
+    .sub { color: var(--muted); margin-top: 4px; }
+    .breadcrumbs { color: var(--muted); font-size: 12px; }
+    .breadcrumbs button { border: 0; background: transparent; color: var(--teal-dark); padding: 0; font-weight: 800; }
+    .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      padding: 7px 11px;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+    .btn:hover { background: #f8fafc; }
+    .btn-primary {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 3px 8px;
+      background: #fff;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .chip-green { background: var(--green-soft); border-color: #bbf7d0; color: var(--green); }
+    .chip-amber { background: var(--amber-soft); border-color: #fed7aa; color: var(--amber); }
+    .chip-blue { background: var(--blue-soft); border-color: #bfdbfe; color: var(--blue); }
+    .chip-teal { background: var(--teal-soft); border-color: #b7ded7; color: var(--teal-dark); }
+    .chip-na { background: var(--na-soft); border-color: #c7d2fe; color: var(--na); }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; align-items: start; }
+    .section-nav {
+      position: sticky;
+      top: var(--assessment-sticky-offset, 0px);
+      z-index: 15;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 4px;
+      overflow: hidden;
+      box-shadow: none;
+    }
+    .section-nav button {
+      width: auto;
+      min-width: 76px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      text-align: center;
+      padding: 7px 6px;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .section-nav button.active { background: var(--teal-soft); color: var(--teal-dark); }
+    .section-nav button:hover { background: #f1f5f9; }
+
+    .paper {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
+      overflow: hidden;
+    }
+    .section { border-bottom: 1px solid var(--line); scroll-margin-top: 70px; }
+    .section:last-of-type { border-bottom: 0; }
+    .section-head {
+      min-height: 38px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--strong-line);
+      background: #f8fafc;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .sign { display: flex; align-items: center; gap: 14px; color: #334155; font-weight: 600; }
+    .sign label { display: flex; align-items: center; gap: 4px; font-weight: 600; }
+    .signline { border-bottom: 1px solid #64748b; min-width: 74px; display: inline-block; height: 16px; }
+    .status { color: var(--muted); font-weight: 700; }
+    .section-body { padding: 10px 12px; overflow-x: auto; }
+
+    .grid {
+      display: grid;
+      gap: 8px 12px;
+      align-items: stretch;
+    }
+    .g5 { grid-template-columns: repeat(5, minmax(0, 1fr)); min-width: 760px; }
+    .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); min-width: 620px; }
+    .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); min-width: 480px; }
+    .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .span2 { grid-column: span 2; }
+    .span3 { grid-column: span 3; }
+    .span4 { grid-column: span 4; }
+    .span5 { grid-column: span 5; }
+
+    .box {
+      border: 1px solid #e9edf1;
+      border-radius: 4px;
+      padding: 7px 9px;
+      min-width: 0;
+      background: #fff;
+    }
+    .box:has(.field) {
+      border: 1px solid #ecf0f3;
+      padding: 8px 10px;
+    }
+    .box-title {
+      color: #111;
+      font-weight: 800;
+      font-size: 11px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 20px;
+    }
+    .field {
+      border: 0;
+      border-bottom: 1px solid #94a3b8;
+      border-radius: 0;
+      background: transparent;
+      padding: 5px 0 3px;
+      min-height: 27px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #334155;
+      font-size: 12px;
+      min-width: 0;
+    }
+    input[type="text"], input[type="date"], input[type="number"] {
+      border: 0;
+      outline: 0;
+      background: transparent;
+      min-width: 0;
+      flex: 1;
+      color: var(--ink);
+    }
+    input[type="checkbox"], input[type="radio"] { accent-color: var(--teal); width: 13px; height: 13px; margin: 0; }
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 24px;
+      color: #24303d;
+      font-size: 12px;
+      min-width: 0;
+    }
+    .opt span { min-width: 0; overflow-wrap: anywhere; }
+    .opt-inline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: #24303d; }
+    .total {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      border: 1px solid #dfe7ed;
+      border-radius: 4px;
+      padding: 8px 9px;
+      background: #f8fafc;
+      font-weight: 800;
+    }
+    .total input { max-width: 42px; text-align: right; font-weight: 800; }
+    .muted { color: var(--muted); }
+    .hint { color: var(--muted); font-size: 11px; margin-top: 5px; }
+    .wide-note {
+      border: 0;
+      border-radius: 4px;
+      padding: 6px 8px;
+      color: #24303d;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .moca-summary {
+      border: 1px solid #e9edf1;
+      border-radius: 6px;
+      background: #fff;
+      padding: 9px 10px;
+      display: grid;
+      grid-template-columns: 70px 70px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .moca-summary strong { font-size: 15px; }
+
+    .form-actions {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, .08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .toolbar-note {
+      margin: 0 0 12px;
+      border: 1px solid #e9edf1;
+      border-radius: 8px;
+      background: #fff;
+      color: #64748b;
+      padding: 9px 11px;
+    }
+
+    .cross {
+      position: relative;
+      height: 58px;
+      border: 1px solid #94a3b8;
+      background: #fff;
+      padding: 0;
+    }
+
+    .cross::before,
+    .cross::after {
+      content: "";
+      position: absolute;
+      background: #94a3b8;
+    }
+
+    .cross::before { left: 50%; top: 0; bottom: 0; width: 1px; }
+    .cross::after { top: 50%; left: 0; right: 0; height: 1px; }
+
+    .cell {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 50%;
+      padding: 4px 8px;
+      border: 0;
+      border-bottom: 1px solid #94a3b8;
+      border-radius: 0;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #334155;
+      min-width: 0;
+    }
+    .cell input { width: 100%; }
+    .cell:nth-child(1) { left: 0; }
+    .cell:nth-child(2) { left: 50%; }
+    .cell:nth-child(3) { top: 50%; left: 0; border-bottom: 0; }
+    .cell:nth-child(4) { top: 50%; left: 50%; border-bottom: 0; }
+    .cross-labels {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 6px;
+      color: #111827;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .cross-labels {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 6px;
+      color: #111827;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .assessment-content { padding: 14px; }
+    .assessment-page-head { margin-bottom: 12px; }
+    .assessment-shell {
+      display: grid;
+      grid-template-columns: 286px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+    .assessment-explorer {
+      position: sticky;
+      top: 0;
+      max-height: calc(100vh - 28px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .explorer-search {
+      margin: 9px 9px 0;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+    }
+    .explorer-search span { color: var(--muted); font-size: 14px; }
+    .explorer-search input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 11px;
+    }
+    .explorer-filters {
+      display: flex;
+      gap: 2px;
+      margin: 8px 9px;
+      padding: 2px;
+      border: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+    }
+    .explorer-filters button {
+      min-width: 0;
+      flex: 1;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      min-height: 27px;
+      padding: 4px 3px;
+      font-size: 9px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .explorer-filters button.active {
+      background: #fff;
+      color: var(--teal-dark);
+      box-shadow: var(--shadow);
+    }
+    .resident-tree {
+      min-height: 180px;
+      overflow: auto;
+      padding: 5px;
+    }
+    .resident-node {
+      width: 100%;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--ink);
+      padding: 7px 6px;
+      display: grid;
+      grid-template-columns: 14px 44px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+      text-align: left;
+    }
+    .resident-node:hover { background: #f8fafc; }
+    .resident-node.selected { background: var(--teal-soft); }
+    .resident-chevron {
+      color: var(--muted);
+      font-size: 12px;
+      transition: transform .12s ease;
+    }
+    .resident-node.expanded .resident-chevron { transform: rotate(90deg); }
+    .resident-bed {
+      border-radius: 4px;
+      background: #eef2f6;
+      color: #475569;
+      padding: 2px 4px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 900;
+    }
+    .resident-node-copy { min-width: 0; }
+    .resident-node-name-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+    .resident-node-name {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .resident-node-meta {
+      display: block;
+      margin-top: 1px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+    .resident-node-place {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .tree-status {
+      border-radius: 999px;
+      padding: 2px 6px;
+      font-size: 9px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .tree-status.draft { background: var(--amber-soft); color: var(--amber); }
+    .tree-status.due { background: var(--red-soft); color: var(--red); }
+    .tree-status.review { background: var(--blue-soft); color: var(--blue); }
+    .tree-status.done { background: var(--green-soft); color: var(--green); }
+    .record-branch {
+      margin: 0 0 4px 24px;
+      padding-left: 8px;
+      border-left: 1px solid var(--line);
+      display: grid;
+      gap: 2px;
+    }
+    .record-year {
+      padding: 4px 5px 2px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .explorer-record {
+      width: 100%;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--ink);
+      padding: 6px 7px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2px 6px;
+      text-align: left;
+    }
+    .explorer-record:hover { background: #f8fafc; }
+    .explorer-record.active { background: #edf7f5; }
+    .explorer-record-date { font-size: 10px; font-weight: 800; }
+    .explorer-record-type { color: var(--muted); font-size: 9px; }
+    .explorer-record .record-dot {
+      grid-row: 1 / 3;
+      grid-column: 2;
+      align-self: center;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+    .explorer-record .record-dot.draft { background: var(--amber); }
+    .explorer-record .record-dot.completed { background: var(--green); }
+    .explorer-record .record-dot.review { background: var(--blue); }
+    .explorer-empty {
+      padding: 18px 10px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .assessment-workspace { min-width: 0; }
+    .workspace-empty {
+      min-height: 430px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .workspace-empty[hidden],
+    .resident-overview[hidden],
+    .record-view[hidden] { display: none !important; }
+    .workspace-empty-mark {
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 10px;
+      border: 1px solid #b7ded7;
+      border-radius: 10px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+    .workspace-empty strong { display: block; font-size: 14px; }
+    .workspace-empty span { color: var(--muted); font-size: 11px; }
+    .resident-overview { display: grid; gap: 10px; }
+    .resident-overview-head {
+      min-height: 72px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .resident-overview-head h2 { margin: 1px 0 4px; font-size: 18px; }
+    .resident-facts { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }
+    .history-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .history-head {
+      min-height: 42px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .history-head span { color: var(--muted); font-size: 10px; }
+    .history-title {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .history-filters {
+      display: inline-flex;
+      gap: 2px;
+      padding: 2px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+      flex: 0 0 auto;
+    }
+    .history-filters button {
+      min-height: 25px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .history-filters button.active {
+      background: #fff;
+      color: var(--teal-dark);
+      box-shadow: var(--shadow);
+    }
+    .history-table { width: 100%; border-collapse: collapse; }
+    .history-table th,
+    .history-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 11px;
+    }
+    .history-table th {
+      color: var(--muted);
+      background: #fcfdfe;
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .history-table tr:last-child td { border-bottom: 0; }
+    .history-table tbody tr { cursor: pointer; }
+    .history-table tbody tr:hover { background: #f8fafc; }
+    .record-void-action {
+      min-height: 25px;
+      padding: 3px 7px;
+      color: var(--red);
+      font-size: 10px;
+    }
+    .record-view .screen-head {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px 10px;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, .08);
+    }
+    .assessment-shell.session-mode .record-view .screen-head { display: none; }
+    .record-view.readonly .paper input { pointer-events: none; }
+    .record-view.readonly .paper select,
+    .record-view.readonly .paper textarea,
+    .record-view.readonly .paper label { pointer-events: none; }
+    .assessment-shell.session-mode { grid-template-columns: minmax(0, 1fr); }
+    .assessment-shell.session-mode .assessment-explorer,
+    .assessment-shell.session-mode #workspace-empty,
+    .assessment-shell.session-mode #resident-overview { display: none !important; }
+    .session-context {
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: none;
+      overflow: hidden;
+    }
+    .session-context[hidden] { display: none; }
+    .session-context-head {
+      min-height: 68px;
+      padding: 9px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .session-summary {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .session-identity {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: auto auto;
+      align-items: center;
+      justify-content: start;
+      gap: 3px 7px;
+    }
+    .session-context h2 {
+      grid-column: 1 / -1;
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+    .session-type {
+      display: inline-flex;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 900;
+    }
+    .session-record-id {
+      color: var(--muted);
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    .session-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .session-actions .btn { box-shadow: none; white-space: nowrap; }
+    .session-role-actions { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .session-role-button {
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: #475569;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .session-role-button.done {
+      border-color: #bbf7d0;
+      background: var(--green-soft);
+      color: var(--green);
+    }
+    .session-notice {
+      padding: 7px 13px;
+      border-top: 1px solid #fed7aa;
+      background: var(--amber-soft);
+      color: var(--amber);
+      font-size: 10px;
+    }
+    .session-notice[hidden] { display: none; }
+    .assessment-toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 100;
+      max-width: min(360px, calc(100vw - 36px));
+      border-radius: 7px;
+      background: #17202a;
+      color: #fff;
+      padding: 9px 12px;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease;
+    }
+    .assessment-toast.show { opacity: 1; transform: translateY(0); }
+
+    .paper {
+      display: grid;
+      gap: 12px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+    }
+    .section {
+      --section-accent: #64748b;
+      --section-soft: #f8fafc;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--section-accent);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .section--context { --section-accent: #64748b; --section-soft: #f8fafc; }
+    .section--history { --section-accent: #7c3aed; --section-soft: #f8f7ff; }
+    .section--cognition { --section-accent: #2563eb; --section-soft: #f5f8ff; }
+    .section--sensation { --section-accent: #0f766e; --section-soft: #f3fbf9; }
+    .section--motor { --section-accent: #15803d; --section-soft: #f5fbf6; }
+    .section--mobility { --section-accent: #b45309; --section-soft: #fff9ef; }
+    .section--mbi { --section-accent: #c2410c; --section-soft: #fff7f2; }
+    .section--problem { --section-accent: #be123c; --section-soft: #fff5f7; }
+    .section--plan { --section-accent: #115e59; --section-soft: #f2fbf9; }
+    .section--assessor { --section-accent: #334155; --section-soft: #f8fafc; }
+    .section-head {
+      min-height: 48px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--section-soft);
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+    .section-title { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .section-number {
+      min-width: 25px;
+      height: 25px;
+      border-radius: 5px;
+      background: var(--section-accent);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 10px;
+      font-weight: 900;
+    }
+    .section-title h2 { margin: 0; font-size: 13px; line-height: 1.25; }
+    .section-meta { display: flex; align-items: center; gap: 7px; }
+    .role-tag {
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      background: #fff;
+      color: #475569;
+      padding: 2px 7px;
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .section-body {
+      padding: 12px;
+      overflow: visible;
+      display: grid;
+      gap: 10px;
+    }
+    .context-grid,
+    .field-columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 18px;
+    }
+    .context-field,
+    .clinical-field {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+      padding: 6px 0;
+      border-bottom: 1px solid #edf1f4;
+    }
+    .context-field:last-child,
+    .clinical-field:last-child { border-bottom: 0; }
+    .context-field label,
+    .field-label {
+      color: #64748b;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+    .quiet-input,
+    .quiet-select {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      border-radius: 5px;
+      background: #f8fafc;
+      color: var(--ink);
+      padding: 7px 8px;
+      font-size: 12px;
+    }
+    select.quiet-input,
+    select.quiet-select { appearance: auto; }
+    .quiet-input:hover,
+    .quiet-select:hover { background: #f1f5f9; }
+    .quiet-input:focus,
+    .quiet-select:focus {
+      outline: 2px solid #99d8cf;
+      outline-offset: 1px;
+      background: #fff;
+    }
+    .derived-choice { margin-top: 2px; }
+    .choice-set { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .choice {
+      min-height: 29px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: #fff;
+      color: #334155;
+      padding: 4px 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .choice:hover { border-color: #b8c7d2; background: #f8fafc; }
+    .choice:has(input:checked) {
+      border-color: var(--section-accent);
+      background: var(--section-soft);
+      color: var(--ink);
+      font-weight: 800;
+    }
+    .choice input { flex: 0 0 auto; }
+    .question {
+      margin: 0;
+      border: 0;
+      border-bottom: 1px solid #edf1f4;
+      padding: 7px 0;
+      min-width: 0;
+    }
+    .question:last-child { border-bottom: 0; }
+    .question legend {
+      width: 100%;
+      margin-bottom: 7px;
+      padding: 0;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .question .hint { margin-top: 5px; }
+    .inline-note {
+      width: 100%;
+      border: 0;
+      border-radius: 5px;
+      background: #f8fafc;
+      padding: 7px 8px;
+      resize: vertical;
+      min-height: 38px;
+      color: var(--ink);
+    }
+    .measure-panel {
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      background: #fbfcfd;
+      padding: 9px;
+      display: grid;
+      gap: 9px;
+    }
+    .measure-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .measure-panel-head strong { font-size: 12px; }
+    .score-badge {
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 3px 8px;
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 10px;
+      font-weight: 900;
+    }
+    .moca-grid {
+      display: grid;
+      grid-template-columns: minmax(140px, .7fr) minmax(90px, .3fr) minmax(100px, .35fr);
+      gap: 8px;
+      align-items: end;
+    }
+    .moca-auto-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .moca-auto-item {
+      border-radius: 6px;
+      background: #f8fafc;
+      padding: 8px 9px;
+      display: grid;
+      gap: 2px;
+    }
+    .moca-auto-item span { color: var(--muted); font-size: 9px; font-weight: 800; }
+    .moca-auto-item strong { font-size: 13px; }
+    .number-field {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      border-radius: 5px;
+      background: #f8fafc;
+      padding-right: 8px;
+    }
+    .number-field .quiet-input { background: transparent; }
+    .number-unit { color: var(--muted); font-size: 10px; }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 620px;
+      font-size: 11px;
+    }
+    .data-table th {
+      background: var(--section-soft);
+      color: #475569;
+      font-size: 9px;
+      font-weight: 800;
+      text-align: left;
+    }
+    .data-table th,
+    .data-table td {
+      padding: 6px 7px;
+      border-bottom: 1px solid #edf1f4;
+    }
+    .data-table tr:last-child td { border-bottom: 0; }
+    .data-table input,
+    .data-table select {
+      width: 100%;
+      min-width: 72px;
+      border: 0;
+      border-radius: 4px;
+      background: #f8fafc;
+      padding: 5px 6px;
+      color: var(--ink);
+      font-size: 11px;
+    }
+    .table-scroll { overflow-x: auto; }
+    .measure-row {
+      margin: 0;
+      border: 0;
+      border-bottom: 1px solid #edf1f4;
+      padding: 8px 0;
+      display: grid;
+      grid-template-columns: minmax(145px, .6fr) minmax(0, 1.4fr);
+      gap: 8px 14px;
+      align-items: start;
+    }
+    .motion-matrices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+    .motion-card {
+      min-width: 0;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      background: #fbfcfd;
+      padding: 9px;
+    }
+    .motion-card h3 {
+      margin: 0 0 8px;
+      color: #334155;
+      font-size: 11px;
+    }
+    .motion-axes {
+      width: min(100%, 280px);
+      margin-inline: auto;
+      display: grid;
+      grid-template-columns: 25px minmax(0, 1fr);
+      gap: 3px;
+    }
+    .motion-axis-labels {
+      grid-column: 2;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 3px;
+    }
+    .motion-axis-labels span,
+    .motion-row-labels span {
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 800;
+      text-align: center;
+    }
+    .motion-row-labels {
+      display: grid;
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 3px;
+      align-items: center;
+    }
+    .motion-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 3px;
+      aspect-ratio: 1 / 1;
+      min-width: 0;
+    }
+    .motion-grid input {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      padding: 5px;
+      text-align: center;
+      font-size: 11px;
+    }
+    .motion-grid input:focus {
+      outline: 2px solid #86c9bd;
+      outline-offset: 1px;
+    }
+    .motor-details-grid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+    .motor-details-grid .table-scroll { min-width: 0; }
+    .motor-details-grid .data-table { min-width: 320px; }
+    #mob .section-body {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    #mbi .section-body {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    #mob .measure-row,
+    #mbi .measure-row {
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      background: #fbfcfd;
+      padding: 8px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 7px;
+    }
+    #mob .measure-row legend,
+    #mbi .measure-row legend { min-height: 30px; }
+    #mob .score-options,
+    #mbi .score-options {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 4px;
+    }
+    #mob .score-choice,
+    #mbi .score-choice { width: 100%; justify-content: flex-start; }
+    .paired-transfer {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .transfer-head,
+    .transfer-row {
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr) 64px;
+      gap: 5px;
+      align-items: center;
+    }
+    .transfer-head {
+      color: #475569;
+      font-size: 9px;
+      font-weight: 900;
+      text-align: center;
+    }
+    .transfer-row + .transfer-row { margin-top: 4px; }
+    .transfer-row .score-choice { justify-content: center; }
+    .transfer-row .score-choice .points { margin-left: 4px; }
+    .transfer-description {
+      color: #334155;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+    #mob .clinical-field,
+    #mbi .clinical-field {
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      background: #fbfcfd;
+      padding: 8px;
+    }
+    #mob .score-footer,
+    #mbi .score-footer { grid-column: 1 / -1; }
+    #mbi .measure-group-title { display: none; }
+    .measure-row:last-child { border-bottom: 0; }
+    .measure-row legend {
+      padding: 1px 0 0;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+    .score-options { display: flex; flex-wrap: wrap; gap: 4px; }
+    .score-choice {
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      background: #fff;
+      padding: 4px 6px;
+      min-width: 120px;
+      flex: 1 1 140px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #334155;
+      font-size: 10px;
+      line-height: 1.3;
+    }
+    .score-choice:has(input:checked) {
+      border-color: var(--section-accent);
+      background: var(--section-soft);
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .score-choice:has(input:disabled) {
+      cursor: not-allowed;
+      opacity: .48;
+    }
+    .score-subgroup { display: grid; gap: 5px; }
+    .score-subgroup h4 {
+      margin: 0;
+      color: #475569;
+      font-size: 9px;
+      font-weight: 900;
+    }
+    .score-subgroup + .score-subgroup {
+      margin-top: 4px;
+      padding-top: 7px;
+      border-top: 1px dashed #e2e8f0;
+    }
+    .score-subgroup .hint { margin: 0; font-size: 9px; }
+    .points {
+      margin-left: auto;
+      min-width: 18px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 1px 4px;
+      text-align: center;
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 8px;
+      font-weight: 900;
+    }
+    .score-choice:has(input:checked) .points {
+      background: var(--section-accent);
+      color: #fff;
+    }
+    .measure-group-title {
+      margin: 3px 0 -2px;
+      color: var(--section-accent);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .04em;
+    }
+    .score-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      border-radius: 6px;
+      background: var(--section-soft);
+      padding: 8px 10px;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .score-footer strong {
+      color: var(--section-accent);
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 15px;
+    }
+    .tag-groups { display: grid; gap: 10px; }
+    .tag-group { display: grid; gap: 6px; }
+    .tag-group > strong {
+      color: #475569;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .assessor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .assessor-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      padding: 10px;
+      display: grid;
+      gap: 7px;
+    }
+    .assessor-card h3 { margin: 0; font-size: 12px; }
+    .assessor-field { display: grid; gap: 3px; }
+    .assessor-field label { color: var(--muted); font-size: 9px; font-weight: 800; }
+    .assessor-card .session-role-button { justify-self: start; }
+    .assessor-signoff {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, .75fr);
+      align-items: center;
+      gap: 24px;
+      min-height: 46px;
+    }
+    .assessor-person { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+    .assessor-person strong { font-size: 14px; }
+    .assessor-person span { color: var(--muted); font-size: 11px; font-weight: 800; }
+    .signature-line {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .signature-line span {
+      flex: 1;
+      min-width: 120px;
+      border-bottom: 1px solid #64748b;
+      transform: translateY(3px);
+    }
+    .contributor-list {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .contributor-list strong { color: var(--ink); font-size: 11px; }
+
+    html.embedded .sidebar,
+    html.embedded .topbar { display: none; }
+    html.embedded .app { display: block; }
+    html.embedded .main { display: block; }
+    html.embedded .content { padding: 12px; }
+    html.embedded .section-nav { top: var(--assessment-sticky-offset, 0px); }
+
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: 72px minmax(0, 1fr); }
+      .brand-title, .brand-sub, .nav small, .sidebar-note { display: none; }
+      .assessment-shell { grid-template-columns: 250px minmax(0, 1fr); }
+      .section-nav { position: sticky; top: var(--assessment-sticky-offset, 0px); }
+      .topbar { padding: 0 12px; }
+      .screen-head, .form-actions { align-items: flex-start; flex-direction: column; }
+      .content { padding: 12px; }
+    }
+    @media (max-width: 900px) {
+      .assessment-shell { grid-template-columns: minmax(0, 1fr); }
+      .assessment-explorer {
+        position: static;
+        max-height: 310px;
+      }
+      .section-nav {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .section-nav button { width: 100%; min-width: 0; }
+      .session-context-head { align-items: flex-start; flex-direction: column; }
+      .session-actions { justify-content: flex-start; }
+      .resident-overview-head { align-items: flex-start; flex-direction: column; }
+      #mob .section-body,
+      #mbi .section-body { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .moca-auto-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 700px) {
+      .section-nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .context-grid,
+      .field-columns,
+      .assessor-grid,
+      .assessor-signoff {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .section-head { align-items: flex-start; }
+      .section-meta { flex-direction: column; align-items: flex-end; }
+      .measure-row { grid-template-columns: minmax(0, 1fr); }
+      .moca-grid { grid-template-columns: minmax(0, 1fr); }
+      #mob .section-body,
+      #mbi .section-body,
+      .moca-auto-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+  </style>
+  <link rel="stylesheet" href="../shared/design-system.css?v=20261116-resident-cards">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">OT</div>
+        <div>
+          <div class="brand-title">OT System</div>
+          <div class="brand-sub">paper-aligned mock</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button><span>工作台</span><small>首頁</small></button>
+        <button><span>住客管理</span><small>007</small></button>
+        <button><span>訓練時間表</span><small>006</small></button>
+        <button><span>復康運動紀錄</span><small>007a / 007c</small></button>
+        <button class="active"><span>評估檔案</span><small>歷史 / Re-Ax</small></button>
+        <button><span>ICP</span><small>週期</small></button>
+        <button><span>院舍設定</span><small>設定</small></button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="home-pill">
+          <span><strong id="chrome-home-code">yt</strong> <span id="chrome-home-name">油塘康璟</span></span>
+          <span class="ui-chevron" aria-hidden="true"></span>
+        </div>
+        <div class="actions">
+          <span class="top-meta">2026年10月</span>
+          <span class="top-meta">OT Testing</span>
+          <div class="user-pill"><span class="avatar">T</span><span>OT</span></div>
+        </div>
+      </header>
+
+      <div class="content assessment-content">
+        <div class="assessment-shell">
+          <aside class="assessment-explorer" aria-label="評估檔案">
+            <label class="console-search console-search--wide explorer-search">
+              <svg class="console-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m20 20-4-4"></path>
+              </svg>
+              <input id="assessment-search" type="search" placeholder="搜尋住客或床號" aria-label="搜尋評估住客" autocomplete="off">
+            </label>
+            <div class="explorer-filters" role="group" aria-label="住客篩選">
+              <button class="active" type="button" data-resident-place="all" aria-pressed="true">全部</button>
+              <button type="button" data-resident-place="voucher" aria-pressed="false">券位</button>
+              <button type="button" data-resident-place="bought" aria-pressed="false">買位</button>
+              <button type="button" data-resident-place="private" aria-pressed="false">私位/暫託</button>
+            </div>
+            <div class="resident-tree" id="resident-tree"></div>
+          </aside>
+
+          <section class="assessment-workspace">
+            <section class="workspace-empty" id="workspace-empty">
+              <div>
+                <div class="workspace-empty-mark">016</div>
+                <strong>請選擇住客</strong>
+              </div>
+            </section>
+            <section class="resident-overview" id="resident-overview" hidden></section>
+
+            <section class="record-view" id="record-view" hidden>
+              <section class="session-context" id="session-context" hidden>
+                <div class="session-context-head">
+                  <div class="session-summary">
+                    <div class="session-identity">
+                      <span class="session-type" id="session-type">ICP Ax</span>
+                      <span class="session-record-id" id="session-record-id">AX-202610-001</span>
+                      <h2 id="session-title">A12 · 陳大文</h2>
+                    </div>
+                  </div>
+                  <div class="session-actions">
+                    <button class="btn" type="button" data-action="exit-session">返回</button>
+                    <button class="btn" type="button" data-action="print-record">列印</button>
+                    <button class="btn btn-primary" type="button" data-action="save-record">儲存草稿</button>
+                  </div>
+                </div>
+                <div class="session-notice" id="session-notice" hidden></div>
+              </section>
+              <div class="screen-head">
+                <div>
+                  <div class="breadcrumbs" id="record-breadcrumb">評估檔案</div>
+                  <div class="sub" id="record-sub"></div>
+                </div>
+                <div class="actions">
+                  <button class="btn" type="button" data-action="print-record">列印</button>
+                  <button class="btn btn-primary" id="save-record" type="button" data-action="save-record">儲存草稿</button>
+                </div>
+              </div>
+
+              <div class="layout">
+          <nav class="section-nav">
+            <button class="active" data-target="bg">Background</button>
+            <button data-target="mh">Medical History</button>
+            <button data-target="cog">Cognition</button>
+            <button data-target="sen">Sensation</button>
+            <button data-target="mot">Motor Function</button>
+            <button data-target="mob">Mobility / EMS</button>
+            <button data-target="mbi">MBI</button>
+            <button data-target="prb">Main Problem</button>
+            <button data-target="tx">Treatment Plan</button>
+            <button data-target="asr">Assessor</button>
+          </nav>
+
+          <article class="paper">
+            <section id="bg" class="section section--context">
+              <div class="section-head">
+                <div class="section-title">
+                  <span class="section-number">01</span>
+                  <div><h2>Background Information</h2></div>
+                </div>
+                <div class="section-meta"><span class="role-tag">Shared</span><span class="status">已完成</span></div>
+              </div>
+              <div class="section-body">
+                <div class="context-grid">
+                  <div class="context-field">
+                    <label for="assessment-date">評估日期</label>
+                    <input class="quiet-input" id="assessment-date" type="date" value="2026-10-03" data-record-field="date" required data-auto-required>
+                  </div>
+                  <div class="context-field">
+                    <label for="assessment-home-name">安老院名稱</label>
+                    <input class="quiet-input" id="assessment-home-name" value="康璟護老院（油塘）">
+                  </div>
+                  <div class="context-field">
+                    <label for="assessment-license">牌照處檔號</label>
+                    <input class="quiet-input" id="assessment-license" value="1498">
+                  </div>
+                  <div class="context-field">
+                    <label for="assessment-resident-name">住客姓名</label>
+                    <input class="quiet-input" id="assessment-resident-name" value="陳大文" data-record-field="residentName" required data-auto-required>
+                  </div>
+                  <div class="context-field">
+                    <label for="assessment-bed">住客床號</label>
+                    <input class="quiet-input" id="assessment-bed" value="A12" data-record-field="bed" required data-auto-required>
+                  </div>
+                  <div class="context-field">
+                    <span class="field-label">宿位</span>
+                    <div class="choice-set" data-auto-required-group>
+                      <label class="choice"><input type="radio" name="place" value="buy" required> 買位</label>
+                      <label class="choice"><input type="radio" name="place" value="voucher" checked> 券位</label>
+                      <label class="choice"><input type="radio" name="place" value="private"> 私位</label>
+                      <label class="choice"><input type="radio" name="place" value="respite"> 暫託</label>
+                    </div>
+                  </div>
+                  <div class="context-field">
+                    <span class="field-label">性別</span>
+                    <div class="choice-set" data-auto-required-group>
+                      <label class="choice"><input type="radio" name="sex" value="male" checked required> 男</label>
+                      <label class="choice"><input type="radio" name="sex" value="female"> 女</label>
+                    </div>
+                  </div>
+                  <div class="context-field">
+                    <span class="field-label">活動現況</span>
+                    <div class="choice-set" data-auto-required-group>
+                      <label class="choice"><input type="radio" name="residentMobility" value="IW" checked> IW 自由活動</label>
+                      <label class="choice"><input type="radio" name="residentMobility" value="IWC"> IWC 自由輪椅活動</label>
+                      <label class="choice"><input type="radio" name="residentMobility" value="CB"> CB 久坐</label>
+                      <label class="choice"><input type="radio" name="residentMobility" value="BB"> BB 臥床</label>
+                    </div>
+                  </div>
+                </div>
+                <fieldset class="question derived-choice">
+                  <legend>評估性質 <span class="hint">由啟動入口自動設定</span></legend>
+                  <div class="choice-set">
+                    <label class="choice"><input type="checkbox" disabled> Initial Ax</label>
+                    <label class="choice"><input type="checkbox" disabled> Re-Ax</label>
+                    <label class="choice"><input type="checkbox" checked disabled> ICP Ax</label>
+                    <label class="choice"><input type="checkbox" disabled> 其他:</label>
+                  </div>
+                </fieldset>
+              </div>
+            </section>
+
+            <section id="mh" class="section section--history">
+              <div class="section-head">
+                <div class="section-title"><span class="section-number">02</span><div><h2>Medical History</h2></div></div>
+                <div class="section-meta"><span class="role-tag">Shared</span><span class="status">已完成</span></div>
+              </div>
+              <div class="section-body">
+                <fieldset class="question">
+                  <legend>Relevant medical history</legend>
+                  <div class="choice-set">
+                    <label class="choice"><input type="checkbox" checked> HT</label>
+                    <label class="choice"><input type="checkbox" checked> DM</label>
+                    <label class="choice"><input type="checkbox"> Dementia: AD / VaD / LBD / FTD</label>
+                    <label class="choice"><input type="checkbox"> CVA: Lt. / Rt.</label>
+                    <label class="choice"><input type="checkbox"> COPD</label>
+                    <label class="choice"><input type="checkbox"> PD</label>
+                    <label class="choice"><input type="checkbox"> Others:</label>
+                  </div>
+                </fieldset>
+                <div class="clinical-field">
+                  <label class="field-label" for="medical-history-note">其他病歷或注意事項</label>
+                  <textarea class="inline-note" id="medical-history-note" placeholder="其他診斷及病史請參閱 Kardex"></textarea>
+                </div>
+              </div>
+            </section>
+
+            <section id="cog" class="section section--cognition">
+              <div class="section-head">
+                <div class="section-title"><span class="section-number">03</span><div><h2>Cognition & Communication</h2></div></div>
+                <div class="section-meta"><span class="role-tag">OT-led</span><span class="status">待 OT 完成</span></div>
+              </div>
+              <div class="section-body">
+                <div class="field-columns">
+                  <fieldset class="question">
+                    <legend>Alertness</legend>
+                    <div class="choice-set">
+                      <label class="choice"><input type="radio" name="alertness" checked> Alert</label>
+                      <label class="choice"><input type="radio" name="alertness"> Drowsy</label>
+                      <label class="choice"><input type="radio" name="alertness"> Unarousable</label>
+                    </div>
+                  </fieldset>
+                  <fieldset class="question">
+                    <legend>Speech</legend>
+                    <div class="choice-set">
+                      <label class="choice"><input type="radio" name="speech"> Nil.</label>
+                      <label class="choice"><input type="radio" name="speech" checked> Sentences</label>
+                      <label class="choice"><input type="radio" name="speech"> Simple words</label>
+                      <label class="choice"><input type="radio" name="speech"> Y/N</label>
+                    </div>
+                  </fieldset>
+                  <fieldset class="question">
+                    <legend>Receptive communication</legend>
+                    <div class="choice-set">
+                      <label class="choice"><input type="radio" name="receptive"> Nil.</label>
+                      <label class="choice"><input type="radio" name="receptive" checked> Verbal</label>
+                      <label class="choice"><input type="radio" name="receptive"> Gesture</label>
+                      <label class="choice"><input type="radio" name="receptive"> Written</label>
+                    </div>
+                  </fieldset>
+                  <fieldset class="question">
+                    <legend>Expressive communication</legend>
+                    <div class="choice-set">
+                      <label class="choice"><input type="radio" name="expressive"> Nil.</label>
+                      <label class="choice"><input type="radio" name="expressive" checked> Verbal</label>
+                      <label class="choice"><input type="radio" name="expressive"> Gesture</label>
+                      <label class="choice"><input type="radio" name="expressive"> Written</label>
+                    </div>
+                  </fieldset>
+                  <fieldset class="question">
+                    <legend>Attention to stimulus</legend>
+                    <div class="choice-set">
+                      <label class="choice"><input type="checkbox"> Verbal</label>
+                      <label class="choice"><input type="checkbox"> Visual</label>
+                      <label class="choice"><input type="checkbox"> Tactile</label>
+                      <label class="choice"><input type="checkbox"> Unable</label>
+                    </div>
+                  </fieldset>
+                  <fieldset class="question">
+                    <legend>Following steps of command</legend>
+                    <div class="choice-set">
+                      <label class="choice"><input type="radio" name="steps" checked> ≥ 2 steps</label>
+                      <label class="choice"><input type="radio" name="steps"> 1 step</label>
+                      <label class="choice"><input type="radio" name="steps"> Unable</label>
+                    </div>
+                  </fieldset>
+                </div>
+
+                <section class="measure-panel">
+                  <div class="measure-panel-head">
+                    <strong>HK-MoCA 5-minute</strong>
+                    <span class="role-tag">Auto-generated</span>
+                  </div>
+                  <div class="moca-auto-grid">
+                    <div class="moca-auto-item"><span>Status</span><strong>Administered</strong></div>
+                    <div class="moca-auto-item"><span>Score</span><strong>21 / 30</strong></div>
+                    <div class="moca-auto-item"><span>Education</span><strong>7 years</strong></div>
+                    <div class="moca-auto-item"><span>Percentile</span><strong>&gt; 16th</strong></div>
+                  </div>
+                </section>
+
+                <fieldset class="question">
+                  <legend>Safety awareness / insight</legend>
+                  <div class="choice-set">
+                    <label class="choice"><input type="radio" name="safety" checked> High</label>
+                    <label class="choice"><input type="radio" name="safety"> Medium</label>
+                    <label class="choice"><input type="radio" name="safety"> Low</label>
+                    <label class="choice"><input type="radio" name="safety"> N/A</label>
+                  </div>
+                </fieldset>
+                <div class="clinical-field">
+                  <label class="field-label" for="cognition-note">Clinical note</label>
+                  <textarea class="inline-note" id="cognition-note" placeholder="Behaviour, communication strategy or assessment limitation"></textarea>
+                </div>
+              </div>
+            </section>
+
+            <section id="sen" class="section section--sensation">
+              <div class="section-head">
+                <div class="section-title"><span class="section-number">04</span><div><h2>Sensation</h2></div></div>
+                <div class="section-meta"><span class="role-tag">OT / PT</span><span class="status">已完成</span></div>
+              </div>
+              <div class="section-body">
+                <div class="field-columns">
+                  <fieldset class="question">
+                    <legend>Vision</legend>
+                    <div class="choice-set">
+                      <label class="choice"><input type="radio" name="vision" checked> Normal</label>
+                      <label class="choice"><input type="radio" name="vision"> Blurred</label>
+                      <label class="choice"><input type="radio" name="vision"> Impaired</label>
+                      <label class="choice"><input type="radio" name="vision"> Blind</label>
+                      <label class="choice"><input type="radio" name="vision"> Unable to assess</label>
+                    </div>
+                    <div class="clinical-field">
+                      <label class="field-label" for="vision-side">Affected side / aid</label>
+                      <input class="quiet-input" id="vision-side" value="N/A">
+                    </div>
+                  </fieldset>
+                  <fieldset class="question">
+                    <legend>Auditory</legend>
+                    <div class="choice-set">
+                      <label class="choice"><input type="radio" name="auditory" checked> Normal</label>
+                      <label class="choice"><input type="radio" name="auditory"> Impaired</label>
+                      <label class="choice"><input type="radio" name="auditory"> Deaf</label>
+                      <label class="choice"><input type="radio" name="auditory"> Unable to assess</label>
+                    </div>
+                    <div class="clinical-field">
+                      <label class="field-label" for="auditory-side">Affected side / aid</label>
+                      <input class="quiet-input" id="auditory-side" value="N/A">
+                    </div>
+                  </fieldset>
+                </div>
+              </div>
+            </section>
+
+            <section id="mot" class="section section--motor">
+              <div class="section-head">
+                <div class="section-title"><span class="section-number">05</span><div><h2>Motor Function</h2></div></div>
+                <div class="section-meta"><span class="role-tag">OT / PT</span><span class="status">已完成</span></div>
+              </div>
+              <div class="section-body">
+                <div class="motion-matrices">
+                  <article class="motion-card">
+                    <h3>AROM</h3>
+                    <div class="motion-axes">
+                      <span></span>
+                      <div class="motion-axis-labels"><span>Rt.</span><span>Lt.</span></div>
+                      <div class="motion-row-labels"><span>UL</span><span>LL</span></div>
+                      <div class="motion-grid">
+                        <input value="Full" aria-label="Right upper limb AROM">
+                        <input aria-label="Left upper limb AROM">
+                        <input aria-label="Right lower limb AROM">
+                        <input aria-label="Left lower limb AROM">
+                      </div>
+                    </div>
+                  </article>
+                  <article class="motion-card">
+                    <h3>PROM</h3>
+                    <div class="motion-axes">
+                      <span></span>
+                      <div class="motion-axis-labels"><span>Rt.</span><span>Lt.</span></div>
+                      <div class="motion-row-labels"><span>UL</span><span>LL</span></div>
+                      <div class="motion-grid">
+                        <input aria-label="Right upper limb PROM">
+                        <input aria-label="Left upper limb PROM">
+                        <input aria-label="Right lower limb PROM">
+                        <input aria-label="Left lower limb PROM">
+                      </div>
+                    </div>
+                  </article>
+                  <article class="motion-card">
+                    <h3>MMT</h3>
+                    <div class="motion-axes">
+                      <span></span>
+                      <div class="motion-axis-labels"><span>Rt.</span><span>Lt.</span></div>
+                      <div class="motion-row-labels"><span>UL</span><span>LL</span></div>
+                      <div class="motion-grid">
+                        <input value="5" aria-label="Right upper limb MMT">
+                        <input aria-label="Left upper limb MMT">
+                        <input aria-label="Right lower limb MMT">
+                        <input aria-label="Left lower limb MMT">
+                      </div>
+                    </div>
+                  </article>
+                </div>
+                <div class="clinical-field">
+                  <label class="field-label" for="deformity">Deformity / contracture</label>
+                  <input class="quiet-input" id="deformity" value="Normal">
+                </div>
+                <div class="field-columns motor-details-grid">
+                  <div class="table-scroll">
+                    <h3 class="measure-group-title">Balance</h3>
+                    <table class="data-table">
+                      <thead><tr><th>Position</th><th>Static</th><th>Dynamic</th></tr></thead>
+                      <tbody>
+                        <tr><td>Sitting</td><td><select name="sit-static"><option>Good</option><option>Fair</option><option>Poor</option><option>N/A</option></select></td><td><select name="sit-dynamic"><option selected>Good</option><option>Fair</option><option>Poor</option><option>N/A</option></select></td></tr>
+                        <tr><td>Standing</td><td><select name="stand-static"><option>Good</option><option selected>Fair</option><option>Poor</option><option>N/A</option></select></td><td><select name="stand-dynamic"><option selected>Good</option><option>Fair</option><option>Poor</option><option>N/A</option></select></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="table-scroll">
+                    <h3 class="measure-group-title">Coordination</h3>
+                    <table class="data-table">
+                      <thead><tr><th>Region</th><th>Right</th><th>Left</th></tr></thead>
+                      <tbody>
+                        <tr><td>Upper limb</td><td><select name="rt-ul"><option selected>Good</option><option>Fair</option><option>Poor</option><option>N/A</option></select></td><td><select name="lt-ul"><option selected>Good</option><option>Fair</option><option>Poor</option><option>N/A</option></select></td></tr>
+                        <tr><td>Lower limb</td><td><select name="rt-ll"><option selected>Good</option><option>Fair</option><option>Poor</option><option>N/A</option></select></td><td><select name="lt-ll"><option selected>Good</option><option>Fair</option><option>Poor</option><option>N/A</option></select></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section id="mob" class="section section--mobility">
+              <div class="section-head">
+                <div class="section-title"><span class="section-number">06</span><div><h2>Mobility / Elderly Mobility Scale</h2></div></div>
+              </div>
+              <div class="section-body">
+                <fieldset class="measure-row">
+                  <legend>臥床 → 坐</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m33" value="2" checked> 獨立完成 <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m33" value="1"> 一人協助 <span class="points">1</span></label>
+                    <label class="score-choice"><input type="radio" name="m33" value="0"> ≥2 人協助 <span class="points">0</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>坐 → 臥床</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m34" value="2" checked> 獨立完成 <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m34" value="1"> 一人協助 <span class="points">1</span></label>
+                    <label class="score-choice"><input type="radio" name="m34" value="0"> ≥2 人協助 <span class="points">0</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>坐 → 站立</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m35" value="3"> 不需支撐（可伸展） <span class="points">3</span></label>
+                    <label class="score-choice"><input type="radio" name="m35" value="2" checked> 不需支撐（不可伸展） <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m35" value="1"> 需支撐 <span class="points">1</span></label>
+                    <label class="score-choice"><input type="radio" name="m35" value="0"> ≥1 人扶持 <span class="points">0</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>站立</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m36" value="3"> 獨立完成（拐杖／四腳叉） <span class="points">3</span></label>
+                    <label class="score-choice"><input type="radio" name="m36" value="2" checked> 獨立完成（助行架） <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m36" value="1"> 需要監察 <span class="points">1</span></label>
+                    <label class="score-choice"><input type="radio" name="m36" value="0"> 需要協助 <span class="points">0</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>步行</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m37" value="3" checked> 獨立完成（拐杖／四腳叉） <span class="points">3</span></label>
+                    <label class="score-choice"><input type="radio" name="m37" value="2"> 獨立完成（有輪／無輪助行架） <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m37" value="1"> 需要監察（轉彎時偶爾不穩） <span class="points">1</span></label>
+                    <label class="score-choice"><input type="radio" name="m37" value="0"> 需要協助 <span class="points">0</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>6 米計時步行</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m38" value="3" checked> ≤15 秒 <span class="points">3</span></label>
+                    <label class="score-choice"><input type="radio" name="m38" value="2"> 16–30 秒 <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m38" value="1"> 超過 30 秒 <span class="points">1</span></label>
+                    <label class="score-choice"><input type="radio" name="m38" value="0"> 未能完成測試 <span class="points">0</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>站立向前伸展</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m39" value="4" checked> 超過 20 cm <span class="points">4</span></label>
+                    <label class="score-choice"><input type="radio" name="m39" value="2"> 10–20 cm <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m39" value="0"> 少於 10 cm <span class="points">0</span></label>
+                  </div>
+                </fieldset>
+                <div class="score-footer">EMS 總分 <strong><span id="ems-total">16</span> / 20</strong></div>
+              </div>
+            </section>
+
+            <section id="mbi" class="section section--mbi">
+              <div class="section-head">
+                <div class="section-title"><span class="section-number">07</span><div><h2>Modified Barthel Index</h2></div></div>
+              </div>
+              <div class="section-body">
+                <h3 class="measure-group-title">Self-care</h3>
+                <fieldset class="measure-row">
+                  <legend>梳洗</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m41" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="m41" value="1"> 有參與 <span class="points">1</span></label>
+                    <label class="score-choice"><input type="radio" name="m41" value="3"> 過程協助 <span class="points">3</span></label>
+                    <label class="score-choice"><input type="radio" name="m41" value="4" checked> 事前事後協助 <span class="points">4</span></label>
+                    <label class="score-choice"><input type="radio" name="m41" value="5"> 完全自理 <span class="points">5</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>進食</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m42" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="m42" value="2"> 持續協助 <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m42" value="5"> 監察或事前協助 <span class="points">5</span></label>
+                    <label class="score-choice"><input type="radio" name="m42" value="8" checked> 事前協助 <span class="points">8</span></label>
+                    <label class="score-choice"><input type="radio" name="m42" value="10"> 完全自理 <span class="points">10</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>穿脫衣物</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m43" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="m43" value="2"> 有參與 <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m43" value="5"> 需要協助 <span class="points">5</span></label>
+                    <label class="score-choice"><input type="radio" name="m43" value="8" checked> 協助扣鈕／拉鏈 <span class="points">8</span></label>
+                    <label class="score-choice"><input type="radio" name="m43" value="10"> 完全自理 <span class="points">10</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>如廁</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m44" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="m44" value="2"> 全程協助 <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m44" value="5"> 偶爾協助 <span class="points">5</span></label>
+                    <label class="score-choice"><input type="radio" name="m44" value="8" checked> 協助清理 <span class="points">8</span></label>
+                    <label class="score-choice"><input type="radio" name="m44" value="10"> 完全自理 <span class="points">10</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>洗澡</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m45" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="m45" value="1"> 少量參與 <span class="points">1</span></label>
+                    <label class="score-choice"><input type="radio" name="m45" value="3" checked> 偶爾協助 <span class="points">3</span></label>
+                    <label class="score-choice"><input type="radio" name="m45" value="4"> 監察下進行 <span class="points">4</span></label>
+                    <label class="score-choice"><input type="radio" name="m45" value="5"> 完全自理 <span class="points">5</span></label>
+                  </div>
+                </fieldset>
+
+                <h3 class="measure-group-title">Mobility</h3>
+                <fieldset class="measure-row">
+                  <legend>轉移</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m46" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="m46" value="3"> 一人大量協助 <span class="points">3</span></label>
+                    <label class="score-choice"><input type="radio" name="m46" value="8" checked> 一人協助 <span class="points">8</span></label>
+                    <label class="score-choice"><input type="radio" name="m46" value="12"> 監察下進行 <span class="points">12</span></label>
+                    <label class="score-choice"><input type="radio" name="m46" value="15"> 完全自理 <span class="points">15</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>步行</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="mbi-walk" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="mbi-walk" value="3"> 一至二人持續協助 <span class="points">3</span></label>
+                    <label class="score-choice"><input type="radio" name="mbi-walk" value="8"> 一人協助 <span class="points">8</span></label>
+                    <label class="score-choice"><input type="radio" name="mbi-walk" value="12" checked> 監察 <span class="points">12</span></label>
+                    <label class="score-choice"><input type="radio" name="mbi-walk" value="15"> 完全自理 <span class="points">15</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>輪椅</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="mbi-wheelchair" value="0" disabled> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="mbi-wheelchair" value="1" disabled> 平地自行推行短距離 <span class="points">1</span></label>
+                    <label class="score-choice"><input type="radio" name="mbi-wheelchair" value="3" disabled> 一人協助 <span class="points">3</span></label>
+                    <label class="score-choice"><input type="radio" name="mbi-wheelchair" value="4" disabled> 轉彎／上斜需少量協助 <span class="points">4</span></label>
+                    <label class="score-choice"><input type="radio" name="mbi-wheelchair" value="5" disabled> 完全自理 <span class="points">5</span></label>
+                  </div>
+                </fieldset>
+
+                <h3 class="measure-group-title">Continence & stairs</h3>
+                <fieldset class="measure-row">
+                  <legend>上下樓梯</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m48" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="m48" value="2"> 持續協助 <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m48" value="5"> 監察及協助 <span class="points">5</span></label>
+                    <label class="score-choice"><input type="radio" name="m48" value="8" checked> 偶爾監察 <span class="points">8</span></label>
+                    <label class="score-choice"><input type="radio" name="m48" value="10"> 完全自理 <span class="points">10</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>排尿控制</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m49" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="m49" value="2"> 使用失禁用品 <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m49" value="5" checked> 夜間失禁 <span class="points">5</span></label>
+                    <label class="score-choice"><input type="radio" name="m49" value="8"> 偶爾失禁 <span class="points">8</span></label>
+                    <label class="score-choice"><input type="radio" name="m49" value="10"> 完全自理 <span class="points">10</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>排便控制</legend>
+                  <div class="score-options">
+                    <label class="score-choice"><input type="radio" name="m50" value="0"> 完全依賴 <span class="points">0</span></label>
+                    <label class="score-choice"><input type="radio" name="m50" value="2"> 需協助姿勢 <span class="points">2</span></label>
+                    <label class="score-choice"><input type="radio" name="m50" value="5"> 需協助清潔 <span class="points">5</span></label>
+                    <label class="score-choice"><input type="radio" name="m50" value="8" checked> 偶爾失禁 <span class="points">8</span></label>
+                    <label class="score-choice"><input type="radio" name="m50" value="10"> 完全自理 <span class="points">10</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="measure-row">
+                  <legend>Walking Aids</legend>
+                  <div class="choice-set">
+                    <label class="choice"><input type="checkbox"> Stick</label>
+                    <label class="choice"><input type="checkbox"> Quadripod</label>
+                    <label class="choice"><input type="checkbox" checked> Frame</label>
+                    <label class="choice"><input type="checkbox"> Rollator</label>
+                    <label class="choice"><input type="checkbox"> Wheelchair</label>
+                  </div>
+                </fieldset>
+                <div class="score-footer">MBI 總分 <strong><span id="mbi-total">72</span> / 100</strong></div>
+              </div>
+            </section>
+
+            <section id="prb" class="section section--problem">
+              <div class="section-head">
+                <div class="section-title"><span class="section-number">08</span><div><h2>Main Problem Identified</h2></div></div>
+                <div class="section-meta"><span class="role-tag">OT / PT</span><span class="status">已完成</span></div>
+              </div>
+              <div class="section-body">
+                <div class="tag-groups" data-auto-required-group>
+                  <div class="tag-group">
+                    <strong>Cognition</strong>
+                    <div class="choice-set">
+                      <label class="choice"><input type="checkbox"> Cognitive decline</label>
+                      <label class="choice"><input type="checkbox"> Disorientation</label>
+                    </div>
+                  </div>
+                  <div class="tag-group">
+                    <strong>Movement & safety</strong>
+                    <div class="choice-set">
+                      <label class="choice"><input type="checkbox" checked> Muscle deconditioning</label>
+                      <label class="choice"><input type="checkbox" checked> Poor balance</label>
+                      <label class="choice"><input type="checkbox" checked> Fear of falling</label>
+                    </div>
+                  </div>
+                  <div class="tag-group">
+                    <strong>Other</strong>
+                    <div class="choice-set">
+                      <label class="choice"><input type="checkbox"> Others</label>
+                    </div>
+                    <textarea class="inline-note" aria-label="Other problem" placeholder="Add another clinical problem"></textarea>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section id="tx" class="section section--plan">
+              <div class="section-head">
+                <div class="section-title"><span class="section-number">09</span><div><h2>Treatment Plan</h2></div></div>
+                <div class="section-meta"><span class="role-tag">OT / PT</span><span class="status">已完成</span></div>
+              </div>
+              <div class="section-body">
+                <div class="tag-groups" data-auto-required-group>
+                  <div class="tag-group">
+                    <strong>Movement</strong>
+                    <div class="choice-set">
+                      <label class="choice"><input type="checkbox" checked> Static bike (UL/LL)</label>
+                      <label class="choice"><input type="checkbox" checked> Strengthening (UL/LL)</label>
+                      <label class="choice"><input type="checkbox" checked> Standing</label>
+                      <label class="choice"><input type="checkbox" checked> Walking</label>
+                      <label class="choice"><input type="checkbox"> Active mobility (UL/LL)</label>
+                      <label class="choice"><input type="checkbox"> Pulley</label>
+                      <label class="choice"><input type="checkbox"> Passive mobility (UL/LL)</label>
+                    </div>
+                  </div>
+                  <div class="tag-group">
+                    <strong>Daily function</strong>
+                    <div class="choice-set">
+                      <label class="choice"><input type="checkbox"> ADL training</label>
+                    </div>
+                  </div>
+                  <div class="tag-group">
+                    <strong>Cognition</strong>
+                    <div class="choice-set">
+                      <label class="choice"><input type="checkbox" checked> Reality orientation</label>
+                      <label class="choice"><input type="checkbox"> Reminiscence</label>
+                      <label class="choice"><input type="checkbox" checked> Cognitive training</label>
+                      <label class="choice"><input type="checkbox"> Multisensory stimulation</label>
+                    </div>
+                  </div>
+                  <div class="tag-group">
+                    <strong>Other</strong>
+                    <textarea class="inline-note" aria-label="Other treatment plan" placeholder="Add another intervention"></textarea>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section id="asr" class="section section--assessor">
+              <div class="section-head">
+                <div class="section-title"><span class="section-number">10</span><div><h2>Assessor & Sign-off</h2></div></div>
+                <div class="section-meta"><span class="role-tag">OT / PT</span><span class="status">待 PT 完成</span></div>
+              </div>
+              <div class="section-body">
+                <div class="assessor-signoff">
+                  <div class="assessor-person">
+                    <strong id="assessment-current-user">Testing</strong>
+                    <span id="assessment-current-post">OT</span>
+                  </div>
+                  <div class="signature-line">Signature: <span aria-label="簽署位置"></span></div>
+                </div>
+              </div>
+            </section>
+          </article>
+        </div>
+
+        <div class="form-actions">
+          <div class="actions"><span class="chip chip-amber" id="record-status-chip">草稿</span><span class="muted" id="record-saved-at"></span></div>
+          <div class="actions"><button class="btn" type="button" data-action="back-to-resident">返回記錄</button></div>
+        </div>
+            </section>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="assessment-toast" id="assessment-toast" role="status" aria-live="polite"></div>
+
+  <script src="../shared/home-settings.js"></script>
+  <script src="../shared/prototype-catalog.js"></script>
+  <script src="../shared/mock-residents.js"></script>
+  <script src="../shared/prototype-domain.js"></script>
+  <script>
+    function applyHomeSettings() {
+      const home = OT_HOME_SETTINGS.getHome();
+      document.getElementById("chrome-home-code").textContent = home.code;
+      document.getElementById("chrome-home-name").textContent = home.name;
+      document.getElementById("assessment-home-name").value = home.name;
+      document.getElementById("assessment-license").value = home.licenseNumber;
+    }
+
+    const TODAY_KEY = "2026-10-22";
+    const ACTIVE_DRAFT_KEY = OT_MOCK_STORAGE_KEYS.assessmentDraft;
+    const ICP_CYCLE_STORAGE_KEY = OT_MOCK_STORAGE_KEYS.icpCycles;
+    if (new URLSearchParams(location.search).get("role")?.toLowerCase() === "pt") {
+      OT_PROTOTYPE.setCurrentUser("pt");
+    }
+    const CURRENT_USER = OT_PROTOTYPE.currentUser();
+    function renderSignoffIdentity() {
+      document.getElementById("assessment-current-user").textContent = CURRENT_USER.name;
+      document.getElementById("assessment-current-post").textContent = CURRENT_USER.role;
+    }
+    const STATUS_META = {
+      draft: { label: "草稿", chip: "chip-amber", dot: "draft" },
+      review: { label: "待評估", chip: "chip-blue", dot: "review" },
+      completed: { label: "已完成", chip: "chip-green", dot: "completed" },
+      void: { label: "已作廢", chip: "chip-red", dot: "void" }
+    };
+    let assessmentResidents = [];
+    let assessmentRecords = {};
+    let residentById = new Map();
+    let selectedResidentId = null;
+    let selectedRecordId = null;
+    let activeResidentPlace = "all";
+    let activeAssessmentStatus = "all";
+    let searchTerm = "";
+    let toastTimer = null;
+    let draftSaveTimer = null;
+    let sessionContext = null;
+    const expandedResidentIds = new Set();
+    let ICP_WINDOWS = {};
+
+    const escapeHtml = value => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    function assessmentWindowForCycle(cycle) {
+      if (!cycle?.dueDate) return null;
+      const [year, month, day] = cycle.dueDate.split("-").map(Number);
+      let start;
+      let end;
+      if (day > 15) {
+        start = new Date(year, month - 1, 1);
+        end = new Date(year, month - 1, 15);
+      } else {
+        start = new Date(year, month - 2, 16);
+        end = new Date(year, month - 1, 0);
+      }
+      const dateKey = date => [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+      ].join("-");
+      return { cycleId: cycle.id, start: dateKey(start), end: dateKey(end) };
+    }
+
+    function refreshAssessmentData() {
+      assessmentResidents = OT_PROTOTYPE.residents({ includeDischarged: true }).map(resident => ({
+        ...resident,
+        due: resident.lastAssessment || resident.icpDue
+      }));
+      assessmentRecords = {};
+      OT_PROTOTYPE.assessments().forEach(record => {
+        if (!assessmentRecords[record.residentId]) assessmentRecords[record.residentId] = [];
+        assessmentRecords[record.residentId].push(record);
+      });
+      residentById = new Map(assessmentResidents.map(resident => [resident.id, resident]));
+      ICP_WINDOWS = Object.fromEntries(
+        OT_PROTOTYPE.cycles()
+          .filter(cycle => !cycle.endedAt)
+          .map(cycle => {
+            const window = assessmentWindowForCycle(cycle);
+            return window ? [cycle.residentId, window] : null;
+          })
+          .filter(Boolean)
+      );
+    }
+
+    refreshAssessmentData();
+
+    function readActiveDraft() {
+      try {
+        const draft = JSON.parse(localStorage.getItem(ACTIVE_DRAFT_KEY));
+        return draft && typeof draft === "object" ? draft : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function formSnapshot() {
+      return [...document.querySelectorAll("#record-view input, #record-view select, #record-view textarea")]
+        .map(control => ({
+          type: control.type,
+          value: control.value,
+          checked: Boolean(control.checked)
+        }));
+    }
+
+    function persistActiveAssessmentDraft() {
+      const record = currentRecord();
+      const resident = residentById.get(selectedResidentId);
+      if (!record || !resident || !sessionContext) return;
+      const params = new URLSearchParams({
+        embed: "1",
+        mode: "session",
+        origin: sessionContext.origin,
+        residentId: resident.id,
+        cycleId: sessionContext.cycleId || record.cycleId || "",
+        assessmentId: record.id,
+        v: "resume"
+      });
+      const draft = {
+        version: 1,
+        resident: { ...resident },
+        record: JSON.parse(JSON.stringify(record)),
+        session: {
+          residentId: resident.id,
+          recordId: record.id,
+          origin: sessionContext.origin,
+          cycleId: sessionContext.cycleId || record.cycleId || null
+        },
+        form: formSnapshot(),
+        scrollY: window.scrollY,
+        updatedAt: new Date().toISOString(),
+        dismissed: false,
+        resumeUrl: `assessment/paper-aligned.html?${params.toString()}`
+      };
+      try {
+        localStorage.setItem(ACTIVE_DRAFT_KEY, JSON.stringify(draft));
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: "ot-assessment-draft", draft }, "*");
+        }
+      } catch (error) {
+        // The form remains usable if browser storage is unavailable.
+      }
+    }
+
+    function scheduleDraftSave() {
+      clearTimeout(draftSaveTimer);
+      draftSaveTimer = setTimeout(() => {
+        const record = currentRecord();
+        if (sessionContext && evaluateAutomaticCompletion(record, true)) return;
+        persistActiveAssessmentDraft();
+      }, 120);
+    }
+
+    function restoreActiveAssessmentDraft(record, providedDraft = null) {
+      const draft = providedDraft || readActiveDraft();
+      if (
+        !draft ||
+        draft.session?.residentId !== selectedResidentId ||
+        draft.session?.recordId !== record.id
+      ) {
+        persistActiveAssessmentDraft();
+        return false;
+      }
+      if (draft.record) Object.assign(record, draft.record);
+      const controls = [...document.querySelectorAll("#record-view input, #record-view select, #record-view textarea")];
+      draft.form?.forEach((state, index) => {
+        const control = controls[index];
+        if (!control) return;
+        if (state.type === "checkbox" || state.type === "radio") {
+          control.checked = Boolean(state.checked);
+        } else {
+          control.value = state.value;
+        }
+      });
+      updateClinicalScores();
+      requestAnimationFrame(() => window.scrollTo({ top: draft.scrollY || 0, behavior: "instant" }));
+      draft.dismissed = false;
+      localStorage.setItem(ACTIVE_DRAFT_KEY, JSON.stringify(draft));
+      return true;
+    }
+
+    function clearActiveAssessmentDraft() {
+      try {
+        localStorage.removeItem(ACTIVE_DRAFT_KEY);
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: "ot-assessment-draft-cleared" }, "*");
+        }
+      } catch (error) {
+        // No cleanup is needed when storage is unavailable.
+      }
+    }
+
+    function recordsFor(residentId) {
+      return (assessmentRecords[residentId] || [])
+        .slice()
+        .sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    function recordById(residentId, recordId) {
+      return recordsFor(residentId).find(record => (
+        record.id === recordId || record.code === recordId
+      ));
+    }
+
+    function residentState(resident) {
+      const records = recordsFor(resident.id);
+      if (records.some(record => record.status === "draft")) {
+        return { key: "draft", label: "草稿", className: "draft" };
+      }
+      if (records.some(record => record.status === "review")) {
+        return { key: "review", label: "待評估", className: "review" };
+      }
+      if (resident.due <= TODAY_KEY) {
+        return { key: "due", label: "待評估", className: "due" };
+      }
+      return { key: "completed", label: "已完成", className: "done" };
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("assessment-toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    function selectedScore(name) {
+      const input = document.querySelector(`input[name="${name}"]:checked`);
+      return Number(input?.value || 0);
+    }
+
+    function updateClinicalScores() {
+      const emsNames = ["m33", "m34", "m35", "m36", "m37", "m38", "m39"];
+      const mbiNames = ["m41", "m42", "m43", "m44", "m45", "m46", "m48", "m49", "m50"];
+      const emsTotal = emsNames.reduce((sum, name) => sum + selectedScore(name), 0);
+      const walkingScore = selectedScore("mbi-walk");
+      const wheelchairInputs = [...document.querySelectorAll('input[name="mbi-wheelchair"]')];
+      wheelchairInputs.forEach(input => {
+        input.disabled = walkingScore !== 0;
+        if (input.disabled) input.checked = false;
+      });
+      const wheelchairScore = walkingScore === 0 ? selectedScore("mbi-wheelchair") : 0;
+      const mbiTotal = mbiNames.reduce((sum, name) => sum + selectedScore(name), 0) +
+        (walkingScore > 0 ? walkingScore : wheelchairScore);
+      document.getElementById("ems-total").textContent = emsTotal;
+      document.getElementById("mbi-total").textContent = mbiTotal;
+    }
+
+    function assessmentTimestamp() {
+      return `${TODAY_KEY} ${new Date().toLocaleTimeString("zh-HK", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      })}`;
+    }
+
+    function renderContributorList(record) {
+      const list = document.getElementById("assessment-contributors");
+      if (!list) return;
+      const contributors = record?.contributors || [];
+      list.innerHTML = contributors.length
+        ? contributors.map(contributor => (
+            `<span><strong>${escapeHtml(contributor.role)} · ${escapeHtml(contributor.name)}</strong> · ${escapeHtml(contributor.sectionLabel)} · ${escapeHtml(contributor.at)}</span>`
+          )).join("")
+        : "<span>尚未記錄編輯者。</span>";
+    }
+
+    function updateSectionRoleLabels(record) {
+      if (!record) return;
+      document.querySelectorAll("#record-view .section").forEach(section => {
+        const status = section.querySelector(".section-meta .status")?.textContent.trim() || "";
+        if (!status.includes("已完成")) return;
+        const sectionId = section.id || "general";
+        const roles = new Set(
+          (record.contributors || [])
+            .filter(contributor => contributor.sectionId === sectionId)
+            .map(contributor => contributor.role)
+            .filter(role => role === "OT" || role === "PT")
+        );
+        if (!roles.size) {
+          const completedBy = String(record.completedBy || "");
+          if (completedBy.includes("OT") && completedBy.includes("PT")) {
+            roles.add("OT");
+            roles.add("PT");
+          } else if (completedBy.includes("PT")) {
+            roles.add("PT");
+          } else if (completedBy.includes("OT")) {
+            roles.add("OT");
+          }
+        }
+        const roleTag = section.querySelector(".section-meta .role-tag");
+        if (!roleTag) return;
+        if (!roles.size) {
+          const existingLabel = roleTag.textContent.trim();
+          if (existingLabel.includes("OT") && existingLabel.includes("PT")) {
+            roles.add("OT");
+            roles.add("PT");
+          } else if (existingLabel.includes("OT")) {
+            roles.add("OT");
+          } else if (existingLabel.includes("PT")) {
+            roles.add("PT");
+          }
+        }
+        if (!roles.size) return;
+        roleTag.textContent = roles.size > 1 ? "Shared" : [...roles][0];
+      });
+    }
+
+    function recordContributor(target) {
+      const record = currentRecord();
+      if (!record) return;
+      const section = target.closest(".section");
+      const sectionLabel =
+        section?.querySelector(".section-title h2")?.textContent.trim() ||
+        section?.id?.toUpperCase() ||
+        "016";
+      const sectionId = section?.id || "general";
+      record.contributors = record.contributors || [];
+      const existing = record.contributors.find(contributor => (
+        contributor.sectionId === sectionId &&
+        contributor.role === CURRENT_USER.role &&
+        contributor.name === CURRENT_USER.name
+      ));
+      const entry = {
+        sectionId,
+        sectionLabel,
+        role: CURRENT_USER.role,
+        name: CURRENT_USER.name,
+        at: assessmentTimestamp()
+      };
+      if (existing) Object.assign(existing, entry);
+      else record.contributors.push(entry);
+      renderContributorList(record);
+      updateSectionRoleLabels(record);
+    }
+
+    function requiredAssessmentValid() {
+      const requiredFields = [...document.querySelectorAll("#record-view [data-auto-required]")];
+      if (requiredFields.some(field => !String(field.value || "").trim())) return false;
+      const requiredGroups = [...document.querySelectorAll("#record-view [data-auto-required-group]")];
+      const groupsValid = requiredGroups.every(group => (
+        Boolean(group.querySelector("input:checked")) ||
+        [...group.querySelectorAll("textarea")].some(field => field.value.trim())
+      ));
+      const mocaStatus = document.querySelector("#cog .moca-auto-item strong")?.textContent.trim();
+      return groupsValid && Boolean(mocaStatus);
+    }
+
+    function applyIcpLinkOnCompletion(record) {
+      const windowInfo = ICP_WINDOWS[record.residentId];
+      const inWindow = windowInfo && record.date >= windowInfo.start && record.date <= windowInfo.end;
+      if (!inWindow) return;
+      if (record.type === "Initial Ax") {
+        record.cycleId = windowInfo.cycleId;
+        record.icpLinkIntent = true;
+        record.servesAsIcpAx = true;
+      } else if (record.type === "Re-Ax" && record.icpLinkIntent === true) {
+        record.cycleId = windowInfo.cycleId;
+        record.servesAsIcpAx = true;
+      }
+    }
+
+    function assessmentClinicalSnapshot() {
+      const resident = residentById.get(selectedResidentId);
+      const mbiTotal = document.getElementById("mbi-total")?.textContent.trim();
+      const mocaScore = document.querySelector("#cog .moca-auto-item strong")?.textContent.trim();
+      const mobility = document.querySelector('input[name="residentMobility"]:checked')?.value;
+      const selectedTreatments = [...document.querySelectorAll("#tx input:checked")]
+        .map(input => input.closest("label")?.textContent.trim())
+        .filter(Boolean);
+      return {
+        mbi: mbiTotal ? `${mbiTotal} / 100` : resident?.mbi || "—",
+        moca: mocaScore || resident?.moca || "—",
+        mobility: mobility || resident?.mobility || "—",
+        orientation: resident?.orientation || "時 — · 地 — · 人 —",
+        activities: selectedTreatments.join(" · ") || resident?.activities || "",
+        history: resident?.history || ""
+      };
+    }
+
+    function evaluateAutomaticCompletion(record = currentRecord(), notify = false) {
+      if (!record || record.status === "completed" || !requiredAssessmentValid()) return false;
+      record.status = "completed";
+      record.completedAt = assessmentTimestamp();
+      record.completedBy = `${CURRENT_USER.role} · ${CURRENT_USER.name}`;
+      record.updated = record.completedAt;
+      record.summary = record.summary === "新評估" ? "016 已自動完成" : record.summary;
+      applyIcpLinkOnCompletion(record);
+      try {
+        OT_PROTOTYPE.updateAssessment(record.id, record, "自動儲存評估");
+        OT_PROTOTYPE.completeAssessment(record.id, assessmentClinicalSnapshot());
+        Object.assign(record, OT_PROTOTYPE.assessment(record.id));
+      } catch (error) {
+        showToast(error.message);
+        return false;
+      }
+      refreshAssessmentData();
+      renderExplorer();
+      openRecord(selectedResidentId, selectedRecordId);
+      renderSessionControls(record);
+      clearActiveAssessmentDraft();
+      if (notify) showToast("必填資料已齊備，016 已自動完成。");
+      return true;
+    }
+
+    document.querySelector(".record-view").addEventListener("change", event => {
+      if (event.target.matches('input[type="radio"]')) updateClinicalScores();
+    });
+    function matchesFilter(resident) {
+      if (activeResidentPlace === "all") return true;
+      if (activeResidentPlace === "private") {
+        return resident.place === "私位" || resident.place === "暫託";
+      }
+      return resident.place === (activeResidentPlace === "voucher" ? "券位" : "買位");
+    }
+
+    function recordsByYear(residentId) {
+      const groups = new Map();
+      recordsFor(residentId).forEach(record => {
+        const year = record.date.slice(0, 4);
+        if (!groups.has(year)) groups.set(year, []);
+        groups.get(year).push(record);
+      });
+      return groups;
+    }
+
+    function renderExplorer() {
+      const normalizedSearch = searchTerm.trim().toLowerCase();
+      const residents = assessmentResidents.filter(resident => (
+        matchesFilter(resident) &&
+        (!normalizedSearch || `${resident.bed} ${resident.name}`.toLowerCase().includes(normalizedSearch))
+      ));
+
+      const tree = document.getElementById("resident-tree");
+      tree.innerHTML = residents.length
+        ? residents.map(resident => {
+          const state = residentState(resident);
+          const expanded = expandedResidentIds.has(resident.id);
+          const selected = resident.id === selectedResidentId;
+          const years = recordsByYear(resident.id);
+          const branch = expanded
+            ? `
+              <div class="record-branch">
+                ${[...years.entries()].map(([year, records]) => `
+                  <div class="record-year">${year}</div>
+                  ${records.map(record => {
+                    const meta = STATUS_META[record.status];
+                    return `
+                      <button class="explorer-record ${record.id === selectedRecordId ? "active" : ""}"
+                        type="button" data-resident-id="${resident.id}" data-record-id="${record.id}">
+                        <span class="explorer-record-date">${record.date}</span>
+                        <span class="record-dot ${meta.dot}"></span>
+                        <span class="explorer-record-type">${escapeHtml(record.type)} · ${meta.label}</span>
+                      </button>
+                    `;
+                  }).join("")}
+                `).join("")}
+              </div>
+            `
+            : "";
+          return `
+            <button class="resident-node ${selected ? "selected" : ""} ${expanded ? "expanded" : ""}"
+              type="button" data-resident-id="${resident.id}" aria-expanded="${expanded}">
+              <span class="resident-chevron" aria-hidden="true"></span>
+              <span class="resident-bed">${escapeHtml(resident.bed)}</span>
+              <span class="resident-node-copy">
+                <span class="resident-node-name-row">
+                  <span class="resident-node-name">${escapeHtml(resident.name)}</span>
+                  <span class="resident-node-place">${escapeHtml(resident.place)}</span>
+                </span>
+              </span>
+              <span class="tree-status ${state.className}">${state.label}</span>
+            </button>
+            ${branch}
+          `;
+        }).join("")
+        : '<div class="explorer-empty">沒有符合條件的住客。</div>';
+    }
+
+    function renderOverview() {
+      const empty = document.getElementById("workspace-empty");
+      const overview = document.getElementById("resident-overview");
+      const recordView = document.getElementById("record-view");
+      if (!selectedResidentId) {
+        empty.hidden = false;
+        overview.hidden = true;
+        recordView.hidden = true;
+        return;
+      }
+
+      const resident = residentById.get(selectedResidentId);
+      const allRecords = recordsFor(resident.id);
+      const records = allRecords.filter(record => (
+        activeAssessmentStatus === "all" || record.status === activeAssessmentStatus
+      ));
+      const state = residentState(resident);
+      empty.hidden = true;
+      recordView.hidden = true;
+      overview.hidden = false;
+      overview.innerHTML = `
+        <header class="resident-overview-head">
+          <div>
+            <h2>${escapeHtml(resident.bed)} · ${escapeHtml(resident.name)}</h2>
+          </div>
+          <button class="btn btn-primary" type="button" data-resident-id="${resident.id}" data-action="new-assessment">新增 016 評估</button>
+        </header>
+        <section class="history-panel">
+          <header class="history-head">
+            <div class="history-title">
+              <strong>過往評估</strong>
+            </div>
+            <div class="history-filters" role="group" aria-label="過往評估篩選">
+              ${[
+                ["all", "全部"],
+                ["review", "待評估"],
+                ["draft", "草稿"],
+                ["completed", "完成"]
+              ].map(([value, label]) => `
+                <button class="${activeAssessmentStatus === value ? "active" : ""}" type="button"
+                  data-assessment-filter="${value}" aria-pressed="${activeAssessmentStatus === value}">${label}</button>
+              `).join("")}
+            </div>
+          </header>
+          <table class="history-table">
+            <thead><tr><th>日期</th><th>類型</th><th>主要結果</th><th>負責</th><th>狀態</th><th>操作</th></tr></thead>
+            <tbody>
+              ${records.map(record => {
+                const meta = STATUS_META[record.status];
+                return `
+                  <tr data-resident-id="${resident.id}" data-record-id="${record.id}" tabindex="0">
+                    <td>${record.date}</td>
+                    <td>${escapeHtml(record.type)}</td>
+                    <td>${escapeHtml(record.summary)}</td>
+                    <td>${escapeHtml(record.owner)}</td>
+                    <td><span class="chip ${meta.chip}">${meta.label}</span></td>
+                    <td>${record.status === "completed"
+                      ? `<button class="btn record-void-action" type="button"
+                           data-action="void-assessment"
+                           data-resident-id="${resident.id}"
+                           data-record-id="${record.id}">作廢</button>`
+                      : ""}</td>
+                  </tr>
+                `;
+              }).join("") || '<tr><td colspan="6"><div class="explorer-empty">尚未有評估記錄。</div></td></tr>'}
+            </tbody>
+          </table>
+        </section>
+      `;
+    }
+
+    function setSectionNavState() {
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.target === "bg"));
+    }
+
+    function syncAssessmentStickyOffset() {
+      const head = document.querySelector("#record-view > .screen-head");
+      const headVisible = head && getComputedStyle(head).display !== "none";
+      const offset = headVisible ? Math.ceil(head.getBoundingClientRect().height) + 10 : 0;
+      document.documentElement.style.setProperty("--assessment-sticky-offset", `${offset}px`);
+    }
+
+    function openRecord(residentId, recordId) {
+      const resident = residentById.get(residentId);
+      const record = recordById(residentId, recordId);
+      if (!resident || !record) return;
+      selectedResidentId = residentId;
+      selectedRecordId = recordId;
+      expandedResidentIds.add(residentId);
+      const meta = STATUS_META[record.status];
+      const recordView = document.getElementById("record-view");
+      document.getElementById("workspace-empty").hidden = true;
+      document.getElementById("resident-overview").hidden = true;
+      recordView.hidden = false;
+      recordView.classList.remove("readonly");
+      document.getElementById("record-breadcrumb").textContent = "評估檔案";
+      document.getElementById("record-sub").textContent = `${record.code} · ${record.date} · ${record.type}`;
+      document.getElementById("record-status-chip").textContent = meta.label;
+      document.getElementById("record-status-chip").className = `chip ${meta.chip}`;
+      document.getElementById("record-saved-at").textContent = `最後儲存：${record.updated}`;
+      document.getElementById("save-record").hidden = false;
+      document.querySelectorAll('[data-action="print-record"]').forEach(button => {
+        button.disabled = record.status !== "completed";
+        button.title = record.status === "completed" ? "" : "只有已完成的 016 可以列印。";
+      });
+      document.querySelectorAll('[data-action="save-record"]').forEach(button => {
+        button.hidden = false;
+        button.textContent = record.status === "completed" ? "儲存變更" : "儲存草稿";
+      });
+      renderSignoffIdentity();
+      renderContributorList(record);
+      updateSectionRoleLabels(record);
+      if (!sessionContext) {
+        document.querySelector(".assessment-shell").classList.remove("session-mode");
+        document.getElementById("session-context").hidden = true;
+      }
+      document.querySelector('[data-record-field="residentName"]').value = resident.name;
+      document.querySelector('[data-record-field="bed"]').value = resident.bed;
+      document.querySelector('[data-record-field="date"]').value = record.date;
+      document.querySelectorAll('input[name="residentMobility"]').forEach(input => {
+        input.checked = input.value === (resident.mobility || "IW");
+      });
+      setSectionNavState();
+      renderExplorer();
+      requestAnimationFrame(syncAssessmentStickyOffset);
+    }
+
+    function openAssessmentRecord(residentId, recordId) {
+      const record = recordById(residentId, recordId);
+      if (!record) return;
+      if (record.status === "completed") {
+        sessionContext = null;
+        document.querySelector(".assessment-shell").classList.remove("session-mode");
+        document.getElementById("session-context").hidden = true;
+        openRecord(residentId, recordId);
+        return;
+      }
+      openAssessmentSession(
+        residentId,
+        recordId,
+        record.origin || "reassessment",
+        record.cycleId || null
+      );
+    }
+
+    function selectResident(residentId) {
+      const alreadySelected = selectedResidentId === residentId;
+      const expanded = expandedResidentIds.has(residentId);
+      selectedResidentId = residentId;
+      selectedRecordId = null;
+      if (!alreadySelected || !expanded) {
+        expandedResidentIds.clear();
+        expandedResidentIds.add(residentId);
+      }
+      else expandedResidentIds.delete(residentId);
+      renderExplorer();
+      renderOverview();
+    }
+
+    const ORIGIN_META = {
+      initial: { type: "Initial Ax", source: "新增住客" },
+      reassessment: { type: "Re-Ax", source: "評估系統" },
+      icp: { type: "ICP Ax", source: "ICP 工作清單" },
+      "urgent-icp": { type: "ICP Ax", source: "緊急 ICP" }
+    };
+
+    function syncAssessmentToIcp(record) {
+      if (!record?.cycleId) return;
+      try {
+        OT_PROTOTYPE.updateAssessment(record.id, record, "儲存評估及 ICP 連結");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    function setDerivedAssessmentType(record) {
+      document.querySelectorAll("#bg .section-body label").forEach(label => {
+        const input = label.querySelector('input[type="checkbox"]');
+        if (!input) return;
+        const text = label.textContent.trim();
+        if (!["Initial Ax", "Re-Ax", "ICP Ax", "其他:"].includes(text)) return;
+        const shouldCheck =
+          text === record.type ||
+          (text === "ICP Ax" && record.servesAsIcpAx);
+        input.checked = shouldCheck;
+        input.disabled = true;
+      });
+    }
+
+    function renderSessionControls(record) {
+      if (!sessionContext) return;
+      const resident = residentById.get(selectedResidentId);
+      document.getElementById("session-title").textContent = `${resident.bed} · ${resident.name}`;
+      document.getElementById("session-record-id").textContent = record.code;
+      renderSignoffIdentity();
+      renderContributorList(record);
+      const windowInfo = ICP_WINDOWS[record.residentId];
+      const inWindow = windowInfo && record.date >= windowInfo.start && record.date <= windowInfo.end;
+      const notice = document.getElementById("session-notice");
+      if (
+        inWindow &&
+        sessionContext.origin === "initial"
+      ) {
+        record.icpLinkIntent = true;
+        record.cycleId = windowInfo.cycleId;
+        notice.textContent =
+          `此 ${record.type} 日期落在 ICP 評估窗口內，完成後將作為週期 ${windowInfo.cycleId} 的 ICP Ax。`;
+        notice.hidden = false;
+      } else if (
+        inWindow &&
+        sessionContext.origin === "reassessment"
+      ) {
+        if (record.icpLinkIntent === true) {
+          record.cycleId = windowInfo.cycleId;
+          notice.textContent =
+            `已選擇在 Re-Ax 自動完成後用作 ICP 週期 ${windowInfo.cycleId} 的 ICP Ax。`;
+        } else if (record.icpLinkIntent === false) {
+          notice.innerHTML =
+            `此 Re-Ax 暫不連結 ICP Ax；可在 ICP 工作清單稍後連結。<button class="btn" type="button" data-icp-link-choice="true">改為用作 ICP Ax</button>`;
+        } else {
+          notice.innerHTML =
+            `此 Re-Ax 日期落在 ICP 評估窗口內。<span class="actions"><button class="btn btn-primary" type="button" data-icp-link-choice="true">用作 ICP Ax</button><button class="btn" type="button" data-icp-link-choice="false">稍後決定</button></span>`;
+        }
+        notice.hidden = false;
+      } else if (record.servesAsIcpAx) {
+        notice.textContent = `此評估已關聯為 ICP 週期 ${record.cycleId || ""} 的 ICP Ax。`;
+        notice.hidden = false;
+      } else if (sessionContext.origin === "initial" && windowInfo) {
+        notice.textContent =
+          `此 Initial Ax 不在 ICP 評估窗口內，因此不會自動作為週期 ${windowInfo.cycleId} 的 ICP Ax。`;
+        notice.hidden = false;
+      } else {
+        notice.hidden = true;
+      }
+      document.getElementById("session-type").textContent =
+        record.servesAsIcpAx && record.type !== "ICP Ax"
+          ? `${record.type} · ICP Ax`
+          : record.type;
+      setDerivedAssessmentType(record);
+      syncAssessmentStickyOffset();
+    }
+
+    function openAssessmentSession(residentId, recordId, origin = "reassessment", cycleId = null) {
+      const record = recordById(residentId, recordId);
+      const resident = residentById.get(residentId);
+      if (!record || !resident) return;
+      sessionContext = { origin, cycleId };
+      selectedResidentId = residentId;
+      selectedRecordId = recordId;
+      expandedResidentIds.add(residentId);
+      record.origin = origin;
+      record.cycleId = cycleId || record.cycleId || null;
+      record.residentId = residentId;
+      if (origin === "icp" || origin === "urgent-icp") record.servesAsIcpAx = true;
+      document.querySelector(".assessment-shell").classList.add("session-mode");
+      document.getElementById("session-context").hidden = false;
+      renderExplorer();
+      openRecord(residentId, recordId);
+      restoreActiveAssessmentDraft(record);
+      renderSessionControls(record);
+      syncAssessmentToIcp(record);
+    }
+
+    function createAssessment(residentId = selectedResidentId, origin = "reassessment", cycleId = null) {
+      const resident = residentById.get(residentId);
+      if (!resident) {
+        showToast("請先選擇住客。");
+        return;
+      }
+      if (resident.status === "discharged") {
+        showToast("退住住客不可建立新評估。");
+        return;
+      }
+      let record;
+      try {
+        record = OT_PROTOTYPE.createAssessment(residentId, origin, cycleId);
+      } catch (error) {
+        showToast(error.message);
+        return;
+      }
+      refreshAssessmentData();
+      record = recordById(residentId, record.id);
+      selectedResidentId = residentId;
+      selectedRecordId = record.id;
+      expandedResidentIds.add(residentId);
+      renderOverview();
+      openAssessmentSession(residentId, record.id, origin, cycleId);
+      showToast("已建立新的 016 草稿。");
+      return record;
+    }
+
+    function currentRecord() {
+      return selectedResidentId && selectedRecordId
+        ? recordById(selectedResidentId, selectedRecordId)
+        : null;
+    }
+
+    function saveCurrentRecord() {
+      const record = currentRecord();
+      if (!record) return;
+      if (sessionContext && evaluateAutomaticCompletion(record, true)) return;
+      record.updated = `${TODAY_KEY} ${new Date().toLocaleTimeString("zh-HK", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
+      record.summary = record.status === "completed" ? "已完成評估已更新" : "已儲存草稿";
+      try {
+        OT_PROTOTYPE.updateAssessment(record.id, record, "儲存評估");
+      } catch (error) {
+        showToast(error.message);
+        return;
+      }
+      renderExplorer();
+      openRecord(selectedResidentId, selectedRecordId);
+      if (sessionContext) renderSessionControls(record);
+      persistActiveAssessmentDraft();
+      showToast(record.status === "completed" ? "已完成 016 的變更已儲存。" : "016 草稿已儲存。");
+    }
+
+    function backToResident() {
+      if (sessionContext) {
+        exitAssessmentSession();
+        return;
+      }
+      selectedRecordId = null;
+      renderExplorer();
+      renderOverview();
+    }
+
+    function exitAssessmentSession() {
+      if (!sessionContext) return;
+      if (new URLSearchParams(location.search).get("mode") === "session") {
+        if (history.length > 1) {
+          history.back();
+        }
+        return;
+      }
+      sessionContext = null;
+      document.querySelector(".assessment-shell").classList.remove("session-mode");
+      document.getElementById("session-context").hidden = true;
+      selectedRecordId = null;
+      renderExplorer();
+      renderOverview();
+    }
+
+    document.getElementById("assessment-search").addEventListener("input", event => {
+      searchTerm = event.target.value;
+      renderExplorer();
+    });
+
+    document.querySelectorAll(".explorer-filters button").forEach(button => {
+      button.addEventListener("click", () => {
+        activeResidentPlace = button.dataset.residentPlace;
+        document.querySelectorAll(".explorer-filters button").forEach(item => {
+          const active = item === button;
+          item.classList.toggle("active", active);
+          item.setAttribute("aria-pressed", String(active));
+        });
+        renderExplorer();
+      });
+    });
+
+    function handleAssessmentEdit(event) {
+      recordContributor(event.target);
+      scheduleDraftSave();
+    }
+    document.getElementById("record-view").addEventListener("input", handleAssessmentEdit);
+    document.getElementById("record-view").addEventListener("change", handleAssessmentEdit);
+    window.addEventListener("message", event => {
+      if (event.source !== window.parent || event.data?.type !== "ot-assessment-restore") return;
+      const draft = event.data.draft;
+      if (!draft?.session?.residentId || !draft?.session?.recordId) return;
+      const { residentId, recordId, origin, cycleId } = draft.session;
+      if (!residentById.has(residentId) && draft.resident) {
+        assessmentResidents.push(draft.resident);
+        residentById.set(residentId, draft.resident);
+        assessmentRecords[residentId] = [];
+      }
+      if (!assessmentRecords[residentId]) assessmentRecords[residentId] = [];
+      if (!recordById(residentId, recordId) && draft.record) {
+        assessmentRecords[residentId].unshift({ ...draft.record });
+      }
+      const record = recordById(residentId, recordId);
+      if (!record) return;
+      if (sessionContext && selectedResidentId === residentId && selectedRecordId === recordId) {
+        restoreActiveAssessmentDraft(record, draft);
+        renderSessionControls(record);
+        syncAssessmentToIcp(record);
+      } else {
+        openAssessmentSession(residentId, recordId, origin || "reassessment", cycleId || null);
+      }
+    });
+    window.addEventListener("pagehide", persistActiveAssessmentDraft);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") persistActiveAssessmentDraft();
+    });
+
+    document.getElementById("resident-tree").addEventListener("click", event => {
+      const recordButton = event.target.closest("[data-record-id]");
+      if (recordButton) {
+        event.stopPropagation();
+        openAssessmentRecord(recordButton.dataset.residentId, recordButton.dataset.recordId);
+        return;
+      }
+      const residentButton = event.target.closest(".resident-node");
+      if (residentButton) selectResident(residentButton.dataset.residentId);
+    });
+
+    document.getElementById("resident-overview").addEventListener("click", event => {
+      if (event.target.closest('[data-action="void-assessment"]')) return;
+      const row = event.target.closest("tr[data-record-id]");
+      if (row) openAssessmentRecord(row.dataset.residentId, row.dataset.recordId);
+    });
+
+    document.getElementById("resident-overview").addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.target.closest('[data-action="void-assessment"]')) return;
+      const row = event.target.closest("tr[data-record-id]");
+      if (!row) return;
+      event.preventDefault();
+      openAssessmentRecord(row.dataset.residentId, row.dataset.recordId);
+    });
+
+    document.addEventListener("click", event => {
+      const assessmentFilterButton = event.target.closest("[data-assessment-filter]");
+      if (assessmentFilterButton) {
+        activeAssessmentStatus = assessmentFilterButton.dataset.assessmentFilter;
+        renderOverview();
+        return;
+      }
+      const actionTarget = event.target.closest("[data-action]");
+      if (actionTarget) {
+        const action = actionTarget.dataset.action;
+        if (action === "new-assessment") {
+          createAssessment(actionTarget.dataset.residentId || selectedResidentId, "reassessment");
+          return;
+        }
+        if (action === "save-record") return saveCurrentRecord();
+        if (action === "void-assessment") {
+          const record = recordById(
+            actionTarget.dataset.residentId,
+            actionTarget.dataset.recordId
+          );
+          if (!record || record.status !== "completed") return;
+          const reason = window.prompt("請填寫作廢原因。");
+          if (!reason?.trim()) return;
+          try {
+            OT_PROTOTYPE.voidAssessment(record.id, reason.trim());
+            selectedRecordId = null;
+            refreshAssessmentData();
+            renderExplorer();
+            renderOverview();
+            showToast("評估已作廢，相關臨床欄位已重新計算。");
+          } catch (error) {
+            showToast(error.message);
+          }
+          return;
+        }
+        if (action === "back-to-resident") return backToResident();
+        if (action === "exit-session") return exitAssessmentSession();
+        if (action === "print-record") return window.print();
+        if (action === "open-moca") {
+          showToast(
+            CURRENT_USER.role === "OT"
+              ? "MOCA 模組會在目前 016 記錄內開啟。"
+              : "只有 OT 可以編輯 HK-MoCA；PT 可查看摘要。"
+          );
+          return;
+        }
+      }
+      const historyButton = event.target.closest("[data-record-id]");
+      if (historyButton) {
+        openAssessmentRecord(historyButton.dataset.residentId, historyButton.dataset.recordId);
+        return;
+      }
+      const icpLinkChoice = event.target.closest("[data-icp-link-choice]");
+      if (icpLinkChoice) {
+        const record = currentRecord();
+        if (!record) return;
+        record.icpLinkIntent = icpLinkChoice.dataset.icpLinkChoice === "true";
+        const windowInfo = ICP_WINDOWS[record.residentId];
+        record.cycleId = record.icpLinkIntent ? windowInfo?.cycleId || record.cycleId : record.cycleId;
+        renderSessionControls(record);
+        persistActiveAssessmentDraft();
+        showToast(record.icpLinkIntent ? "Re-Ax 將於自動完成後用作 ICP Ax。" : "Re-Ax 暫不連結 ICP Ax。");
+      }
+    });
+
+    const navButtons = document.querySelectorAll('.section-nav button');
+    const sections = document.querySelectorAll('.section');
+    let navScrollLockUntil = 0;
+
+    function setActiveSection(sectionId) {
+      navButtons.forEach(item => {
+        const active = item.dataset.target === sectionId;
+        item.classList.toggle("active", active);
+        if (active) item.setAttribute("aria-current", "location");
+        else item.removeAttribute("aria-current");
+      });
+    }
+
+    function syncActiveSection() {
+      if (Date.now() < navScrollLockUntil || !sections.length) return;
+      const navBottom = document.querySelector(".section-nav")?.getBoundingClientRect().bottom || 0;
+      let activeSection = sections[0];
+      sections.forEach(section => {
+        if (section.getBoundingClientRect().top <= navBottom + 8) activeSection = section;
+      });
+      setActiveSection(activeSection.id);
+    }
+
+    navButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        navScrollLockUntil = Date.now() + 700;
+        document.getElementById(button.dataset.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setActiveSection(button.dataset.target);
+      });
+    });
+
+    let navSyncFrame = 0;
+    window.addEventListener("resize", syncAssessmentStickyOffset);
+    window.addEventListener("scroll", () => {
+      if (navSyncFrame) return;
+      navSyncFrame = requestAnimationFrame(() => {
+        navSyncFrame = 0;
+        syncActiveSection();
+      });
+    }, { passive: true });
+    syncActiveSection();
+
+    function initializeSessionFromQuery() {
+      const params = new URLSearchParams(location.search);
+      const residentId = params.get("residentId") || "r1";
+      if (params.get("mode") !== "session") {
+        if (params.get("view") === "ax-list" && residentById.has(residentId)) {
+          selectedResidentId = residentId;
+          expandedResidentIds.add(residentId);
+          renderExplorer();
+          renderOverview();
+          requestAnimationFrame(() => {
+            document.querySelector(`[data-resident-id="${residentId}"]`)
+              ?.scrollIntoView({ block: "center" });
+          });
+        }
+        return;
+      }
+      const origin = params.get("origin") || "reassessment";
+      const cycleId = params.get("cycleId") || null;
+      const assessmentId = params.get("assessmentId");
+      if (!residentById.has(residentId) && params.get("name")) {
+        const resident = {
+          id: residentId,
+          bed: params.get("bed") || "NEW",
+          name: params.get("name") || "新住客",
+          place: params.get("place") || "券位",
+          due: TODAY_KEY
+        };
+        assessmentResidents.push(resident);
+        residentById.set(resident.id, resident);
+        assessmentRecords[resident.id] = [];
+      }
+      const activeDraft = readActiveDraft();
+      if (
+        activeDraft &&
+        assessmentId &&
+        activeDraft.session?.residentId === residentId &&
+        activeDraft.session?.recordId === assessmentId &&
+        !recordById(residentId, assessmentId)
+      ) {
+        if (!assessmentRecords[residentId]) assessmentRecords[residentId] = [];
+        assessmentRecords[residentId].unshift({ ...activeDraft.record });
+      }
+      const existingRecord = assessmentId ? recordById(residentId, assessmentId) : null;
+      if (existingRecord) {
+        openAssessmentSession(residentId, existingRecord.id, origin, cycleId);
+      } else {
+        createAssessment(residentId, origin, cycleId);
+      }
+    }
+
+    applyHomeSettings();
+    updateClinicalScores();
+    renderExplorer();
+    renderOverview();
+    initializeSessionFromQuery();
+    window.addEventListener("storage", event => {
+      if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
+    });
+  </script>
+  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <style>
+    .clinical-note-button {
+      min-height: 26px;
+      border: 1px solid #b8c5ce;
+      border-radius: 5px;
+      background: #fff;
+      color: #334155;
+      padding: 3px 7px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .clinical-note-button:hover { background: #f8fafc; }
+    .section-clinical-note-wrap {
+      margin-top: 8px;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      background: #f8fbff;
+      padding: 8px;
+      display: grid;
+      gap: 5px;
+    }
+    .section-clinical-note-wrap[hidden] { display: none; }
+    .section-clinical-note-wrap label {
+      color: #1d4ed8;
+      font-size: 10px;
+      font-weight: 900;
+    }
+    .section-clinical-note {
+      width: 100%;
+      min-height: 58px;
+      resize: vertical;
+      border: 1px solid #bfdbfe;
+      border-radius: 5px;
+      background: #fff;
+      padding: 7px 8px;
+    }
+    @media print {
+      .clinical-note-button { display: none !important; }
+      .section-clinical-note-wrap { display: grid !important; }
+    }
+  </style>
+  <script>
+    (() => {
+      const storageKey = "ot-clinical-notes-v1";
+      const recordView = document.getElementById("record-view");
+      if (!recordView) return;
+
+      const readNotes = () => {
+        try {
+          return JSON.parse(localStorage.getItem(storageKey) || "{}");
+        } catch (error) {
+          return {};
+        }
+      };
+
+      const saveNotes = notes => {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(notes));
+        } catch (error) {
+          // The prototype remains usable without persistence.
+        }
+      };
+
+      const installSectionNotes = () => {
+        if (!recordView.querySelector(".section-title")) return;
+        if (recordView.dataset.clinicalNotesInstalled === "true") return;
+        recordView.dataset.clinicalNotesInstalled = "true";
+        const notes = readNotes();
+
+        // Remove the old per-section note text boxes. Non-note text areas used
+        // for "Other problem" and "Other treatment plan" remain untouched.
+        ["medical-history-note", "cognition-note"].forEach(id => {
+          document.getElementById(id)?.closest(".clinical-field")?.remove();
+        });
+
+        recordView.querySelectorAll(".section").forEach(section => {
+          const sectionId = section.id || `section-${Math.random().toString(16).slice(2)}`;
+          if (sectionId === "asr") return;
+          const title = section.querySelector(".section-title");
+          const body = section.querySelector(".section-body");
+          if (!title || !body || title.querySelector(".clinical-note-button")) return;
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "clinical-note-button";
+          button.textContent = "Clinical Notes";
+          button.setAttribute("aria-controls", `${sectionId}-clinical-note`);
+
+          const wrap = document.createElement("div");
+          wrap.className = "section-clinical-note-wrap";
+          wrap.id = `${sectionId}-clinical-note`;
+          wrap.innerHTML = `
+            <label for="${sectionId}-clinical-note-input">Clinical Notes</label>
+            <textarea class="section-clinical-note" id="${sectionId}-clinical-note-input"></textarea>
+          `;
+          const textarea = wrap.querySelector("textarea");
+          textarea.value = notes[sectionId] || "";
+          wrap.hidden = !textarea.value.trim();
+          button.setAttribute("aria-expanded", String(!wrap.hidden));
+          textarea.addEventListener("input", () => {
+            const current = readNotes();
+            current[sectionId] = textarea.value;
+            saveNotes(current);
+            wrap.hidden = !textarea.value.trim();
+            button.setAttribute("aria-expanded", String(!wrap.hidden));
+          });
+          button.addEventListener("click", () => {
+            const opening = wrap.hidden;
+            wrap.hidden = !opening;
+            button.setAttribute("aria-expanded", String(opening));
+            if (opening) {
+              requestAnimationFrame(() => {
+                const top = Math.max(
+                  0,
+                  button.getBoundingClientRect().top + window.scrollY - 112
+                );
+                window.scrollTo({ top, behavior: "smooth" });
+                textarea.focus({ preventScroll: true });
+              });
+            }
+          });
+
+          title.append(button);
+          body.append(wrap);
+        });
+      };
+
+      installSectionNotes();
+      const observer = new MutationObserver(() => {
+        if (!recordView.querySelector(".clinical-note-button")) {
+          recordView.dataset.clinicalNotesInstalled = "false";
+          installSectionNotes();
+        }
+      });
+      observer.observe(recordView, { childList: true, subtree: true });
+    })();
+  </script>
+</body>
+</html>
