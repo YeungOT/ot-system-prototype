@@ -140,7 +140,6 @@
     .btn-danger { border-color: #fecaca; color: var(--red); }
     .btn:focus-visible,
     .segmented button:focus-visible,
-    .channel-button:focus-visible,
     .task-main:focus-visible,
     .todo-group summary:focus-visible {
       outline: 2px solid var(--teal);
@@ -328,17 +327,6 @@
       justify-content: space-between;
       gap: 8px;
     }
-    .channel-tabs { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; background: #f8fafc; padding: 2px; }
-    .channel-button {
-      border: 0;
-      border-radius: 5px;
-      background: transparent;
-      color: var(--muted);
-      padding: 5px 7px;
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .channel-button.active { background: var(--surface); color: var(--teal-dark); box-shadow: var(--shadow); }
     .handover-date {
       display: inline-flex;
       align-items: center;
@@ -400,14 +388,6 @@
       font-size: 10px;
     }
     .handover-section p { margin: 0; color: var(--ink); font-size: 11px; line-height: 1.55; }
-    .handover-copy {
-      border: 0;
-      background: transparent;
-      color: var(--teal-dark);
-      padding: 2px 0;
-      font-size: 10px;
-      font-weight: 800;
-    }
     .handover-note {
       width: 100%;
       min-height: 44px;
@@ -475,6 +455,7 @@
     .dialog-head p { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
     .dialog-body { padding: 12px 15px; display: grid; gap: 9px; }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .form-grid[hidden] { display: none; }
     .form-field { display: grid; gap: 3px; }
     .form-field.full { grid-column: 1 / -1; }
     .form-field[hidden] { display: none; }
@@ -620,9 +601,9 @@
               <button class="btn" type="button" data-action="new-post">＋ 貼文</button>
             </header>
             <div class="channel-bar">
-              <div class="channel-tabs segmented" role="tablist" aria-label="交更頻道">
-                <button class="channel-button active" type="button" role="tab" aria-selected="true" data-channel="home">院舍</button>
-                <button class="channel-button" type="button" role="tab" aria-selected="false" data-channel="announcement">公告</button>
+              <div class="segmented" role="tablist" aria-label="交更頻道">
+                <button class="active" type="button" role="tab" aria-selected="true" data-channel="home">院舍</button>
+                <button type="button" role="tab" aria-selected="false" data-channel="announcement">公告</button>
               </div>
               <label class="handover-date">
                 <button class="handover-day-btn" type="button" data-action="prev-handover-day"
@@ -684,7 +665,6 @@
     <form id="post-form">
       <div class="dialog-head">
         <h2 id="post-dialog-title">新增貼文</h2>
-        <p>任務會同時出現在待辦；完成只在待辦進行。</p>
       </div>
       <div class="dialog-body">
         <div class="post-type">
@@ -805,22 +785,6 @@
       toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
     }
 
-    async function copyText(text) {
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch (error) {
-        const fallback = document.createElement("textarea");
-        fallback.value = text;
-        fallback.style.position = "fixed";
-        fallback.style.opacity = "0";
-        document.body.append(fallback);
-        fallback.select();
-        document.execCommand("copy");
-        fallback.remove();
-      }
-      showToast("已複製交更內容。");
-    }
-
     function groupFor(task) {
       if (!task.due || task.due === TODAY_KEY) return "today";
       const due = parseDate(task.due);
@@ -919,17 +883,15 @@
           <section class="handover-block">
             <div class="handover-block-head">
               <h3>${handoverDate === TODAY_KEY ? "今日交更" : `${handoverDate.replaceAll("-", "/")} 交更`}</h3>
-              <button class="handover-copy" type="button" data-action="copy-handover" data-handover-id="all">複製全部</button>
             </div>
             ${generatedHandover.sections.map(section => `
               <div class="handover-section" data-handover-section="${escapeHtml(section.id)}">
                 <div class="handover-section-head">
                   <strong>${escapeHtml(section.title)}</strong>
-                  <button class="handover-copy" type="button" data-action="copy-handover" data-handover-id="${escapeHtml(section.id)}">複製</button>
                 </div>
                 <p>${escapeHtml(section.text).replaceAll("\n", "<br>")}</p>
                 <textarea class="handover-note" data-handover-note="${escapeHtml(section.id)}"
-                  placeholder="加入本段備註" aria-label="${escapeHtml(section.title)}備註">${escapeHtml(OT_PROTOTYPE.handoverNote(handoverDate, section.id))}</textarea>
+                  placeholder="備註" aria-label="${escapeHtml(section.title)}備註">${escapeHtml(OT_PROTOTYPE.handoverNote(handoverDate, section.id))}</textarea>
               </div>
             `).join("")}
           </section>
@@ -1077,15 +1039,6 @@
         handoverDate = dateKey(date);
         renderHandover();
         document.getElementById("handover-date").value = handoverDate;
-        return;
-      }
-      if (action === "copy-handover") {
-        const handover = OT_PROTOTYPE.generatedHandover(handoverDate);
-        const id = actionTarget.dataset.handoverId;
-        const text = id === "all"
-          ? handover.sections.map(section => `${section.title}\n${section.text}`).join("\n\n")
-          : handover.sections.find(section => section.id === id)?.text || "";
-        copyText(text);
         return;
       }
       if (action === "new-task") {

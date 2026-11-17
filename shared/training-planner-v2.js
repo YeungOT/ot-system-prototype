@@ -1035,7 +1035,7 @@
     return `
       <div class="tp2-grid-scroll">
         <div class="tp2-grid">
-          <div class="tp2-time">時段</div>
+          <div class="tp2-time" aria-hidden="true"></div>
           ${dayHeads}
           ${rows}
         </div>
@@ -1640,7 +1640,7 @@
     const dates = serviceDates(weekStart);
     return `
       <div class="${monthView ? "month-grid" : "week-grid"}">
-        <div class="time-head">時段</div>
+        <div class="time-head" aria-hidden="true"></div>
         ${dates.map((date, index) => `
           <div class="day-head ${index === dates.length - 1 ? "day-last" : ""} ${date.slice(0, 7) !== state.activeMonth ? "outside-month" : ""}">
             <span>${legacyDateLabel(date)}</span>
@@ -1784,11 +1784,6 @@
                   data-legacy-view="week" aria-pressed="${state.view === "week"}">週</button>
                 <button class="${state.view === "month" ? "active" : ""}" type="button"
                   data-legacy-view="month" aria-pressed="${state.view === "month"}">月</button>
-              </div>
-              <div class="week-nav">
-                <button class="btn icon-btn" type="button" data-legacy-action="prev" aria-label="上一段">←</button>
-                <strong>${state.view === "week" ? legacyWeekRange(state.activeWeek) : monthLabel(state.activeMonth)}</strong>
-                <button class="btn icon-btn" type="button" data-legacy-action="next" aria-label="下一段">→</button>
               </div>
               <button class="btn" type="button" data-legacy-action="autofill">自動填入</button>
             </div>

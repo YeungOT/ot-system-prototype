@@ -348,15 +348,6 @@
       outline-offset: 1px;
       border-color: #72b9ae;
     }
-    .roster-reset {
-      min-height: 35px;
-      border: 0;
-      background: transparent;
-      color: var(--teal-dark);
-      padding: 5px 8px;
-      font-size: 11px;
-      font-weight: 800;
-    }
     .roster-view-tools {
       position: relative;
       display: flex;
@@ -1504,13 +1495,6 @@
                   <option value="hospital">留醫中</option>
                   <option value="discharged">已退住</option>
                 </select>
-                <select class="roster-filter" id="filter-icp" aria-label="ICP 限期">
-                  <option value="all">全部 ICP</option>
-                  <option value="month">本月</option>
-                  <option value="next">下月</option>
-                  <option value="overdue">逾期</option>
-                </select>
-                <button class="roster-reset" id="reset-roster-filters" type="button">重設</button>
                 <div class="roster-view-tools">
                   <button class="roster-tool" id="roster-columns-toggle" type="button"
                     aria-expanded="false" aria-controls="roster-columns-menu">顯示欄位</button>
@@ -2224,16 +2208,12 @@
       const floor = document.getElementById("filter-floor").value;
       const place = document.getElementById("filter-place").value;
       const status = document.getElementById("filter-status").value;
-      const icp = document.getElementById("filter-icp").value;
       const rows = residentData.filter(resident => {
         if (query && !`${resident.name} ${resident.bed} ${resident.place}`.toLowerCase().includes(query)) return false;
         if (floor !== "all" && resident.floor !== `${floor}樓`) return false;
         if (place !== "all" && resident.place !== place) return false;
         if (status === "all" && resident.status === "discharged") return false;
         if (status !== "all" && resident.status !== status) return false;
-        if (icp === "month" && !resident.icpDue.startsWith(TODAY_KEY.slice(0, 7))) return false;
-        if (icp === "next" && !resident.icpDue.startsWith("2026-11")) return false;
-        if (icp === "overdue" && !(resident.icpDue < TODAY_KEY && resident.icpState !== "已完成")) return false;
         return true;
       });
       return sortedResidents(rows);
@@ -3395,17 +3375,9 @@
       rosterColumnsToggle.focus();
     });
 
-    ["roster-search", "filter-floor", "filter-place", "filter-status", "filter-icp"].forEach(id => {
+    ["roster-search", "filter-floor", "filter-place", "filter-status"].forEach(id => {
       document.getElementById(id).addEventListener("input", renderRoster);
       document.getElementById(id).addEventListener("change", renderRoster);
-    });
-    document.getElementById("reset-roster-filters").addEventListener("click", () => {
-      document.getElementById("roster-search").value = "";
-      document.getElementById("filter-floor").value = "all";
-      document.getElementById("filter-place").value = "all";
-      document.getElementById("filter-status").value = "all";
-      document.getElementById("filter-icp").value = "all";
-      renderRoster();
     });
     document.getElementById("open-latest-assessment").addEventListener("click", openLatestAssessment);
     document.getElementById("summary-open-icp").addEventListener("click", () => {
