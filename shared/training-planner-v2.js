@@ -105,7 +105,7 @@
   }
 
   function serviceDates(weekStart) {
-    return SERVICE_WEEKDAYS.map(index => addDays(weekStart, index));
+    return weekDates(weekStart).filter(date => staffOnDuty(date) !== null);
   }
 
   function weeksForMonth(month) {
@@ -334,10 +334,12 @@
   }
 
   function latestEarlierPlan(month) {
-    return Object.keys(state.plans)
+    const earlier = Object.keys(state.plans)
       .filter(key => key < month)
-      .sort()
-      .at(-1);
+      .sort();
+    return earlier.filter(key => state.plans[key]?.status === "valid").at(-1)
+      || earlier.at(-1)
+      || null;
   }
 
   function ensurePlan(month) {
@@ -408,9 +410,9 @@
   }
 
   function staffOnDuty(date) {
+    if (!SERVICE_WEEKDAYS.includes(weekdayIndex(date))) return null;
     if (date === "2026-11-18") return null;
-    const day = parseDate(date).getDay();
-    return day === 0 ? 1 : 2;
+    return 2;
   }
 
   function validateResidentPlacement(residentId, date, time, options = {}) {
@@ -500,7 +502,7 @@
     return invalid || { valid: true, reason: "可移動至此時段。" };
   }
 
-  function residentToSessionResult(residentId, sessionId) {
+  function residentToSessionResult(residentId, sessionId, options = {}) {
     const found = findSession(sessionId);
     if (!found) return { valid: false, reason: "找不到目標小組。" };
     const resident = residentById.get(residentId);
@@ -520,8 +522,42 @@
     }
     return validateResidentPlacement(residentId, session.date, session.time, {
       paid: session.paid,
-      ignoreSessionIds: [sessionId],
+      ignoreSessionIds: [sessionId, ...(options.ignoreSessionIds || [])],
       allowAdjacent: false
+    });
+  }
+
+  function memberSessionContext(residentId, sessionId) {
+    const found = findSession(sessionId);
+    if (!found) return null;
+    if (!found.session.memberIds.includes(residentId)) return null;
+    return found;
+  }
+
+  function memberSlotDropResult(residentId, sourceSessionId, date, time) {
+    const source = memberSessionContext(residentId, sourceSessionId);
+    if (!source) return { valid: false, reason: "找不到要移動的小組成員。" };
+    if (source.session.memberIds.length <= 1) {
+      return { valid: false, reason: "個別節數沒有可拖出的其他小組成員。" };
+    }
+    return residentSlotDropResult(residentId, date, time, {
+      paid: source.session.paid,
+      ignoreSessionIds: [sourceSessionId]
+    });
+  }
+
+  function memberToSessionResult(residentId, sourceSessionId, targetSessionId) {
+    if (sourceSessionId === targetSessionId) {
+      return { valid: false, reason: "成員已在此小組。" };
+    }
+    const source = memberSessionContext(residentId, sourceSessionId);
+    const target = findSession(targetSessionId);
+    if (!source || !target) return { valid: false, reason: "找不到來源或目標節數。" };
+    if (source.session.paid !== target.session.paid) {
+      return { valid: false, reason: "基本訓練與額外服務成員不可混合。" };
+    }
+    return residentToSessionResult(residentId, targetSessionId, {
+      ignoreSessionIds: [sourceSessionId]
     });
   }
 
@@ -555,13 +591,30 @@
     const blocked = slotDropBlock(date, time);
     if (blocked) return blocked;
     if (targetSessionId) {
-      return payload.type === "resident"
-        ? residentToSessionResult(payload.residentId, targetSessionId)
-        : sessionsMergeResult(payload.sessionId, targetSessionId);
+      if (payload.type === "resident") {
+        return residentToSessionResult(payload.residentId, targetSessionId);
+      }
+      if (payload.type === "member") {
+        return memberToSessionResult(
+          payload.residentId,
+          payload.sessionId,
+          targetSessionId
+        );
+      }
+      return sessionsMergeResult(payload.sessionId, targetSessionId);
     }
-    return payload.type === "resident"
-      ? residentSlotDropResult(payload.residentId, date, time)
-      : sessionSlotDropResult(payload.sessionId, date, time);
+    if (payload.type === "resident") {
+      return residentSlotDropResult(payload.residentId, date, time);
+    }
+    if (payload.type === "member") {
+      return memberSlotDropResult(
+        payload.residentId,
+        payload.sessionId,
+        date,
+        time
+      );
+    }
+    return sessionSlotDropResult(payload.sessionId, date, time);
   }
 
   function markPlanDraft(month, reason) {
@@ -695,7 +748,26 @@
         }
       });
     }
-    ensurePlan(month).sessions.forEach(session => {
+    const planSessions = ensurePlan(month).sessions;
+    const duplicateKeys = new Map();
+    planSessions.forEach(session => {
+      const key = [
+        session.date,
+        session.time,
+        session.paid ? "paid" : "basic",
+        [...session.memberIds].sort().join(",")
+      ].join("|");
+      duplicateKeys.set(key, (duplicateKeys.get(key) || 0) + 1);
+    });
+    duplicateKeys.forEach((count, key) => {
+      if (count > 1) {
+        issues.push({
+          type: "duplicate",
+          message: `${key.split("|").slice(0, 2).join(" ")} 有重複節數`
+        });
+      }
+    });
+    planSessions.forEach(session => {
       if (staffOnDuty(session.date) === null) {
         issues.push({
           type: "rota",
@@ -720,6 +792,66 @@
           });
         }
       }
+      session.memberIds.forEach(residentId => {
+        if (!residentById.has(residentId)) {
+          issues.push({
+            type: "stale-resident",
+            sessionId: session.id,
+            message: `${session.date} ${session.time} 引用已不存在的住客`
+          });
+        }
+      });
+      if (session.patternId && !state.patterns.some(pattern => pattern.id === session.patternId)) {
+        issues.push({
+          type: "stale-pattern",
+          sessionId: session.id,
+          message: `${session.date} ${session.time} 引用已失效的固定安排`
+        });
+      }
+    });
+    residents.filter(resident => resident.cadence === "biweekly").forEach(resident => {
+      cyclesForMonth(resident, month).forEach(cycle => {
+        if (cycleSessionCount(resident.id, cycle.key) > 1) {
+          issues.push({
+            type: "duplicate-cycle",
+            residentId: resident.id,
+            message: `${resident.bed} ${resident.name} · ${cycle.start} 至 ${cycle.end} 有超過一節基本訓練`
+          });
+        }
+      });
+    });
+    const sessionsByDate = planSessions.reduce((result, session) => {
+      if (!result.has(session.date)) result.set(session.date, []);
+      result.get(session.date).push(session);
+      return result;
+    }, new Map());
+    sessionsByDate.forEach((sessions, date) => {
+      const onDuty = staffOnDuty(date);
+      if (onDuty === null) return;
+      const availableSlots = TIMES.filter(time => !isLunchTime(time)).length;
+      if (sessions.length > onDuty * availableSlots) {
+        issues.push({
+          type: "daily-capacity",
+          message: `${date} 的節數超過當日 T/A 工時容量`
+        });
+      }
+      const residentDaily = new Map();
+      sessions.forEach(session => {
+        session.memberIds.forEach(residentId => {
+          const key = `${residentId}|${session.paid ? "paid" : "basic"}`;
+          residentDaily.set(key, (residentDaily.get(key) || 0) + 1);
+        });
+      });
+      residentDaily.forEach((count, key) => {
+        if (count <= 1) return;
+        const [residentId, type] = key.split("|");
+        const resident = residentById.get(residentId);
+        issues.push({
+          type: "daily-resident-cap",
+          residentId,
+          message: `${resident?.bed || residentId} ${resident?.name || ""} · ${date} ${type === "paid" ? "額外服務" : "基本訓練"}超過每日上限`
+        });
+      });
     });
     return issues;
   }
@@ -915,11 +1047,9 @@
     </div>
     <dialog id="tp2-scope-dialog" aria-labelledby="tp2-scope-title">
       <div class="dialog-head"><h2 id="tp2-scope-title">套用變更範圍</h2></div>
-      <div class="dialog-body"><p class="tp2-plan-meta">請選擇這次調動是否只影響此日期、本月其餘日期，或更新固定計劃。</p></div>
       <div class="dialog-actions">
-        <button class="btn" type="button" data-tp-scope="recurring">更新固定計劃</button>
-        <button class="btn" type="button" data-tp-scope="month">本月其餘日期</button>
-        <button class="btn btn-primary" type="button" data-tp-scope="date">只限此日期</button>
+        <button class="btn" type="button" data-tp-scope="date">只更改本節</button>
+        <button class="btn btn-primary" type="button" data-tp-scope="recurring">更改所有相關節數</button>
       </div>
     </dialog>
     <dialog id="tp2-autofill-dialog" aria-labelledby="tp2-autofill-title">
@@ -1113,10 +1243,12 @@
   }
 
   function findAvailableSlot(residentId, dates, planned, paid) {
-    const preferred = [
+    const fallbackTimes = [
       "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
       "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"
     ];
+    const preferred = [...new Set([...autofillGroupTimes(), ...fallbackTimes])]
+      .filter(time => TIMES.includes(time) && !isLunchTime(time));
     for (const date of dates.filter(candidate => SERVICE_WEEKDAYS.includes(weekdayIndex(candidate)))) {
       for (const time of preferred) {
         const result = validateResidentPlacement(residentId, date, time, {
@@ -1221,21 +1353,7 @@
       moved.cycleKey = resident?.cadence === "biweekly" ? cycleForDate(resident, targetDate)?.key || null : null;
       moved.carryOut = targetDate.slice(0, 7) !== planForDate(targetDate).month;
       planForDate(targetDate).sessions.push(moved);
-      markPlanDraft(planForDate(targetDate).month, "只限此日期的調動");
-    } else if (scope === "month") {
-      const delta = daysBetween(sourceDate, targetDate);
-      const patternSessions = found.plan.sessions.filter(session => (
-        session.patternId === found.session.patternId &&
-        session.date >= sourceDate
-      ));
-      patternSessions.forEach(session => {
-        const nextDate = addDays(session.date, delta);
-        if (monthKey(nextDate) === state.activeMonth || monthKey(session.date) === state.activeMonth) {
-          session.date = nextDate;
-          session.time = targetTime;
-        }
-      });
-      markPlanDraft(found.plan.month, "本月其餘日期的調動");
+      markPlanDraft(planForDate(targetDate).month, "只更改本節");
     } else {
       const pattern = state.patterns.find(item => item.id === found.session.patternId);
       if (pattern) {
@@ -1321,6 +1439,66 @@
     target.format = "g";
     removeSession(sourceId);
     markPlanDraft(targetFound.plan.month, "合併小組");
+    saveState();
+    render();
+  }
+
+  function detachSessionMember(sessionId, residentId) {
+    const found = findSession(sessionId);
+    if (!found) return null;
+    found.session.memberIds = found.session.memberIds.filter(id => id !== residentId);
+    if (!found.session.memberIds.length) {
+      removeSession(sessionId);
+    } else {
+      found.session.format = found.session.memberIds.length === 1 ? "i" : "g";
+      markPlanDraft(found.plan.month, "移出小組成員");
+    }
+    return found.session;
+  }
+
+  function moveMemberToSlot(residentId, sourceSessionId, targetDate, targetTime) {
+    const result = memberSlotDropResult(
+      residentId,
+      sourceSessionId,
+      targetDate,
+      targetTime
+    );
+    if (!result.valid) {
+      renderStatusMessage(result.reason);
+      return;
+    }
+    const source = memberSessionContext(residentId, sourceSessionId);
+    const sourceMeta = {
+      paid: source.session.paid,
+      activity: source.session.activity,
+      staffMode: source.session.staffMode
+    };
+    detachSessionMember(sourceSessionId, residentId);
+    const created = addSession(targetDate, targetTime, [residentId], {
+      paid: sourceMeta.paid,
+      activity: sourceMeta.activity,
+      staffMode: sourceMeta.staffMode
+    });
+    created.patternId = null;
+    saveState();
+    render();
+  }
+
+  function moveMemberToSession(residentId, sourceSessionId, targetSessionId) {
+    const result = memberToSessionResult(
+      residentId,
+      sourceSessionId,
+      targetSessionId
+    );
+    if (!result.valid) {
+      renderStatusMessage(result.reason);
+      return;
+    }
+    const target = findSession(targetSessionId);
+    detachSessionMember(sourceSessionId, residentId);
+    target.session.memberIds.push(residentId);
+    target.session.format = "g";
+    markPlanDraft(target.plan.month, "移動小組成員");
     saveState();
     render();
   }
@@ -1564,7 +1742,7 @@
   function legacySessionCard(session, compact = false) {
     const category =
       session.paid ? "extra" :
-      session.memberIds.some(id => residentById.get(id)?.cadence === "monthly") ? "monthly" :
+      session.memberIds.some(id => residentById.get(id)?.cadence === "biweekly") ? "biweekly" :
       "regular";
     const classNames = [
       "session-card",
@@ -1618,7 +1796,7 @@
     }
     const direct = sessions.filter(session => (
       session.paid ||
-      session.memberIds.some(id => residentById.get(id)?.cadence === "monthly")
+      session.memberIds.some(id => residentById.get(id)?.cadence === "biweekly")
     ));
     const regular = sessions.filter(session => !direct.includes(session));
     const headcount = regular.reduce((sum, session) => sum + session.memberIds.length, 0);
@@ -1800,9 +1978,8 @@
       <small class="save-status-corner" id="legacy-save">${escapeHtml(legacyPlanLabel())}</small>
       <dialog class="scope-dialog" id="legacy-scope-dialog" aria-label="變更範圍">
         <div class="scope-options" role="group" aria-label="變更範圍">
-          <button class="scope-option" type="button" data-legacy-scope="date">只限此日期</button>
-          <button class="scope-option" type="button" data-legacy-scope="month">本月其餘日期</button>
-          <button class="scope-option" type="button" data-legacy-scope="recurring">更新固定計劃</button>
+          <button class="scope-option" type="button" data-legacy-scope="date">只更改本節</button>
+          <button class="scope-option" type="button" data-legacy-scope="recurring">更改所有相關節數</button>
         </div>
       </dialog>
     `;
@@ -1916,6 +2093,18 @@
         if (action.dataset.legacyAction === "complete") legacyComplete();
       });
       content.addEventListener("dragstart", event => {
+        const member = event.target.closest("[data-legacy-member]");
+        if (member) {
+          legacyDragPayload = {
+            type: "member",
+            residentId: member.dataset.legacyMember,
+            sessionId: member.dataset.legacyMemberSession
+          };
+          if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+          paintLegacyDropCues(legacyDragPayload);
+          member.classList.add("dragging");
+          return;
+        }
         const resident = event.target.closest("[data-legacy-resident]");
         const session = event.target.closest("[data-legacy-session]");
         const source = resident || session;
@@ -1960,7 +2149,20 @@
           renderStatusMessage(result.reason);
           return;
         }
-        if (payload.type === "resident" && targetSession) {
+        if (payload.type === "member" && targetSession) {
+          moveMemberToSession(
+            payload.residentId,
+            payload.sessionId,
+            targetSession.dataset.legacySession
+          );
+        } else if (payload.type === "member") {
+          moveMemberToSlot(
+            payload.residentId,
+            payload.sessionId,
+            slot.dataset.legacyDate,
+            slot.dataset.legacyTime
+          );
+        } else if (payload.type === "resident" && targetSession) {
           joinResidentToSession(payload.residentId, targetSession.dataset.legacySession);
         } else if (payload.type === "resident") {
           addResidentToSlot(
