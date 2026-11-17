@@ -225,8 +225,8 @@
     .month-nav { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
     .month-nav strong { padding-inline: 4px; text-align: center; font-size: 12px; white-space: nowrap; }
     .month-nav .btn { min-height: 34px; height: 34px; }
-    .place-menu { position: relative; flex: 0 0 auto; }
-    .place-menu summary {
+    .record-filter-menu { position: relative; flex: 0 0 auto; }
+    .record-filter-menu summary {
       min-height: 34px;
       list-style: none;
       border: 1px solid var(--line);
@@ -241,8 +241,8 @@
       align-items: center;
       gap: 7px;
     }
-    .place-menu summary::-webkit-details-marker { display: none; }
-    .place-menu summary::after {
+    .record-filter-menu summary::-webkit-details-marker { display: none; }
+    .record-filter-menu summary::after {
       content: "";
       width: 7px;
       height: 7px;
@@ -252,17 +252,22 @@
       color: var(--muted);
       transform: rotate(45deg);
     }
-    .place-menu[open] summary::after {
+    .record-filter-menu[open] summary::after {
       margin-top: 3px;
       transform: rotate(225deg);
     }
-    .place-menu[open] summary { background: var(--teal-soft); border-color: #b7ded7; color: var(--teal-dark); }
+    .record-filter-menu[open] summary,
+    .record-filter-menu.is-active summary {
+      background: var(--teal-soft);
+      border-color: #b7ded7;
+      color: var(--teal-dark);
+    }
     .place-popover {
       position: absolute;
       right: 0;
       top: calc(100% + 5px);
       z-index: 40;
-      min-width: 170px;
+      width: 250px;
       border: 1px solid var(--line);
       border-radius: 7px;
       background: #fff;
@@ -270,6 +275,15 @@
       padding: 7px;
       display: grid;
       gap: 5px;
+    }
+    .record-filter-group {
+      display: grid;
+      gap: 4px;
+    }
+    .record-filter-group > strong {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
     }
     .place-option {
       min-height: 30px;
@@ -283,6 +297,14 @@
       font-weight: 700;
     }
     .place-option:hover { background: #f8fafc; }
+    .record-filter-field {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .record-filter-field .compact-select { width: 100%; font-size: 10px; }
     .record-search {
       width: 190px;
       min-height: 34px;
@@ -840,24 +862,33 @@
               <button class="btn" type="button" data-action="current-month">本月</button>
             </div>
             <input class="record-search" id="record-search" type="search" placeholder="搜尋床號或姓名" aria-label="搜尋床號或姓名">
-            <details class="place-menu">
-              <summary><span>宿位</span><strong id="place-summary">全部</strong></summary>
+            <details class="record-filter-menu" id="record-filter-menu">
+              <summary><span>篩選</span><strong id="record-filter-summary">全部</strong></summary>
               <div class="place-popover">
-                <label class="place-option"><input type="checkbox" data-place="voucher" checked> 券位</label>
-                <label class="place-option"><input type="checkbox" data-place="bought" checked> 買位</label>
-                <label class="place-option"><input type="checkbox" data-place="private" checked> 私位 / 暫託</label>
+                <div class="record-filter-group">
+                  <strong>宿位</strong>
+                  <label class="place-option"><input type="checkbox" data-place="voucher" checked> 券位</label>
+                  <label class="place-option"><input type="checkbox" data-place="bought" checked> 買位</label>
+                  <label class="place-option"><input type="checkbox" data-place="private" checked> 私位 / 暫託</label>
+                </div>
+                <label class="record-filter-field">
+                  樓層
+                  <select class="compact-select" id="floor-filter" aria-label="樓層篩選">
+                    <option value="all">全部樓層</option>
+                  </select>
+                </label>
+                <label class="record-filter-field">
+                  活動現況
+                  <select class="compact-select" id="mobility-filter" aria-label="活動現況篩選">
+                    <option value="all">全部活動現況</option>
+                    <option value="IW">IW 自由活動</option>
+                    <option value="IWC">IWC 自由輪椅活動</option>
+                    <option value="CB">CB 久坐</option>
+                    <option value="BB">BB 臥床</option>
+                  </select>
+                </label>
               </div>
             </details>
-            <select class="compact-select" id="floor-filter" aria-label="樓層篩選">
-              <option value="all">全部樓層</option>
-            </select>
-            <select class="compact-select" id="mobility-filter" aria-label="活動現況篩選">
-              <option value="all">全部活動現況</option>
-              <option value="IW">IW 自由活動</option>
-              <option value="IWC">IWC 自由輪椅活動</option>
-              <option value="CB">CB 久坐</option>
-              <option value="BB">BB 臥床</option>
-            </select>
             <button class="btn" type="button" data-action="print-preview">列印</button>
           </div>
         </section>
@@ -1308,11 +1339,15 @@
         activePlaces.has("bought") ? "買位" : "",
         activePlaces.has("private") ? "私位／暫託" : ""
       ].filter(Boolean);
-      document.getElementById("place-summary").textContent = placeLabels.length === 3
-        ? "全部"
-        : placeLabels.length
-          ? placeLabels.join("、")
-          : "無";
+      const activeFilterCount = [
+        placeLabels.length !== 3,
+        activeFloor !== "all",
+        activeMobility !== "all"
+      ].filter(Boolean).length;
+      document.getElementById("record-filter-summary").textContent =
+        activeFilterCount ? `${activeFilterCount} 項` : "全部";
+      document.getElementById("record-filter-menu")
+        .classList.toggle("is-active", activeFilterCount > 0);
       const floorFilter = document.getElementById("floor-filter");
       const floors = [...new Set(residents.map(resident => resident.floor))].sort();
       if (floorFilter.options.length === 1) {
@@ -1764,6 +1799,10 @@
         document.getElementById("activity-select").disabled = Boolean(draftEntry.special);
         document.getElementById("menu-error").textContent = "";
       }
+    });
+    document.addEventListener("click", event => {
+      const menu = document.getElementById("record-filter-menu");
+      if (menu.open && !event.target.closest("#record-filter-menu")) menu.open = false;
     });
     document.getElementById("record-search").addEventListener("input", event => {
       recordSearchTerm = event.target.value.trim();
