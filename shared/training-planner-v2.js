@@ -71,6 +71,10 @@
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+  const groupLabelMarkup = label => {
+    const match = String(label || "").match(/^G(\d+)$/);
+    return match ? `G<sub>${match[1]}</sub>` : escapeHtml(label || "");
+  };
 
   const sourceResidents = OT_PROTOTYPE.residents({ includeDischarged: false });
   const residents = sourceResidents.map(resident => {
@@ -1123,7 +1127,7 @@
     const groupLabel = session.format === "g"
       ? OT_PROTOTYPE.groupLabelForSession(allSessionEntries(), session)
       : null;
-    const group = groupLabel ? `${groupLabel} · ` : "";
+    const group = groupLabel ? `${groupLabelMarkup(groupLabel)} · ` : "";
     return `
       <button class="${classes}" type="button" draggable="true"
         data-tp-session="${session.id}"
@@ -1772,7 +1776,7 @@
       return `
         <div class="${classNames}" draggable="true" data-legacy-session="${session.id}" data-spec-ids="BH-006-005,BH-006-014,BH-006-016,BH-006-022,BH-006-023,BH-006-031,BH-006-032,BH-006-033">
           <div class="group-heading" data-spec-ids="BH-006-024,BH-006-033">
-            <span class="format-mark">${groupLabel || "G1"}</span>
+            <span class="format-mark">${groupLabelMarkup(groupLabel || "G1")}</span>
             <span class="suggested-activity">${escapeHtml(activities)}</span>
             <span class="group-capacity">${members.length}/${GROUP_LIMIT}</span>
           </div>

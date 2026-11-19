@@ -590,6 +590,13 @@
       font-size: 8px;
       line-height: 1;
     }
+    .planned-group-label sub,
+    .record-cell .cell-form sub {
+      font-size: .65em;
+      line-height: 0;
+      position: relative;
+      bottom: -.18em;
+    }
     .record-cell.planned.overdue .planned-group-label {
       color: #9f1239;
     }
@@ -1094,6 +1101,10 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+    const groupLabelMarkup = label => {
+      const match = String(label || "").match(/^G(\d+)$/);
+      return match ? `G<sub>${match[1]}</sub>` : escapeHtml(label || "");
+    };
 
     function cloneData(value) {
       return JSON.parse(JSON.stringify(value));
@@ -1464,6 +1475,10 @@
           const pendingPlan = content ? null : pendingPlanForCell(resident.id, day);
           const overdue = Boolean(pendingPlan && dateKey(day) < TODAY_KEY);
           const pendingGroupLabel = pendingPlan ? plannedGroupLabel(pendingPlan) : null;
+          const splitCell = Boolean(
+            content?.form ||
+            (pendingPlan && OT_PROTOTYPE.isGroupSession(pendingPlan))
+          );
           const pendingKind = pendingPlan
             ? OT_PROTOTYPE.isGroupSession(pendingPlan) ? "小組" : "個別"
             : "";
@@ -1483,17 +1498,17 @@
                 : `${resident.name} ${day}日 新增記錄`;
           return `
             <td class="record-cell-wrap ${weekStartClass} ${beforeTodayClass} ${todayClass}">
-              <button class="record-cell ${content?.type || ""} ${content?.form ? "session-split" : ""} ${pendingPlan ? "planned" : ""} ${overdue ? "overdue" : ""} ${lockReason ? "locked" : ""}" type="button"
+              <button class="record-cell ${content?.type || ""} ${splitCell ? "session-split" : ""} ${pendingPlan ? "planned" : ""} ${overdue ? "overdue" : ""} ${lockReason ? "locked" : ""}" type="button"
                 data-spec-ids="BH-REC-003,BH-REC-004,BH-REC-005,BH-REC-006,BH-REC-009,BH-REC-011,BH-REC-013,BH-REC-014,BH-006-032,BH-006-033"
                 ${lockReason ? "disabled" : 'data-action="open-cell"'} data-resident-id="${resident.id}" data-day="${day}"
                 title="${escapeHtml(title)}"
                 aria-label="${escapeHtml(aria)}">
                 ${pendingPlan
                   ? pendingGroupLabel
-                    ? `<span class="planned-group-label">${escapeHtml(pendingGroupLabel)}</span>${overdue ? '<span class="planned-debt">欠</span>' : ""}`
+                    ? `<span class="planned-group-label">${groupLabelMarkup(pendingGroupLabel)}</span>${overdue ? '<span class="planned-debt">欠</span>' : ""}`
                     : overdue ? '<span class="cell-code">欠</span>' : ""
                   : content?.form
-                  ? `<span class="cell-form">${escapeHtml(content.groupLabel || content.form)}</span><span class="cell-activity">${escapeHtml(content.activity)}</span>`
+                  ? `<span class="cell-form">${content.groupLabel ? groupLabelMarkup(content.groupLabel) : escapeHtml(content.form)}</span><span class="cell-activity">${escapeHtml(content.activity)}</span>`
                   : `<span class="cell-code">${content ? escapeHtml(content.text) : ""}</span>`}
               </button>
             </td>
