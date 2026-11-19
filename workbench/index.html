@@ -580,13 +580,13 @@
 
       <div class="content">
         <div class="workspace">
-          <section class="panel todo-panel" aria-labelledby="todo-title">
+          <section class="panel todo-panel" aria-labelledby="todo-title" data-spec-ids="BH-GLOBAL-002,BH-TODO-001">
             <header class="panel-head">
               <h2 id="todo-title">待辦</h2>
-              <button class="btn btn-primary" type="button" data-action="new-task">＋ 新增待辦</button>
+              <button class="btn btn-primary" type="button" data-action="new-task" data-spec-ids="BH-TODO-006,BH-TODO-008">＋ 新增待辦</button>
             </header>
             <div class="todo-tools">
-              <div class="segmented" role="tablist" aria-label="待辦範圍">
+              <div class="segmented" role="tablist" aria-label="待辦範圍" data-spec-ids="BH-TODO-012">
                 <button class="active" type="button" role="tab" aria-selected="true" data-view="mine">我的</button>
                 <button type="button" role="tab" aria-selected="false" data-view="home">全院</button>
                 <button type="button" role="tab" aria-selected="false" data-view="done">已完成</button>
@@ -595,12 +595,12 @@
             <div class="todo-list" id="todo-list"></div>
           </section>
 
-          <aside class="panel handover-panel" aria-labelledby="handover-title">
+          <aside class="panel handover-panel" aria-labelledby="handover-title" data-spec-ids="BH-HO-001">
             <header class="panel-head">
               <h2 id="handover-title">交更</h2>
-              <button class="btn" type="button" data-action="new-post">＋ 貼文</button>
+              <button class="btn" type="button" data-action="new-post" data-spec-ids="BH-HO-004,BH-HO-009">＋ 貼文</button>
             </header>
-            <div class="channel-bar">
+            <div class="channel-bar" data-spec-ids="BH-HO-002">
               <div class="segmented" role="tablist" aria-label="交更頻道">
                 <button class="active" type="button" role="tab" aria-selected="true" data-channel="home">院舍</button>
                 <button type="button" role="tab" aria-selected="false" data-channel="announcement">公告</button>
@@ -608,12 +608,12 @@
               <label class="handover-date">
                 <button class="handover-day-btn" type="button" data-action="prev-handover-day"
                   title="前一日" aria-label="前一日交更">←</button>
-                <input id="handover-date" type="date" value="2026-10-23" aria-label="交更日期">
+                <input id="handover-date" type="date" value="2026-10-23" aria-label="交更日期" data-spec-ids="BH-HO-008">
                 <button class="handover-day-btn" type="button" data-action="next-handover-day"
                   title="後一日" aria-label="後一日交更">→</button>
               </label>
             </div>
-            <div class="handover-body" id="handover-body"></div>
+            <div class="handover-body" id="handover-body" data-spec-ids="BH-HO-003,BH-HO-006,BH-HO-007,BH-ICP-011"></div>
           </aside>
         </div>
       </div>
@@ -628,7 +628,7 @@
       <div class="dialog-body">
         <div class="form-field full">
           <label for="task-title-input">待辦內容</label>
-          <input id="task-title-input" name="title" placeholder="例如：核對訓練紀錄" required>
+          <input id="task-title-input" name="title" placeholder="例如：核對訓練紀錄" required data-spec-ids="BH-TODO-008">
         </div>
         <div class="form-grid">
           <div class="form-field">
@@ -650,7 +650,7 @@
           </div>
           <div class="form-field">
             <label for="task-due-input">限期</label>
-            <input id="task-due-input" name="due" type="date">
+            <input id="task-due-input" name="due" type="date" data-spec-ids="BH-TODO-005,BH-TODO-006">
           </div>
         </div>
       </div>
@@ -667,7 +667,7 @@
         <h2 id="post-dialog-title">新增貼文</h2>
       </div>
       <div class="dialog-body">
-        <div class="post-type">
+        <div class="post-type" data-spec-ids="BH-HO-009">
           <label><input type="radio" name="postType" value="announcement" checked> 公告事項</label>
           <label><input type="radio" name="postType" value="task"> 任務</label>
         </div>
@@ -675,7 +675,7 @@
           <label for="post-content">內容</label>
           <textarea id="post-content" placeholder="輸入交更內容" required></textarea>
         </div>
-        <div class="form-grid" id="post-task-fields" hidden>
+        <div class="form-grid" id="post-task-fields" hidden data-spec-ids="BH-HO-009,BH-TODO-005">
           <div class="form-field">
             <label for="post-task-title">待辦內容</label>
             <input id="post-task-title" placeholder="例如：補回訓練紀錄">
@@ -697,7 +697,7 @@
           </div>
           <div class="form-field">
             <label for="post-due">限期</label>
-            <input id="post-due" type="date" required>
+            <input id="post-due" type="date" required data-spec-ids="BH-TODO-005">
           </div>
         </div>
       </div>
@@ -830,9 +830,9 @@
              <span aria-hidden="true"></span>
            </label>`;
       return `
-        <div class="task-row ${done ? "completed" : ""}" data-task-id="${task.id}">
+        <div class="task-row ${done ? "completed" : ""}" data-task-id="${task.id}" data-spec-ids="BH-TODO-007,BH-TODO-009">
           ${check}
-          <button class="task-main" type="button" data-action="open-task" data-task-id="${task.id}">
+          <button class="task-main" type="button" data-action="open-task" data-task-id="${task.id}" data-spec-ids="BH-TODO-007,BH-TODO-008">
             <span class="task-title">${escapeHtml(task.title)}</span>
             ${taskMetaMarkup(task, group)}
           </button>
@@ -848,7 +848,7 @@
         return;
       }
       if (activeView === "done") {
-        list.innerHTML = `<div class="todo-group" open>${visible
+        list.innerHTML = `<div class="todo-group" open data-spec-ids="BH-TODO-001,BH-TODO-011">${visible
           .sort((a, b) => (b.completedAt || "").localeCompare(a.completedAt || ""))
           .map(task => taskRowMarkup(task, "done"))
           .join("")}</div>`;
@@ -867,7 +867,7 @@
           .sort((a, b) => (a.due || TODAY_KEY).localeCompare(b.due || TODAY_KEY));
         if (!rows.length) return "";
         return `
-          <details class="todo-group ${key}" ${key === "later" ? "" : "open"}>
+          <details class="todo-group ${key}" ${key === "later" ? "" : "open"} data-spec-ids="BH-TODO-001,BH-TODO-011">
             <summary><h3>${label}</h3></summary>
             ${rows.map(task => taskRowMarkup(task, key)).join("")}
           </details>
@@ -880,12 +880,12 @@
       const generatedHandover = OT_PROTOTYPE.generatedHandover(handoverDate);
       const generated = activeChannel === "home"
         ? `
-          <section class="handover-block">
+          <section class="handover-block" data-spec-ids="BH-HO-003,BH-HO-006">
             <div class="handover-block-head">
               <h3>${handoverDate === TODAY_KEY ? "今日交更" : `${handoverDate.replaceAll("-", "/")} 交更`}</h3>
             </div>
             ${generatedHandover.sections.map(section => `
-              <div class="handover-section" data-handover-section="${escapeHtml(section.id)}">
+              <div class="handover-section" data-handover-section="${escapeHtml(section.id)}" data-spec-ids="BH-HO-003,BH-HO-006,BH-HO-007">
                 <div class="handover-section-head">
                   <strong>${escapeHtml(section.title)}</strong>
                 </div>
@@ -903,7 +903,7 @@
         <div class="feed-title">跟進</div>
         ${channelPosts.length
           ? channelPosts.map(post => `
-              <article class="post">
+              <article class="post" data-spec-ids="BH-HO-007">
                 <div class="post-meta">
                   <span class="post-actor"><span>發文者</span><strong>${escapeHtml(post.author)}</strong></span>
                   <span>${escapeHtml(post.time)}</span>
@@ -1173,5 +1173,7 @@
     });
   </script>
   <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/spec-inspector-data.js?v=20261118-spec-inspector"></script>
+  <script src="../shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>
 </html>

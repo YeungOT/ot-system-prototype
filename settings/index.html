@@ -303,8 +303,8 @@
 
       <div class="content">
         <form class="settings-shell" id="settings-form" novalidate>
-          <div class="settings-grid">
-            <section class="settings-card">
+          <div class="settings-grid" data-spec-ids="BH-GLOBAL-001">
+            <section class="settings-card" data-spec-ids="BH-GLOBAL-001">
               <h2>院舍資料</h2>
               <div class="field-grid">
                 <div class="field full">
@@ -318,7 +318,7 @@
               </div>
             </section>
 
-            <section class="settings-card">
+            <section class="settings-card" data-spec-ids="BH-RES-025,BH-006-013">
               <h2>人力及容量</h2>
               <div class="field-grid">
                 <div class="field">
@@ -327,39 +327,39 @@
                 </div>
                 <div class="field">
                   <label for="setting-group-limit">小組人數上限</label>
-                  <input id="setting-group-limit" name="groupLimit" type="number" min="1" max="20" step="1" required>
+                  <input id="setting-group-limit" name="groupLimit" type="number" min="1" max="20" step="1" required data-spec-ids="BH-006-006,BH-006-013">
                 </div>
                 <div class="field">
                   <label for="setting-total-beds">總床位</label>
-                  <input id="setting-total-beds" name="totalBeds" type="number" min="1" max="999" step="1" required>
+                  <input id="setting-total-beds" name="totalBeds" type="number" min="1" max="999" step="1" required data-spec-ids="BH-RES-025">
                 </div>
                 <div class="field">
                   <label for="setting-voucher-beds">券位床位數</label>
-                  <input id="setting-voucher-beds" name="voucherBeds" type="number" min="0" max="999" step="1" required>
+                  <input id="setting-voucher-beds" name="voucherBeds" type="number" min="0" max="999" step="1" required data-spec-ids="BH-RES-025">
                 </div>
               </div>
             </section>
 
-            <section class="settings-card">
+            <section class="settings-card" data-spec-ids="BH-006-006">
               <h2>午膳時段</h2>
               <div class="field-grid">
                 <div class="field">
                   <label for="setting-lunch-start">開始</label>
-                  <input id="setting-lunch-start" name="lunchStart" type="time" required>
+                  <input id="setting-lunch-start" name="lunchStart" type="time" required data-spec-ids="BH-006-006">
                 </div>
                 <div class="field">
                   <label for="setting-lunch-end">結束</label>
-                  <input id="setting-lunch-end" name="lunchEnd" type="time" required>
+                  <input id="setting-lunch-end" name="lunchEnd" type="time" required data-spec-ids="BH-006-006">
                 </div>
               </div>
             </section>
 
-            <section class="settings-card rule-card">
+            <section class="settings-card rule-card" data-spec-ids="BH-ICP-008">
               <h2>ICP 規則</h2>
               <div class="rule-line">
                 <div class="field">
                   <label for="setting-urgent-rule">緊急 ICP 影響</label>
-                  <select id="setting-urgent-rule" name="urgentIcpRule">
+                  <select id="setting-urgent-rule" name="urgentIcpRule" data-spec-ids="BH-ICP-008">
                     <option value="none">沒有影響</option>
                     <option value="restart">重啟週期</option>
                     <option value="current">計算於週期內</option>
@@ -371,11 +371,11 @@
 
           <p class="form-error" id="settings-error" hidden></p>
 
-          <div class="save-bar">
+          <div class="save-bar" data-spec-ids="BH-GLOBAL-004">
             <span class="save-state" id="bottom-save-state">所有設定已儲存</span>
             <div class="save-actions">
               <button class="btn" id="reset-settings" type="button">還原</button>
-              <button class="btn btn-primary" type="submit">儲存設定</button>
+              <button class="btn btn-primary" type="submit" data-spec-ids="BH-GLOBAL-004">儲存設定</button>
             </div>
           </div>
         </form>
@@ -511,5 +511,7 @@
     });
   </script>
   <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/spec-inspector-data.js?v=20261118-spec-inspector"></script>
+  <script src="../shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>
 </html>

@@ -355,7 +355,8 @@
     .legend .extra-group { background: #fdba74; }
     .legend .special { background: #fca5a5; }
     .legend .hospital { background: #f2d4b9; }
-    .legend .planned { background: #fef3c7; }
+    .legend .planned { background: #fef9c3; }
+    .legend .planned-overdue { background: #fce7f3; }
 
     .sheet {
       margin-top: 8px;
@@ -569,12 +570,17 @@
     .record-cell.refusal { background: var(--red-soft); color: var(--red); }
     .record-cell.hospital { background: var(--amber-soft); color: var(--amber); }
     .record-cell.planned {
-      background: #fffbeb;
-      color: #92400e;
+      background: #fef9c3;
+      color: #475569;
+      box-shadow: none;
     }
     .record-cell.planned:hover { background: #fef3c7; box-shadow: none; }
-    .record-cell.planned.overdue { background: #fee2e2; color: #991b1b; }
-    .record-cell.planned.overdue:hover { background: #fecaca; box-shadow: none; }
+    .record-cell.planned.overdue {
+      background: #fce7f3;
+      color: #be123c;
+      box-shadow: none;
+    }
+    .record-cell.planned.overdue:hover { background: #fbcfe8; box-shadow: none; }
     .record-cell.locked {
       background: #f1f5f9;
       color: #94a3b8;
@@ -849,22 +855,22 @@
       </header>
 
       <div class="content">
-        <section class="control-bar">
-          <div class="mode-switch" role="group" aria-label="紀錄類型">
-            <button class="mode-tab active" type="button" data-mode="a" aria-pressed="true">復康訓練</button>
-            <button class="mode-tab" type="button" data-mode="c" aria-pressed="false">額外服務</button>
+        <section class="control-bar" data-spec-ids="BH-REC-001,BH-REC-002,BH-REC-015,BH-REC-016">
+          <div class="mode-switch" role="group" aria-label="紀錄類型" data-spec-ids="BH-REC-001">
+            <button class="mode-tab active" type="button" data-mode="a" aria-pressed="true" data-spec-ids="BH-REC-001,BH-REC-004">復康訓練</button>
+            <button class="mode-tab" type="button" data-mode="c" aria-pressed="false" data-spec-ids="BH-REC-001,BH-REC-005">額外服務</button>
           </div>
           <div class="toolbar-right">
-            <div class="month-nav">
+            <div class="month-nav" data-spec-ids="BH-REC-003,BH-REC-012">
               <button class="btn icon-btn" type="button" data-action="prev-month" title="上一個月" aria-label="上一個月">←</button>
               <strong id="month-label">2026年10月</strong>
               <button class="btn icon-btn" type="button" data-action="next-month" title="下一個月" aria-label="下一個月">→</button>
               <button class="btn" type="button" data-action="current-month">本月</button>
             </div>
-            <input class="record-search" id="record-search" type="search" placeholder="搜尋床號或姓名" aria-label="搜尋床號或姓名">
+            <input class="record-search" id="record-search" type="search" placeholder="搜尋床號或姓名" aria-label="搜尋床號或姓名" data-spec-ids="BH-REC-016">
             <details class="record-filter-menu" id="record-filter-menu">
               <summary><span>篩選</span><strong id="record-filter-summary">全部</strong></summary>
-              <div class="place-popover">
+              <div class="place-popover" data-spec-ids="BH-REC-002">
                 <div class="record-filter-group">
                   <strong>宿位</strong>
                   <label class="place-option"><input type="checkbox" data-place="voucher" checked> 券位</label>
@@ -873,13 +879,13 @@
                 </div>
                 <label class="record-filter-field">
                   樓層
-                  <select class="compact-select" id="floor-filter" aria-label="樓層篩選">
+                  <select class="compact-select" id="floor-filter" aria-label="樓層篩選" data-spec-ids="BH-REC-015">
                     <option value="all">全部樓層</option>
                   </select>
                 </label>
                 <label class="record-filter-field">
                   活動現況
-                  <select class="compact-select" id="mobility-filter" aria-label="活動現況篩選">
+                  <select class="compact-select" id="mobility-filter" aria-label="活動現況篩選" data-spec-ids="BH-REC-015">
                     <option value="all">全部活動現況</option>
                     <option value="IW">IW 自由活動</option>
                     <option value="IWC">IWC 自由輪椅活動</option>
@@ -889,15 +895,15 @@
                 </label>
               </div>
             </details>
-            <button class="btn" type="button" data-action="print-preview">列印</button>
+            <button class="btn" type="button" data-action="print-preview" data-spec-ids="BH-REC-012">列印</button>
           </div>
         </section>
 
-        <section class="sheet">
-          <div class="record-scroll" id="record-scroll"></div>
+        <section class="sheet" data-spec-ids="BH-REC-003,BH-REC-004,BH-REC-005,BH-REC-006,BH-REC-013">
+          <div class="record-scroll" id="record-scroll" data-spec-ids="BH-REC-003,BH-REC-013"></div>
         </section>
 
-        <section class="summary-line">
+        <section class="summary-line" data-spec-ids="BH-REC-008">
           <div class="summary-copy">
             <span class="summary-dot" aria-hidden="true"></span>
             <div id="summary-copy"></div>
@@ -908,7 +914,7 @@
     </main>
   </div>
 
-  <div class="cell-menu" id="cell-menu" hidden>
+  <div class="cell-menu" id="cell-menu" hidden data-spec-ids="BH-REC-004,BH-REC-005,BH-REC-006,BH-REC-007,BH-REC-009,BH-REC-011">
     <div class="menu-fields">
       <label class="menu-field"><select id="form-select" aria-label="形式"></select></label>
       <label class="menu-field"><select id="activity-select" aria-label="活動"></select></label>
@@ -917,12 +923,12 @@
     <div class="cell-meta" id="cell-meta"></div>
     <div class="menu-error" id="menu-error" role="alert"></div>
     <div class="cell-menu-actions">
-      <button class="btn" type="button" data-action="clear-cell">清除</button>
-      <button class="btn btn-primary" type="button" data-action="save-cell">儲存</button>
+      <button class="btn" type="button" data-action="clear-cell" data-spec-ids="BH-REC-006,BH-REC-009,BH-REC-011">清除</button>
+      <button class="btn btn-primary" type="button" data-action="save-cell" data-spec-ids="BH-REC-004,BH-REC-005,BH-REC-006,BH-REC-007">儲存</button>
     </div>
   </div>
 
-  <dialog id="print-dialog" aria-labelledby="print-title">
+  <dialog id="print-dialog" aria-labelledby="print-title" data-spec-ids="BH-REC-012">
     <div class="print-toolbar">
       <strong id="print-title">列印預覽</strong>
       <div class="actions">
@@ -948,8 +954,18 @@
 
     const STORAGE_KEY = OT_MOCK_STORAGE_KEYS.records;
     const PLAN_STORAGE_KEY = OT_MOCK_STORAGE_KEYS.trainingSchedule;
-    const TODAY = new Date(2026, 9, 22);
-    const TODAY_KEY = "2026-10-22";
+    const requestedToday = params.get("today");
+    const parsedRequestedToday = requestedToday
+      ? new Date(`${requestedToday}T00:00:00`)
+      : null;
+    const TODAY = parsedRequestedToday && !Number.isNaN(parsedRequestedToday.getTime())
+      ? parsedRequestedToday
+      : new Date();
+    const TODAY_KEY = [
+      TODAY.getFullYear(),
+      String(TODAY.getMonth() + 1).padStart(2, "0"),
+      String(TODAY.getDate()).padStart(2, "0")
+    ].join("-");
     const PLAN_WEEK_DATES = {
       1: ["2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10"],
       2: ["2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17"],
@@ -1252,16 +1268,24 @@
       return Boolean(session.paid) || session.format === "ei" || session.format === "eg";
     }
 
-    function pendingPlanForCell(residentId, day) {
-      const key = cellKey(residentId, day);
-      if (data.statuses[key] || recordsForMode()[key]) return null;
-      if (residentDateLock(residentId, day)) return null;
+    function plannedSessionForCell(residentId, day) {
       const date = dateKey(day);
       return plannedSessions.find(session => (
         planDateForSession(session) === date &&
         session.memberIds.includes(residentId) &&
         (activeMode === "c" ? isPaidPlanSession(session) : !isPaidPlanSession(session))
       )) || null;
+    }
+
+    function plannedGroupLabel(session) {
+      return OT_PROTOTYPE.groupLabelForSession(plannedSessions, session);
+    }
+
+    function pendingPlanForCell(residentId, day) {
+      const key = cellKey(residentId, day);
+      if (data.statuses[key] || recordsForMode()[key]) return null;
+      if (residentDateLock(residentId, day)) return null;
+      return plannedSessionForCell(residentId, day);
     }
 
     function pendingPlanCount(rows) {
@@ -1292,7 +1316,10 @@
     }
 
     function isDayBeforeToday(day) {
-      return isSameMonth(visibleMonth, TODAY) && day === TODAY.getDate() - 1;
+      const monthStart = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1);
+      const todayMonthStart = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+      if (monthStart < todayMonthStart) return true;
+      return isSameMonth(visibleMonth, TODAY) && day < TODAY.getDate();
     }
 
     function cellContent(resident, day) {
@@ -1310,11 +1337,17 @@
       const record = recordsForMode()[key];
       if (!record) return null;
       const isIndividual = record.form === "i" || record.form === "ei";
+      const plannedSession = plannedSessionForCell(resident.id, day);
+      const groupLabel = !isIndividual
+        ? record.groupLabel || plannedGroupLabel(plannedSession)
+        : null;
       return {
         text: `${record.form}·${record.activity}`,
         sub: ACTIVITY_LABELS[record.activity] || record.activity,
         form: record.form,
+        groupLabel,
         activity: record.activity,
+        planSessionId: record.planSessionId || null,
         modifiedBy: record.modifiedBy || "OT Test",
         modifiedAt: record.modifiedAt || "2026-10-22T09:30:00+08:00",
         type: activeMode === "c"
@@ -1375,8 +1408,8 @@
         ? `<strong>${rows.length} 位住客 · 已記錄 ${totalRecorded} 節 · ${pendingCells} 格待填</strong><span>${missingRows} 位未達本週／本月基本頻率</span>`
         : `<strong>${rows.length} 位住客 · 額外服務 ${totalRecorded} / ${targetTotal} 節 · ${pendingCells} 格待填</strong><span>${missingRows} 位未達額外服務目標</span>`;
       document.getElementById("legend").innerHTML = activeMode === "a"
-        ? '<span><i class="individual"></i>個別</span><span><i class="group"></i>小組</span><span><i class="planned"></i>006 待填</span><span><i class="special"></i>X / 拒絕</span><span><i class="hospital"></i>H / 醫院</span>'
-        : '<span><i class="extra-individual"></i>額外個別</span><span><i class="extra-group"></i>額外小組</span><span><i class="planned"></i>006 待填</span><span><i class="special"></i>X / 拒絕</span><span><i class="hospital"></i>H / 醫院</span>';
+        ? '<span><i class="individual"></i>個別</span><span><i class="group"></i>小組</span><span><i class="planned"></i>待填</span><span><i class="planned-overdue"></i>欠</span><span><i class="special"></i>X / 拒絕</span><span><i class="hospital"></i>H / 醫院</span>'
+        : '<span><i class="extra-individual"></i>額外個別</span><span><i class="extra-group"></i>額外小組</span><span><i class="planned"></i>待填</span><span><i class="planned-overdue"></i>欠</span><span><i class="special"></i>X / 拒絕</span><span><i class="hospital"></i>H / 醫院</span>';
     }
 
     function renderTable() {
@@ -1400,28 +1433,35 @@
           const content = cellContent(resident, day);
           const pendingPlan = content ? null : pendingPlanForCell(resident.id, day);
           const overdue = Boolean(pendingPlan && dateKey(day) < TODAY_KEY);
+          const pendingGroupLabel = pendingPlan ? plannedGroupLabel(pendingPlan) : null;
+          const pendingKind = pendingPlan
+            ? OT_PROTOTYPE.isGroupSession(pendingPlan) ? "小組" : "個別"
+            : "";
           const title = lockReason
             ? lockReason
             : pendingPlan
-            ? `006 已安排 ${pendingPlan.format}，尚待輸入紀錄`
+            ? `006 已安排${pendingKind}${pendingGroupLabel ? ` ${pendingGroupLabel}` : ""}，${overdue ? "欠：" : ""}尚待輸入紀錄`
             : content
               ? `${content.text} · ${content.sub} · 最後修改 ${content.modifiedBy} ${new Date(content.modifiedAt).toLocaleString("zh-HK", { hour12: false })}`
               : "新增記錄";
           const aria = lockReason
             ? `${resident.name} ${day}日 ${lockReason}`
             : pendingPlan
-              ? `${resident.name} ${day}日 006 已安排，尚待輸入紀錄`
+              ? `${resident.name} ${day}日 006 已安排${pendingKind}${pendingGroupLabel ? ` ${pendingGroupLabel}` : ""}，${overdue ? "欠，尚待輸入紀錄" : "尚待輸入紀錄"}`
               : content
                 ? `${resident.name} ${day}日 ${content.text} ${content.sub}`
                 : `${resident.name} ${day}日 新增記錄`;
           return `
             <td class="record-cell-wrap ${weekStartClass} ${beforeTodayClass} ${todayClass}">
               <button class="record-cell ${content?.type || ""} ${content?.form ? "session-split" : ""} ${pendingPlan ? "planned" : ""} ${overdue ? "overdue" : ""} ${lockReason ? "locked" : ""}" type="button"
+                data-spec-ids="BH-REC-003,BH-REC-004,BH-REC-005,BH-REC-006,BH-REC-009,BH-REC-011,BH-REC-013,BH-REC-014,BH-006-032,BH-006-033"
                 ${lockReason ? "disabled" : 'data-action="open-cell"'} data-resident-id="${resident.id}" data-day="${day}"
                 title="${escapeHtml(title)}"
                 aria-label="${escapeHtml(aria)}">
-                ${content?.form
-                  ? `<span class="cell-form">${escapeHtml(content.form)}</span><span class="cell-activity">${escapeHtml(content.activity)}</span>`
+                ${pendingPlan
+                  ? overdue ? '<span class="cell-code">欠</span>' : ""
+                  : content?.form
+                  ? `<span class="cell-form">${escapeHtml(content.groupLabel || content.form)}</span><span class="cell-activity">${escapeHtml(content.activity)}</span>`
                   : `<span class="cell-code">${content ? escapeHtml(content.text) : ""}</span>`}
               </button>
             </td>
@@ -1430,7 +1470,7 @@
         return `
           <tr data-resident-id="${resident.id}">
             <td class="resident-cell">
-              <div class="row-resident">
+              <div class="row-resident" data-spec-ids="BH-REC-014,BH-REC-015,BH-REC-016">
                 <span class="bed">${escapeHtml(resident.bed)}</span>
                 <span class="resident-name-line">
                   <strong class="resident-inline-name">${escapeHtml(resident.name)}</strong>
@@ -1524,21 +1564,31 @@
       const key = cellKey(residentId, day);
       const record = recordsForMode()[key];
       const status = data.statuses[key] || null;
+      const plannedSession = plannedSessionForCell(residentId, day);
+      const autoForm = OT_PROTOTYPE.sessionRecordForm(plannedSession, activeMode);
+      const groupLabel = plannedGroupLabel(plannedSession);
       selectedCell = { residentId, day, key, record };
       draftEntry = {
-        form: record?.form || null,
+        form: record?.form || autoForm || null,
+        autoForm,
         activity: record?.activity || null,
-        special: status
+        special: status,
+        plannedSessionId: plannedSession?.id || null,
+        groupLabel
       };
       document.querySelectorAll(".record-cell.selected").forEach(cell => cell.classList.remove("selected"));
       const anchor = document.querySelector(`[data-action="open-cell"][data-resident-id="${residentId}"][data-day="${day}"]`);
       anchor?.classList.add("selected");
       document.getElementById("menu-error").textContent = "";
-      document.getElementById("cell-meta").textContent = record
+      const planMeta = plannedSession
+        ? `006：${groupLabel ? `${groupLabel} · ` : ""}${OT_PROTOTYPE.isGroupSession(plannedSession) ? "小組" : "個別"}`
+        : "";
+      const recordMeta = record
         ? `最後修改：${record.modifiedBy || "OT Test"} · ${new Date(record.modifiedAt || "2026-10-22T09:30:00+08:00").toLocaleString("zh-HK", { hour12: false })}`
         : status && data.statusMeta[key]
           ? `最後修改：${data.statusMeta[key].modifiedBy} · ${new Date(data.statusMeta[key].modifiedAt).toLocaleString("zh-HK", { hour12: false })}`
         : "尚未有紀錄。";
+      document.getElementById("cell-meta").textContent = [planMeta, recordMeta].filter(Boolean).join(" · ");
       populateCellMenu(resident);
       positionCellMenu(anchor);
     }
@@ -1555,8 +1605,13 @@
       const forms = activeMode === "a"
         ? [{ code: "", label: "請選擇形式" }, { code: "i", label: "個別" }, { code: "g", label: "小組" }]
         : [{ code: "", label: "請選擇形式" }, { code: "ei", label: "額外個別" }, { code: "eg", label: "額外小組" }];
+      const visibleForms = draftEntry.autoForm
+        ? forms.filter(form => form.code === draftEntry.autoForm)
+        : forms;
       const formSelect = document.getElementById("form-select");
-      formSelect.innerHTML = forms.map(form => `<option value="${form.code}">${escapeHtml(form.label)}</option>`).join("");
+      formSelect.innerHTML = visibleForms
+        .map(form => `<option value="${form.code}">${escapeHtml(form.label)}</option>`)
+        .join("");
       formSelect.value = draftEntry.form || "";
 
       const activitySelect = document.getElementById("activity-select");
@@ -1577,7 +1632,7 @@
         ))
       ].join("");
       statusSelect.value = draftEntry.special || "";
-      formSelect.disabled = Boolean(draftEntry.special);
+      formSelect.disabled = Boolean(draftEntry.special || draftEntry.autoForm);
       activitySelect.disabled = Boolean(draftEntry.special);
       document.getElementById("cell-menu").hidden = false;
     }
@@ -1615,6 +1670,8 @@
         recordsForMode()[key] = {
           form: draftEntry.form,
           activity: draftEntry.activity,
+          planSessionId: draftEntry.plannedSessionId,
+          groupLabel: draftEntry.groupLabel,
           modifiedBy: OT_PROTOTYPE.currentUser().name,
           modifiedAt: new Date().toISOString()
         };
@@ -1794,8 +1851,11 @@
           draftEntry.activity = null;
           document.getElementById("form-select").value = "";
           document.getElementById("activity-select").value = "";
+        } else if (draftEntry.autoForm) {
+          draftEntry.form = draftEntry.autoForm;
+          document.getElementById("form-select").value = draftEntry.autoForm;
         }
-        document.getElementById("form-select").disabled = Boolean(draftEntry.special);
+        document.getElementById("form-select").disabled = Boolean(draftEntry.special || draftEntry.autoForm);
         document.getElementById("activity-select").disabled = Boolean(draftEntry.special);
         document.getElementById("menu-error").textContent = "";
       }
@@ -1831,5 +1891,7 @@
     });
   </script>
   <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/spec-inspector-data.js?v=20261118-spec-inspector"></script>
+  <script src="../shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>
 </html>

@@ -1147,8 +1147,8 @@
 
       <div class="content">
         <div class="workbench">
-          <article class="resident-panel" aria-label="住客清單">
-            <div class="service-switch">
+          <article class="resident-panel" aria-label="住客清單" data-spec-ids="BH-006-004,BH-006-012,BH-006-026">
+            <div class="service-switch" data-spec-ids="BH-006-001">
               <div class="segmented" role="tablist" aria-label="服務類型">
                 <button class="active" type="button" role="tab" aria-selected="true" data-service-mode="basic">基本</button>
                 <button type="button" role="tab" aria-selected="false" data-service-mode="extra">額外服務</button>
@@ -1157,15 +1157,15 @@
             <div class="resident-queue" id="resident-queue"></div>
           </article>
 
-          <article class="schedule-panel" aria-label="訓練時段">
-            <section class="cadence" id="cadence" aria-label="本月週次"></section>
-            <div class="schedule-toolbar">
+          <article class="schedule-panel" aria-label="訓練時段" data-spec-ids="BH-006-003,BH-006-021">
+            <section class="cadence" id="cadence" aria-label="本月週次" data-spec-ids="BH-006-002,BH-006-021"></section>
+            <div class="schedule-toolbar" data-spec-ids="BH-006-001,BH-006-003">
               <div class="schedule-toolbar-group">
                 <div class="segmented" role="group" aria-label="時間表檢視">
-                  <button type="button" class="active" data-view="week" aria-pressed="true">週</button>
-                  <button type="button" data-view="month" aria-pressed="false">月</button>
+                  <button type="button" class="active" data-view="week" aria-pressed="true" data-spec-ids="BH-006-001">週</button>
+                  <button type="button" data-view="month" aria-pressed="false" data-spec-ids="BH-006-001,BH-006-003,BH-006-015,BH-006-017">月</button>
                 </div>
-                <button class="btn" type="button" data-action="open-autofill">
+                <button class="btn" type="button" data-action="open-autofill" data-spec-ids="BH-006-010,BH-006-020">
                   自動填入
                 </button>
               </div>
@@ -1183,10 +1183,10 @@
                   </svg>
                 </button>
                 <button class="btn dev-only" type="button" data-action="reset-demo">重設示範</button>
-                <button class="btn btn-primary" type="button" data-action="complete" id="complete-button">完成時間表</button>
+                <button class="btn btn-primary" type="button" data-action="complete" id="complete-button" data-spec-ids="BH-006-013,BH-006-026,BH-006-027,BH-006-029">完成時間表</button>
               </div>
             </div>
-            <div class="schedule-scroll" id="schedule-grid"></div>
+            <div class="schedule-scroll" id="schedule-grid" data-spec-ids="BH-006-003,BH-006-006,BH-006-021,BH-006-029"></div>
           </article>
         </div>
         <small class="save-status-corner" id="last-saved">尚未變更</small>
@@ -1194,7 +1194,7 @@
     </main>
   </div>
 
-  <dialog id="autofill-dialog" aria-labelledby="autofill-title">
+  <dialog id="autofill-dialog" aria-labelledby="autofill-title" data-spec-ids="BH-006-010,BH-006-020">
     <div class="dialog-head">
       <h2 id="autofill-title">自動填入所有住客</h2>
       <p>補齊目前月份及所選週期所需節數；現有安排不會被覆蓋。</p>
@@ -1213,10 +1213,10 @@
     </div>
   </dialog>
 
-  <dialog class="scope-dialog" id="week-scope-dialog" aria-label="變更範圍">
+  <dialog class="scope-dialog" id="week-scope-dialog" aria-label="變更範圍" data-spec-ids="BH-006-011">
     <div class="scope-options" role="group" aria-label="變更範圍">
-      <button class="scope-option" type="button" data-action="week-scope" data-scope="current">只限本週</button>
-      <button class="scope-option" type="button" data-action="week-scope" data-scope="all">套用到所有週次</button>
+      <button class="scope-option" type="button" data-action="week-scope" data-scope="current" data-spec-ids="BH-006-011">只限本週</button>
+      <button class="scope-option" type="button" data-action="week-scope" data-scope="all" data-spec-ids="BH-006-011">套用到所有週次</button>
     </div>
   </dialog>
 
@@ -1229,5 +1229,7 @@
   <script src="../shared/prototype-domain.js"></script>
   <script src="../shared/training-planner-v2.js?v=20261116-legacy-format-v3"></script>
   <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/spec-inspector-data.js?v=20261118-spec-inspector"></script>
+  <script src="../shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>
 </html>

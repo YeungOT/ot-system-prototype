@@ -503,14 +503,14 @@
   <div class="app app-frame">
     <header class="topbar">
       <div class="topbar-left">
-        <select id="home-select" class="home-select" aria-label="目前院舍"></select>
+        <select id="home-select" class="home-select" aria-label="目前院舍" data-spec-ids="BH-GLOBAL-001"></select>
       </div>
       <div class="topbar-right">
         <button class="annotation-toggle" id="open-annotation-preview" type="button" aria-label="Open annotatable module view">Annotate</button>
         <span class="top-meta">2026年10月26日</span>
         <label class="user-pill" title="切換示範身份">
           <span class="avatar" id="current-user-avatar">T</span>
-          <select class="role-select" id="current-role-select" aria-label="目前使用者">
+          <select class="role-select" id="current-role-select" aria-label="目前使用者" data-spec-ids="BH-GLOBAL-004">
             <option value="ot">OT · Testing</option>
             <option value="pt">PT · Testing</option>
           </select>
@@ -577,7 +577,7 @@
   </div>
 
   <aside class="assessment-tracker" id="assessment-tracker" aria-label="進行中的 016 評估" hidden>
-    <button class="assessment-tracker-resume" id="assessment-tracker-resume" type="button">
+    <button class="assessment-tracker-resume" id="assessment-tracker-resume" type="button" data-spec-ids="BH-AX-016">
       <span class="assessment-tracker-mark">016</span>
       <span class="assessment-tracker-copy">
         <strong id="assessment-tracker-resident">016 評估進行中</strong>
@@ -934,5 +934,7 @@
     }
   </script>
   <script src="shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="shared/spec-inspector-data.js?v=20261118-spec-inspector"></script>
+  <script src="shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>
 </html>

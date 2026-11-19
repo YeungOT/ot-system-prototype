@@ -674,10 +674,8 @@
 
   function groupNumber(session) {
     if (session.format !== "g") return null;
-    const groups = sessionsAt(session.date, session.time)
-      .filter(item => item.format === "g" && !item.paid)
-      .sort((left, right) => left.id.localeCompare(right.id));
-    return groups.findIndex(item => item.id === session.id) + 1 || 1;
+    const label = OT_PROTOTYPE.groupLabelForSession(allSessionEntries(), session);
+    return label ? Number(label.slice(1)) : null;
   }
 
   function weekProgress(resident, weekStart) {
@@ -1004,39 +1002,39 @@
       }
     </style>
     <div class="tp2-shell">
-      <header class="tp2-toolbar">
+      <header class="tp2-toolbar" data-spec-ids="BH-006-001,BH-006-002">
         <div class="tp2-nav">
-          <button class="btn" type="button" data-tp-action="prev">←</button>
+          <button class="btn" type="button" data-tp-action="prev" data-spec-ids="BH-006-002">←</button>
           <div class="tp2-title">
             <strong id="tp2-period-title"></strong>
             <span id="tp2-plan-meta"></span>
           </div>
-          <button class="btn" type="button" data-tp-action="next">→</button>
-          <button class="btn" type="button" data-tp-action="today">本月</button>
+          <button class="btn" type="button" data-tp-action="next" data-spec-ids="BH-006-002">→</button>
+          <button class="btn" type="button" data-tp-action="today" data-spec-ids="BH-006-002,BH-006-028">本月</button>
         </div>
         <div class="tp2-actions">
-          <div class="tp2-segmented" role="group" aria-label="檢視">
-            <button type="button" data-tp-view="week">週</button>
-            <button type="button" data-tp-view="month">月</button>
+          <div class="tp2-segmented" role="group" aria-label="檢視" data-spec-ids="BH-006-001,BH-006-003">
+            <button type="button" data-tp-view="week" data-spec-ids="BH-006-001">週</button>
+            <button type="button" data-tp-view="month" data-spec-ids="BH-006-001,BH-006-003,BH-006-015,BH-006-017">月</button>
           </div>
           <div class="tp2-segmented" role="group" aria-label="服務">
             <button type="button" data-tp-mode="basic">基本</button>
             <button type="button" data-tp-mode="extra">額外服務</button>
           </div>
-          <button class="btn" type="button" data-tp-action="autofill">自動填入</button>
-          <button class="btn btn-primary" type="button" data-tp-action="validate">標為有效</button>
+          <button class="btn" type="button" data-tp-action="autofill" data-spec-ids="BH-006-010,BH-006-020">自動填入</button>
+          <button class="btn btn-primary" type="button" data-tp-action="validate" data-spec-ids="BH-006-013,BH-006-026,BH-006-027,BH-006-029">標為有效</button>
         </div>
       </header>
       <div id="tp2-issues"></div>
       <div class="tp2-layout">
-        <aside class="tp2-queue">
+        <aside class="tp2-queue" data-spec-ids="BH-006-004,BH-006-012,BH-006-026,BH-006-027">
           <header class="tp2-queue-head">
             <strong>住客</strong>
             <span id="tp2-queue-summary"></span>
           </header>
           <div class="tp2-queue-body" id="tp2-queue-body"></div>
         </aside>
-        <section class="tp2-board">
+        <section class="tp2-board" data-spec-ids="BH-006-003,BH-006-021">
           <header class="tp2-board-head">
             <strong id="tp2-board-title"></strong>
             <span id="tp2-board-summary"></span>
@@ -1045,14 +1043,14 @@
         </section>
       </div>
     </div>
-    <dialog id="tp2-scope-dialog" aria-labelledby="tp2-scope-title">
+    <dialog id="tp2-scope-dialog" aria-labelledby="tp2-scope-title" data-spec-ids="BH-006-011">
       <div class="dialog-head"><h2 id="tp2-scope-title">套用變更範圍</h2></div>
       <div class="dialog-actions">
-        <button class="btn" type="button" data-tp-scope="date">只更改本節</button>
-        <button class="btn btn-primary" type="button" data-tp-scope="recurring">更改所有相關節數</button>
+        <button class="btn" type="button" data-tp-scope="date" data-spec-ids="BH-006-011">只更改本節</button>
+        <button class="btn btn-primary" type="button" data-tp-scope="recurring" data-spec-ids="BH-006-011">更改所有相關節數</button>
       </div>
     </dialog>
-    <dialog id="tp2-autofill-dialog" aria-labelledby="tp2-autofill-title">
+    <dialog id="tp2-autofill-dialog" aria-labelledby="tp2-autofill-title" data-spec-ids="BH-006-010,BH-006-020">
       <div class="dialog-head"><h2 id="tp2-autofill-title">自動填入</h2></div>
       <div class="dialog-body" id="tp2-autofill-summary"></div>
       <div class="dialog-actions">
@@ -1096,6 +1094,7 @@
             : "";
           return `
             <button class="tp2-resident" type="button" draggable="true" data-tp-resident="${resident.id}"
+              data-spec-ids="${resident.cadence === "biweekly" ? "BH-006-004,BH-006-005,BH-006-012,BH-006-027" : "BH-006-004,BH-006-005,BH-006-026"}"
               title="${escapeHtml(cycleDetail)}">
               <strong>${escapeHtml(resident.bed)} · ${escapeHtml(resident.name)}</strong>
               <b>${progress.count}/${progress.target}</b>
@@ -1121,10 +1120,14 @@
       session.paid ? "extra" : "",
       session.carryOut ? "carry" : ""
     ].filter(Boolean).join(" ");
-    const group = session.format === "g" ? `G${groupNumber(session)} · ` : "";
+    const groupLabel = session.format === "g"
+      ? OT_PROTOTYPE.groupLabelForSession(allSessionEntries(), session)
+      : null;
+    const group = groupLabel ? `${groupLabel} · ` : "";
     return `
       <button class="${classes}" type="button" draggable="true"
         data-tp-session="${session.id}"
+        data-spec-ids="BH-006-005,BH-006-014,BH-006-016,BH-006-022,BH-006-024,BH-006-031,BH-006-032,BH-006-033"
         title="${escapeHtml(sessionTitle(session))}">
         <strong>${group}${escapeHtml(sessionTitle(session))}</strong>
         <small>${session.paid ? "額外" : session.format === "g" ? `小組 ${session.memberIds.length}/${GROUP_LIMIT}` : "個別"} · ${escapeHtml(session.activity)}${session.patternId ? " · 固定" : ""}</small>
@@ -1136,7 +1139,7 @@
     const dates = serviceDates(weekStart);
     const dayHeads = dates.map(date => `
       <div class="tp2-day">
-        <strong>${date.slice(8, 10)}/${date.slice(5, 7)}</strong>
+        <strong data-spec-ids="BH-006-021">${date.slice(8, 10)}/${date.slice(5, 7)}</strong>
         <small>${WEEKDAYS[weekdayIndex(date)]}</small>
       </div>
     `).join("");
@@ -1151,7 +1154,8 @@
           : "";
         return `
           <div class="tp2-cell ${lunch ? "lunch" : ""} ${readonly ? "readonly" : ""} ${date === TODAY_KEY ? "today" : ""}"
-            data-tp-date="${date}" data-tp-time="${time}">
+            data-tp-date="${date}" data-tp-time="${time}"
+            data-spec-ids="BH-006-006,BH-006-019,BH-006-021,BH-006-029">
             ${sessions.map(sessionMarkup).join("")}
             ${vacancy}
           </div>
@@ -1204,7 +1208,7 @@
           session.date === date && sessionMatchesMode(session)
         )));
         return `
-          <section class="tp2-week-card">
+          <section class="tp2-week-card" data-spec-ids="BH-006-021,BH-006-022">
             <header>
               <strong>${weekStart.slice(8, 10)}/${weekStart.slice(5, 7)}–${weekEnd.slice(8, 10)}/${weekEnd.slice(5, 7)}</strong>
               <span>${weekStart.slice(0, 7) !== weekEnd.slice(0, 7) ? '<b class="tp2-boundary">跨月</b> · ' : ""}${currentSessions.length} 節 · ${currentSessions.reduce((sum, session) => sum + session.memberIds.length, 0)} 人次</span>
@@ -1526,6 +1530,16 @@
     render();
   }
 
+  function moveMonth(direction) {
+    state.activeMonth = direction === 0
+      ? currentMonth()
+      : shiftMonth(state.activeMonth, direction);
+    state.activeWeek = startOfWeek(monthStart(state.activeMonth));
+    ensureCoverage(state.activeMonth);
+    saveState();
+    render();
+  }
+
   function validateCurrentPlan() {
     const issues = collectIssues(state.activeMonth);
     if (issues.length) {
@@ -1754,17 +1768,19 @@
     if (session.format === "g") {
       const members = session.memberIds.map(id => residentById.get(id)).filter(Boolean);
       const activities = [...new Set(members.flatMap(member => member.activities || []))].slice(0, 3).join(", ") || "-";
+      const groupLabel = OT_PROTOTYPE.groupLabelForSession(allSessionEntries(), session);
       return `
-        <div class="${classNames}" draggable="true" data-legacy-session="${session.id}">
-          <div class="group-heading">
-            <span class="format-mark">G${groupNumber(session)}</span>
+        <div class="${classNames}" draggable="true" data-legacy-session="${session.id}" data-spec-ids="BH-006-005,BH-006-014,BH-006-016,BH-006-022,BH-006-023,BH-006-031,BH-006-032,BH-006-033">
+          <div class="group-heading" data-spec-ids="BH-006-024,BH-006-033">
+            <span class="format-mark">${groupLabel || "G1"}</span>
             <span class="suggested-activity">${escapeHtml(activities)}</span>
             <span class="group-capacity">${members.length}/${GROUP_LIMIT}</span>
           </div>
           <div class="group-members">
             ${members.map(member => `
               <div class="schedule-resident-card" draggable="true"
-                data-legacy-member="${member.id}" data-legacy-member-session="${session.id}">
+                data-legacy-member="${member.id}" data-legacy-member-session="${session.id}"
+                data-spec-ids="BH-006-005,BH-006-031">
                 <span class="bed-number">${escapeHtml(member.bed)}</span>
                 <span class="schedule-resident-name">${escapeHtml(member.name)}</span>
               </div>
@@ -1775,7 +1791,7 @@
     }
     const member = residentById.get(session.memberIds[0]);
     return `
-      <div class="${classNames}" draggable="true" data-legacy-session="${session.id}">
+      <div class="${classNames}" draggable="true" data-legacy-session="${session.id}" data-spec-ids="BH-006-005,BH-006-014,BH-006-016,BH-006-022,BH-006-023,BH-006-032">
         <div class="individual-line">
           <span class="format-mark">${session.paid ? "ei" : "i"}</span>
           <span class="bed-number">${escapeHtml(member?.bed || "")}</span>
@@ -1957,6 +1973,12 @@
           </section>
           <div class="schedule-toolbar">
             <div class="schedule-toolbar-group">
+              <div class="segmented" role="group" aria-label="月份" style="align-items:center;">
+                <button type="button" data-legacy-action="prev-month" aria-label="上一個月" data-spec-ids="BH-006-001,BH-006-021">←</button>
+                <strong data-legacy-month-label style="min-width:88px;padding:0 6px;text-align:center;">${monthLabel(state.activeMonth)}</strong>
+                <button type="button" data-legacy-action="next-month" aria-label="下一個月" data-spec-ids="BH-006-001,BH-006-021">→</button>
+                <button type="button" data-legacy-action="current-month" data-spec-ids="BH-006-028">本月</button>
+              </div>
               <div class="segmented" role="group" aria-label="時間表檢視">
                 <button class="${state.view === "week" ? "active" : ""}" type="button"
                   data-legacy-view="week" aria-pressed="${state.view === "week"}">週</button>
@@ -1966,9 +1988,9 @@
               <button class="btn" type="button" data-legacy-action="autofill">自動填入</button>
             </div>
             <div class="schedule-toolbar-group schedule-toolbar-actions">
-              <button class="btn icon-btn" type="button" disabled title="復原上一步" aria-label="復原上一步">↶</button>
-              <button class="btn icon-btn" type="button" disabled title="重做" aria-label="重做">↷</button>
-              <button class="btn btn-primary" type="button" data-legacy-action="complete">${state.serviceMode === "extra" ? "完成額外服務" : "完成時間表"}</button>
+              <button class="btn icon-btn" type="button" disabled title="復原上一步" aria-label="復原上一步" data-spec-ids="BH-006-009">↶</button>
+              <button class="btn icon-btn" type="button" disabled title="重做" aria-label="重做" data-spec-ids="BH-006-009">↷</button>
+              <button class="btn btn-primary" type="button" data-legacy-action="complete" data-spec-ids="BH-006-013,BH-006-030">${state.serviceMode === "extra" ? "完成額外服務" : "完成時間表"}</button>
             </div>
           </div>
           <div id="legacy-issues"></div>
@@ -1983,6 +2005,9 @@
         </div>
       </dialog>
     `;
+    document.getElementById("legacy-scope-dialog")?.addEventListener("cancel", () => {
+      pendingMove = null;
+    });
     const issues = collectIssues(state.activeMonth);
     if (issues.length) {
       document.getElementById("legacy-issues").innerHTML = `
@@ -2087,6 +2112,9 @@
         }
         const action = event.target.closest("[data-legacy-action]");
         if (!action) return;
+        if (action.dataset.legacyAction === "prev-month") moveMonth(-1);
+        if (action.dataset.legacyAction === "next-month") moveMonth(1);
+        if (action.dataset.legacyAction === "current-month") moveMonth(0);
         if (action.dataset.legacyAction === "prev") movePeriod(-1);
         if (action.dataset.legacyAction === "next") movePeriod(1);
         if (action.dataset.legacyAction === "autofill") legacyOpenAutofill();
@@ -2185,6 +2213,12 @@
         clearLegacyDropCues();
       });
       document.addEventListener("click", event => {
+        const scopeDialog = event.target.closest?.("#legacy-scope-dialog");
+        if (scopeDialog && event.target === scopeDialog) {
+          scopeDialog.close();
+          pendingMove = null;
+          return;
+        }
         if (event.target.closest('[data-action="close-dialog"]')) {
           document.getElementById("autofill-dialog")?.close();
         }

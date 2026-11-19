@@ -31,6 +31,48 @@
     C: "3樓",
     D: "4樓"
   })[letter] || "";
+  const dateKeyAfterDays = (value, amount) => {
+    const [year, month, day] = String(value).split("-").map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day + amount));
+    return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+  };
+  const isGroupSession = session => (
+    session?.format === "g" ||
+    (Array.isArray(session?.memberIds) && session.memberIds.length > 1)
+  );
+  const sessionRecordForm = (session, mode = session?.paid ? "c" : "a") => {
+    if (!session) return null;
+    const group = isGroupSession(session);
+    if (mode === "c" || session.paid) return group ? "eg" : "ei";
+    return group ? "g" : "i";
+  };
+  function groupSessionNumbers(sessions = []) {
+    const seen = new Set();
+    const groups = sessions
+      .filter(session => session?.date && isGroupSession(session))
+      .filter(session => {
+        const key = session.id || `${session.date}|${session.time}|${session.memberIds?.join(",")}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort((left, right) => (
+        left.date.localeCompare(right.date) ||
+        String(left.time || "").localeCompare(String(right.time || "")) ||
+        String(left.id || "").localeCompare(String(right.id || ""))
+      ));
+    const numbers = new Map();
+    const dayCounts = new Map();
+    groups.forEach(session => {
+      const next = (dayCounts.get(session.date) || 0) + 1;
+      dayCounts.set(session.date, next);
+      numbers.set(session.id, `G${next}`);
+    });
+    return numbers;
+  }
+  const groupLabelForSession = (sessions, session) => (
+    session ? groupSessionNumbers(sessions).get(session.id) || null : null
+  );
 
   function readRoot() {
     try {
@@ -378,7 +420,7 @@
       title: "完成 Initial Ax",
       residentId: resident.id,
       owner: "OT",
-      due: "2026-10-30",
+      due: dateKeyAfterDays(resident.admissionDate, 7),
       status: "open",
       kind: "auto",
       source: "新增住客",
@@ -1214,6 +1256,10 @@
     residents: listResidents,
     resident: findResident,
     parseBedCode,
+    isGroupSession,
+    sessionRecordForm,
+    groupSessionNumbers,
+    groupLabelForSession,
     moveResidents,
     updateResident,
     admitResident,

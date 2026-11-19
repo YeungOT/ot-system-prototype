@@ -151,6 +151,14 @@
   `;
   document.head.append(style);
 
+  const topbarElement = document.querySelector(".topbar");
+  const topbarSpecIds = new Set(
+    String(topbarElement?.dataset.specIds || "")
+      .split(/[\s,]+/)
+      .filter(Boolean)
+  );
+  topbarSpecIds.add("BH-GLOBAL-003");
+  if (topbarElement) topbarElement.dataset.specIds = [...topbarSpecIds].join(",");
   const main = document.querySelector("main") || document.querySelector(".main");
   if (main) {
     if (!main.id) main.id = "main-content";
@@ -175,6 +183,7 @@
   const runtimeBanner = document.createElement("div");
   runtimeBanner.className = "shared-runtime-banner";
   runtimeBanner.setAttribute("role", "status");
+  runtimeBanner.dataset.specIds = "BH-GLOBAL-006";
   runtimeBanner.hidden = true;
   document.body.prepend(runtimeBanner);
   const updateRuntimeBanner = () => {
@@ -213,11 +222,22 @@
     "ICP": '<rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 11h8M8 15h5"></path>',
     "院舍設定": '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.04.04-2.83 2.83-.04-.04A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1a1.7 1.7 0 0 0-.4-1.1 1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.04.04-2.83-2.83.04-.04A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1a1.7 1.7 0 0 0 1.1-.4 1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.04-.04 2.83-2.83.04.04A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1a1.7 1.7 0 0 0 .4 1.1 1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.04-.04 2.83 2.83-.04.04A1.7 1.7 0 0 0 19.4 9c.14.37.4.7.73.92.3.2.67.31 1.04.31H21v4h-.1a1.7 1.7 0 0 0-1.5.77Z"></path>'
   };
+  const navSpecs = {
+    "工作台": "BH-GLOBAL-002,BH-TODO-001,BH-HO-001",
+    "住客管理": "BH-RES-001,BH-RES-002,BH-RES-004",
+    "訓練時間表": "BH-006-001,BH-006-002,BH-006-003",
+    "復康運動紀錄": "BH-REC-001,BH-REC-003",
+    "評估系統": "BH-AX-001,BH-AX-019",
+    "評估檔案": "BH-AX-001,BH-AX-019",
+    "ICP": "BH-ICP-001,BH-ICP-003",
+    "院舍設定": "BH-GLOBAL-001,BH-ICP-008"
+  };
   document.querySelectorAll(".nav button").forEach(button => {
     const labelNode = button.querySelector("span") || button;
     const label = labelNode.textContent.trim();
     const target = routes[label];
     if (!target) return;
+    if (navSpecs[label]) button.dataset.specIds = navSpecs[label];
     if (!button.querySelector(".shared-nav-icon")) {
       const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       icon.setAttribute("class", "shared-nav-icon");
@@ -265,6 +285,7 @@
     const select = document.createElement("select");
     select.className = "shared-home-select";
     select.setAttribute("aria-label", "選擇院舍");
+    select.dataset.specIds = "BH-GLOBAL-001";
     select.innerHTML = OT_HOME_SETTINGS.getHomeList()
       .map(home => `<option value="${home.code}">${home.code} · ${home.name}</option>`)
       .join("");
@@ -274,6 +295,7 @@
       window.location.reload();
     });
     homePill.classList.add("shared-home-picker");
+    homePill.dataset.specIds = "BH-GLOBAL-001";
     homePill.replaceChildren(select);
   }
 
@@ -291,6 +313,7 @@
     const roleSelect = document.createElement("select");
     roleSelect.className = "shared-role-select";
     roleSelect.setAttribute("aria-label", "目前使用者");
+    roleSelect.dataset.specIds = "BH-GLOBAL-004";
     roleSelect.innerHTML = `
       <option value="ot">OT · Testing</option>
       <option value="pt">PT · Testing</option>

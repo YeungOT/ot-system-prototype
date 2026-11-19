@@ -747,16 +747,16 @@
       </header>
 
       <div class="content">
-        <div class="summary-strip" id="summary-strip"></div>
+        <div class="summary-strip" id="summary-strip" data-spec-ids="BH-ICP-001,BH-ICP-003"></div>
 
-        <section class="controls" aria-label="ICP 篩選">
-          <div class="month-nav">
+        <section class="controls" aria-label="ICP 篩選" data-spec-ids="BH-ICP-001,BH-ICP-002">
+          <div class="month-nav" data-spec-ids="BH-ICP-001">
             <button class="btn icon-btn" type="button" data-action="prev-month" aria-label="上一個月">←</button>
             <strong id="month-label">2026年10月</strong>
             <button class="btn icon-btn" type="button" data-action="next-month" aria-label="下一個月">→</button>
             <button class="btn" type="button" data-action="current-month">本月</button>
           </div>
-          <div class="segmented" role="group" aria-label="半月">
+          <div class="segmented" role="group" aria-label="半月" data-spec-ids="BH-ICP-002">
             <button class="active" type="button" data-half="all" aria-pressed="true">全部</button>
             <button type="button" data-half="first" aria-pressed="false">上半月</button>
             <button type="button" data-half="second" aria-pressed="false">下半月</button>
@@ -766,11 +766,11 @@
               <circle cx="11" cy="11" r="7"></circle>
               <path d="m20 20-4-4"></path>
             </svg>
-            <input id="search-input" type="search" placeholder="搜尋床號或住客" aria-label="搜尋 ICP 住客" autocomplete="off">
+            <input id="search-input" type="search" placeholder="搜尋床號或住客" aria-label="搜尋 ICP 住客" autocomplete="off" data-spec-ids="BH-ICP-002">
           </label>
           <div class="icp-actions">
             <div class="filter-wrap">
-              <button class="btn filter-button" type="button" data-action="toggle-filters">
+              <button class="btn filter-button" type="button" data-action="toggle-filters" data-spec-ids="BH-ICP-002">
                 篩選 <span class="filter-count" id="filter-count">0</span>
               </button>
               <form class="filter-popover" id="filter-popover" hidden>
@@ -807,14 +807,14 @@
                 </div>
               </form>
             </div>
-            <button class="btn btn-danger icp-emergency" type="button" data-action="open-urgent">建立緊急 ICP</button>
+            <button class="btn btn-danger icp-emergency" type="button" data-action="open-urgent" data-spec-ids="BH-ICP-008">建立緊急 ICP</button>
           </div>
         </section>
 
         <div class="active-filters" id="active-filters"></div>
 
         <div class="worklist-layout" id="worklist-layout">
-          <section class="worklist-stack" id="worklist-stack" aria-label="ICP 工作清單"></section>
+          <section class="worklist-stack" id="worklist-stack" aria-label="ICP 工作清單" data-spec-ids="BH-ICP-003,BH-ICP-004,BH-ICP-007"></section>
           <div class="table-card empty-state" id="empty-state" hidden>沒有符合目前篩選的 ICP 週期。</div>
 
           <aside class="inspector" id="inspector" hidden></aside>
@@ -823,7 +823,7 @@
     </main>
   </div>
 
-  <dialog id="urgent-dialog" aria-labelledby="urgent-title">
+  <dialog id="urgent-dialog" aria-labelledby="urgent-title" data-spec-ids="BH-ICP-008">
     <form method="dialog" id="urgent-form">
       <div class="dialog-head">
         <h2 id="urgent-title">建立緊急 ICP</h2>
@@ -1078,8 +1078,8 @@
         <span class="completion-pair">
           ${area === "assessment"
             ? `<span class="completion-pill ${otDone ? "done" : ""}">${otDone ? "已完成" : "待完成"}</span>`
-            : `<button class="completion-pill ${otDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="${area}" data-role="ot" data-cycle-id="${cycle.id}" aria-pressed="${otDone}">OT ${otDone ? "✓" : "·"}</button>
-               <button class="completion-pill ${ptDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="${area}" data-role="pt" data-cycle-id="${cycle.id}" aria-pressed="${ptDone}">PT ${ptDone ? "✓" : "·"}</button>`}
+            : `<button class="completion-pill ${otDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="${area}" data-role="ot" data-cycle-id="${cycle.id}" aria-pressed="${otDone}" data-spec-ids="BH-ICP-005,BH-ICP-006">OT ${otDone ? "✓" : "·"}</button>
+               <button class="completion-pill ${ptDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="${area}" data-role="pt" data-cycle-id="${cycle.id}" aria-pressed="${ptDone}" data-spec-ids="BH-ICP-005,BH-ICP-006">PT ${ptDone ? "✓" : "·"}</button>`}
         </span>
       `;
       if (compact) {
@@ -1115,7 +1115,7 @@
           <td class="date">${cycle.icpDate ? formatDate(cycle.icpDate, true) : "—"}</td>
           <td>
             ${cycle.activeAssessment
-              ? `<button class="assessment-link" type="button" data-action="open-assessment" data-cycle-id="${cycle.id}" data-assessment-id="${cycle.activeAssessment.id}" title="${escapeHtml(cycle.activeAssessment.id)}">
+              ? `<button class="assessment-link" type="button" data-action="open-assessment" data-cycle-id="${cycle.id}" data-assessment-id="${cycle.activeAssessment.id}" title="${escapeHtml(cycle.activeAssessment.id)}" data-spec-ids="BH-ICP-007,BH-ICP-009">
                    <span class="assessment-path">
                      <strong>${escapeHtml(cycle.activeAssessment.type)}</strong>
                      <span>${escapeHtml(cycle.activeAssessment.id)}</span>
@@ -1155,7 +1155,7 @@
       const columns = visibleIcpColumns(compact);
       const totalWidth = columns.reduce((sum, column) => sum + column.width, 0);
       return `
-        <section class="table-card">
+        <section class="table-card" data-spec-ids="BH-ICP-003">
           ${heading ? `<header class="half-block-head"><strong>${heading}</strong><span>${rows.length} 位</span></header>` : ""}
           <div class="table-scroll">
             <table class="${compact ? "compact-table" : ""}" style="min-width:${totalWidth}px">
@@ -1250,15 +1250,16 @@
             </div>
             <h2 id="inspector-title">${escapeHtml(cycle.bed)} · ${escapeHtml(cycle.name)}</h2>
           </div>
-          <button class="inspector-close" type="button" data-action="close-cycle" aria-label="返回 ICP 清單">×</button>
+          <button class="inspector-close" type="button" data-action="close-cycle" aria-label="返回 ICP 清單" data-spec-ids="BH-ICP-003">×</button>
         </header>
         <div class="inspector-body">
-          <section class="workspace-card">
+          <section class="workspace-card" data-spec-ids="BH-ICP-009">
             <div class="workspace-card-head">
               <h3>016 評估路徑</h3>
               <span class="status-chip ${assessmentDone ? "status-filled" : cycle.activeAssessment ? "status-assessing" : "status-assess"}">${assessmentDone ? "已完成" : cycle.activeAssessment ? "評估中" : "待開始"}</span>
             </div>
             <button class="encounter-summary encounter-link" type="button" ${cycle.activeAssessment
+              ? 'data-spec-ids="BH-ICP-007,BH-ICP-009"' : ""} ${cycle.activeAssessment
               ? `data-action="open-assessment" data-cycle-id="${cycle.id}" data-assessment-id="${cycle.activeAssessment.id}"`
               : "disabled"}>
               <div class="encounter-identity">
@@ -1268,18 +1269,18 @@
             </button>
           </section>
 
-          <section class="workspace-card" id="icp-date-section">
+          <section class="workspace-card" id="icp-date-section" data-spec-ids="BH-ICP-019">
             <div class="workspace-card-head">
               <h3>下次 ICP</h3>
               <span class="status-chip ${cycle.dueDate ? "status-filled" : "status-fill"}">${cycle.dueDate ? "已記錄" : "待輸入"}</span>
             </div>
             <div class="inline-form">
-              <select id="next-icp-type-input" aria-label="下次 ICP 性質">
+              <select id="next-icp-type-input" aria-label="下次 ICP 性質" data-spec-ids="BH-ICP-019">
                 <option value="1個月" ${cycle.nextIcpType === "1個月" ? "selected" : ""}>1 個月</option>
                 <option value="6個月" ${cycle.nextIcpType === "6個月" ? "selected" : ""}>6 個月</option>
                 <option value="1年" ${cycle.nextIcpType === "1年" ? "selected" : ""}>1 年</option>
               </select>
-              <input id="next-icp-due-input" type="date" value="${cycle.dueDate || ""}" aria-label="下次 ICP 限期">
+              <input id="next-icp-due-input" type="date" value="${cycle.dueDate || ""}" aria-label="下次 ICP 限期" data-spec-ids="BH-ICP-019">
               <button class="btn btn-primary" type="button" data-action="save-next-icp" data-cycle-id="${cycle.id}">儲存</button>
             </div>
           </section>
@@ -1295,18 +1296,18 @@
             </div>
           </section>
 
-          <section class="workspace-card" id="icp-form-section">
+          <section class="workspace-card" id="icp-form-section" data-spec-ids="BH-ICP-005,BH-ICP-006,BH-ICP-012">
             <div class="workspace-card-head">
               <h3>標記 ICP 已填</h3>
               <span class="status-chip ${icpDone ? "status-filled" : "status-fill"}">${icpDone ? "已完成" : "待完成"}</span>
             </div>
             <div class="mark-actions">
-              <button class="mark-button ${cycle.icpOtDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="icp" data-role="ot" data-cycle-id="${cycle.id}" aria-pressed="${cycle.icpOtDone}">
+              <button class="mark-button ${cycle.icpOtDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="icp" data-role="ot" data-cycle-id="${cycle.id}" aria-pressed="${cycle.icpOtDone}" data-spec-ids="BH-ICP-005,BH-ICP-006,BH-ICP-012">
                 <span>OT</span>
                 <strong>${cycle.icpOtDone ? "已填" : "未填"}</strong>
                 <small>${cycle.icpOtCompletedAt ? formatDate(cycle.icpOtCompletedAt, true) : "—"}</small>
               </button>
-              <button class="mark-button ${cycle.icpPtDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="icp" data-role="pt" data-cycle-id="${cycle.id}" aria-pressed="${cycle.icpPtDone}">
+              <button class="mark-button ${cycle.icpPtDone ? "done" : ""}" type="button" data-action="toggle-completion" data-area="icp" data-role="pt" data-cycle-id="${cycle.id}" aria-pressed="${cycle.icpPtDone}" data-spec-ids="BH-ICP-005,BH-ICP-006,BH-ICP-012">
                 <span>PT</span>
                 <strong>${cycle.icpPtDone ? "已填" : "未填"}</strong>
                 <small>${cycle.icpPtCompletedAt ? formatDate(cycle.icpPtCompletedAt, true) : "—"}</small>
@@ -1759,5 +1760,7 @@
     });
   </script>
   <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/spec-inspector-data.js?v=20261118-spec-inspector"></script>
+  <script src="../shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>
 </html>

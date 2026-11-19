@@ -1466,9 +1466,9 @@
       </header>
 
       <div class="content">
-        <section id="screen-list" class="screen active">
+        <section id="screen-list" class="screen active" data-spec-ids="BH-RES-001,BH-RES-002,BH-RES-004">
           <div class="roster-shell">
-            <div class="roster-controls" aria-label="住客篩選">
+            <div class="roster-controls" aria-label="住客篩選" data-spec-ids="BH-RES-002,BH-RES-003">
               <label class="console-search roster-search">
                 <svg class="console-search-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <circle cx="11" cy="11" r="7"></circle>
@@ -1496,15 +1496,15 @@
                   <option value="discharged">已退住</option>
                 </select>
                 <div class="roster-view-tools">
-                  <button class="roster-tool" id="roster-columns-toggle" type="button"
+                  <button class="roster-tool" id="roster-columns-toggle" type="button" data-spec-ids="BH-RES-002,BH-RES-003"
                     aria-expanded="false" aria-controls="roster-columns-menu">顯示欄位</button>
                   <div class="roster-column-menu" id="roster-columns-menu" hidden></div>
                 </div>
-                <button class="btn btn-primary" id="add-resident-button" type="button">＋ 新增住客</button>
+                <button class="btn btn-primary" id="add-resident-button" type="button" data-spec-ids="BH-RES-004,BH-RES-005,BH-RES-025">＋ 新增住客</button>
               </div>
             </div>
 
-            <div class="table-scroll">
+            <div class="table-scroll" data-spec-ids="BH-RES-002,BH-RES-003">
               <table class="roster-table">
                 <colgroup id="roster-colgroup"></colgroup>
                 <thead id="roster-table-head"></thead>
@@ -1514,21 +1514,21 @@
           </div>
         </section>
 
-        <section id="screen-detail" class="screen">
+        <section id="screen-detail" class="screen" data-spec-ids="BH-RES-001">
           <div class="detail-layout">
-            <aside class="resident-summary-card">
-              <button class="resident-more" id="resident-more-button" type="button"
+            <aside class="resident-summary-card" data-spec-ids="BH-RES-022,BH-RES-026,BH-ICP-019">
+              <button class="resident-more" id="resident-more-button" type="button" data-spec-ids="BH-RES-006,BH-RES-021"
                 aria-label="更多住客操作" aria-expanded="false" aria-controls="resident-more-menu">⋮</button>
-              <div class="resident-more-menu" id="resident-more-menu" role="menu" hidden>
-                <button id="discharge-resident-button" type="button" role="menuitem" data-resident-action="discharge">退住</button>
-                <button id="cancel-discharge-button" type="button" role="menuitem" data-resident-action="cancel-discharge" hidden>取消退住</button>
+              <div class="resident-more-menu" id="resident-more-menu" role="menu" hidden data-spec-ids="BH-RES-006,BH-RES-021">
+                <button id="discharge-resident-button" type="button" role="menuitem" data-resident-action="discharge" data-spec-ids="BH-RES-006,BH-RES-015,BH-RES-017,BH-RES-018,BH-RES-019,BH-RES-020">退住</button>
+                <button id="cancel-discharge-button" type="button" role="menuitem" data-resident-action="cancel-discharge" hidden data-spec-ids="BH-RES-021">取消退住</button>
               </div>
               <div class="resident-summary-main">
                 <span class="resident-summary-bed" id="summary-bed">A12</span>
                 <h2 id="summary-name">陳大文</h2>
               </div>
               <div class="resident-summary-facts">
-                <div class="summary-fact summary-status-card">
+                <div class="summary-fact summary-status-card" data-spec-ids="BH-TODO-010">
                   <span>住客狀態</span>
                   <strong id="summary-status">Active</strong>
                   <div class="summary-status-editor">
@@ -1543,7 +1543,7 @@
             </aside>
 
             <div class="detail-main">
-              <section class="detail-section" data-detail-section="basic">
+              <section class="detail-section" data-detail-section="basic" data-spec-ids="BH-RES-001,BH-RES-014">
                 <header class="detail-section-head">
                   <h2>基本資料</h2>
                   <div class="section-actions">
@@ -1555,7 +1555,7 @@
                   <div class="detail-fields">
                     <div class="detail-field">
                       <label for="detail-place">宿位</label>
-                      <select id="detail-place" data-edit-control data-resident-field="place" disabled>
+                      <select id="detail-place" data-edit-control data-resident-field="place" disabled data-spec-ids="BH-RES-014">
                         <option value="券位">券位</option>
                         <option value="買位">買位</option>
                         <option value="私位">私位</option>
@@ -1573,7 +1573,7 @@
                     </div>
                     <div class="detail-field">
                       <label for="detail-bed">床位號碼</label>
-                      <input id="detail-bed" data-edit-control value="12" maxlength="8" disabled>
+                      <input id="detail-bed" data-edit-control value="12" maxlength="8" disabled data-spec-ids="BH-RES-014">
                     </div>
                     <div class="detail-field">
                       <label for="detail-sex">性別</label>
@@ -1622,11 +1622,11 @@
                 </div>
               </section>
 
-              <section class="detail-section detail-section--clinical" data-detail-section="clinical">
+              <section class="detail-section detail-section--clinical" data-detail-section="clinical" data-spec-ids="BH-RES-022,BH-RES-023,BH-RES-024,BH-RES-026">
                 <header class="detail-section-head">
                   <h2>臨床概況</h2>
                   <div class="section-actions">
-                    <button class="section-action clinical-file-link" type="button" id="open-latest-assessment">查看 Ax 檔案 →</button>
+                    <button class="section-action clinical-file-link" type="button" id="open-latest-assessment" data-spec-ids="BH-RES-026">查看 Ax 檔案 →</button>
                   </div>
                 </header>
                 <div class="detail-section-body">
@@ -1658,16 +1658,16 @@
                 </div>
               </section>
 
-              <section class="detail-section detail-section--icp" data-detail-section="icp">
+              <section class="detail-section detail-section--icp" data-detail-section="icp" data-spec-ids="BH-ICP-010,BH-ICP-018,BH-ICP-019">
                 <header class="detail-section-head">
                   <h2>ICP 週期</h2>
                   <div class="section-actions">
-                    <button class="section-action" type="button" id="summary-open-icp">開啟 ICP</button>
+                    <button class="section-action" type="button" id="summary-open-icp" data-spec-ids="BH-ICP-003,BH-ICP-007">開啟 ICP</button>
                     <button class="section-action secondary" type="button" data-section-cancel="icp" hidden>取消</button>
                     <button class="section-action" type="button" data-section-save="icp">編輯</button>
                   </div>
                 </header>
-                <div class="icp-view-tabs" role="tablist" aria-label="ICP 檢視">
+                <div class="icp-view-tabs" role="tablist" aria-label="ICP 檢視" data-spec-ids="BH-ICP-010,BH-ICP-018">
                   <button class="icp-view-tab active" type="button" data-icp-view="current" role="tab" aria-selected="true">目前週期</button>
                   <button class="icp-view-tab" type="button" data-icp-view="history" role="tab" aria-selected="false">歷次 ICP</button>
                 </div>
@@ -1676,13 +1676,13 @@
                     <div class="detail-field"><label for="detail-last-icp">上次 ICP 會議</label><input id="detail-last-icp" data-edit-control data-resident-field="lastIcp" type="date" value="2026-05-14" disabled></div>
                     <div class="detail-field">
                       <label for="detail-icp-type">下次 ICP 性質</label>
-                      <select id="detail-icp-type" data-edit-control data-resident-field="icpType" disabled>
+                      <select id="detail-icp-type" data-edit-control data-resident-field="icpType" disabled data-spec-ids="BH-ICP-019">
                         <option value="1個月">1 個月</option>
                         <option value="6個月">6 個月</option>
                         <option value="1年">1 年</option>
                       </select>
                     </div>
-                    <div class="detail-field"><label for="detail-next-icp">下次 ICP 限期</label><input id="detail-next-icp" data-edit-control data-resident-field="icpDue" type="date" value="2026-11-14" disabled></div>
+                    <div class="detail-field"><label for="detail-next-icp">下次 ICP 限期</label><input id="detail-next-icp" data-edit-control data-resident-field="icpDue" type="date" value="2026-11-14" disabled data-spec-ids="BH-ICP-019"></div>
                   </div>
                 </div>
                 <div class="detail-section-body" id="icp-history-view" hidden>
@@ -1690,11 +1690,11 @@
                 </div>
               </section>
 
-              <section class="detail-section detail-section--training" data-detail-section="training">
+              <section class="detail-section detail-section--training" data-detail-section="training" data-spec-ids="BH-006-025,BH-RES-014">
                 <header class="detail-section-head">
                   <h2>訓練安排</h2>
                   <div class="section-actions">
-                    <button class="section-action training-link" id="summary-open-training" type="button">
+                    <button class="section-action training-link" id="summary-open-training" type="button" data-spec-ids="BH-006-001,BH-006-004">
                       <span id="summary-training-label">查看本週安排</span>
                       <small id="summary-training-progress"></small>
                     </button>
@@ -1715,7 +1715,7 @@
                 </div>
               </section>
 
-              <section class="detail-section detail-section--history" data-detail-section="status">
+              <section class="detail-section detail-section--history" data-detail-section="status" data-spec-ids="BH-RES-001,BH-GLOBAL-004">
                 <header class="detail-section-head">
                   <h2>住客紀錄</h2>
                 </header>
@@ -1740,7 +1740,7 @@
     </main>
   </div>
 
-  <dialog id="add-resident-dialog" aria-labelledby="add-resident-title">
+  <dialog id="add-resident-dialog" aria-labelledby="add-resident-title" data-spec-ids="BH-RES-005,BH-RES-025">
     <form id="add-resident-form">
       <div class="dialog-head">
         <h2 id="add-resident-title">新增住客</h2>
@@ -1775,7 +1775,7 @@
     </form>
   </dialog>
 
-  <dialog id="training-scope-dialog" aria-labelledby="training-scope-title">
+  <dialog id="training-scope-dialog" aria-labelledby="training-scope-title" data-spec-ids="BH-006-025">
     <div class="dialog-head">
       <h2 id="training-scope-title">儲存訓練建議</h2>
     </div>
@@ -1789,7 +1789,7 @@
     </div>
   </dialog>
 
-  <dialog id="discharge-resident-dialog" aria-labelledby="discharge-resident-title">
+  <dialog id="discharge-resident-dialog" aria-labelledby="discharge-resident-title" data-spec-ids="BH-RES-006,BH-RES-015,BH-RES-017,BH-RES-018,BH-RES-019,BH-RES-020">
     <form id="discharge-resident-form">
       <div class="dialog-head">
         <h2 id="discharge-resident-title">確認退住</h2>
@@ -1815,7 +1815,7 @@
     </form>
   </dialog>
 
-  <dialog id="bed-conflict-dialog" aria-labelledby="bed-conflict-title">
+  <dialog id="bed-conflict-dialog" aria-labelledby="bed-conflict-title" data-spec-ids="BH-RES-014">
     <div class="dialog-head">
       <h2 id="bed-conflict-title">床位已被佔用</h2>
     </div>
@@ -1830,7 +1830,7 @@
     </div>
   </dialog>
 
-  <dialog id="bed-rotation-dialog" aria-labelledby="bed-rotation-title">
+  <dialog id="bed-rotation-dialog" aria-labelledby="bed-rotation-title" data-spec-ids="BH-RES-014">
     <div class="dialog-head">
       <h2 id="bed-rotation-title">調床安排</h2>
       <p>選擇目標床位；如目標已有住客，會自動加入調床鏈。</p>
@@ -2241,14 +2241,14 @@
             const ariaSort = sortable ? ` aria-sort="${sortState}"` : "";
             const label = column.label || column.key;
             const headerContent = sortable
-              ? `<button class="roster-sort-button" type="button" data-roster-sort="${column.key}">
+              ? `<button class="roster-sort-button" type="button" data-roster-sort="${column.key}" data-spec-ids="BH-RES-002,BH-RES-003">
                    <span>${escapeHtml(label)}</span>
                    <span class="roster-sort-indicator" aria-hidden="true"></span>
                  </button>`
               : `<span class="visually-hidden">${escapeHtml(label)}</span>`;
             return `<th scope="col" data-column="${column.key}"${ariaSort}>
               ${headerContent}
-              <span class="roster-column-resizer" role="separator" aria-orientation="vertical"
+              <span class="roster-column-resizer" role="separator" aria-orientation="vertical" data-spec-ids="BH-RES-002,BH-RES-003"
                 aria-label="調整${escapeHtml(label)}欄寬" tabindex="0"
                 data-column-resize="${column.key}"
                 aria-valuemin="${column.minWidth}"
@@ -2304,7 +2304,7 @@
       renderRosterHeader();
       body.innerHTML = rows.length
         ? rows.map(resident => `
-            <tr data-resident-id="${resident.id}" tabindex="0" aria-label="開啟 ${escapeHtml(resident.name)} 住客檔案">
+            <tr data-resident-id="${resident.id}" tabindex="0" aria-label="開啟 ${escapeHtml(resident.name)} 住客檔案" data-spec-ids="BH-RES-002,BH-RES-004">
               ${columns.map(column => `<td>${rosterCellMarkup(resident, column.key)}</td>`).join("")}
             </tr>
           `).join("")
@@ -2615,7 +2615,7 @@
       const visible = icpHistoryExpanded ? history : history.slice(0, 5);
       const hiddenCount = history.length - 5;
       list.innerHTML = visible.map(item => `
-        <div class="icp-history-row">
+        <div class="icp-history-row" data-spec-ids="BH-ICP-010,BH-ICP-018">
           <div>
             <strong>${slashDate(item.meetingDate)}</strong>
           </div>
@@ -2626,7 +2626,7 @@
           <span class="icp-history-state">下次 ${escapeHtml(resident.icpType)} · ${slashDate(item.dueDate)}</span>
         </div>
       `).join("") + (history.length > 5
-        ? `<button class="icp-history-more" type="button" data-action="show-more-icp">${icpHistoryExpanded ? "收起" : `顯示更多（${hiddenCount}）`}</button>`
+        ? `<button class="icp-history-more" type="button" data-action="show-more-icp" data-spec-ids="BH-ICP-018">${icpHistoryExpanded ? "收起" : `顯示更多（${hiddenCount}）`}</button>`
         : "");
     }
 
@@ -3763,6 +3763,8 @@
           residentId: result.resident.id,
           assessmentId: result.assessment.id,
           cycleId: result.cycle.id,
+          todoId: result.task.id,
+          todoDue: result.task.due,
           v: "initial-session"
         });
         window.location.href = `../assessment/paper-aligned.html?${params.toString()}`;
@@ -3830,5 +3832,7 @@
     });
   </script>
   <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/spec-inspector-data.js?v=20261118-spec-inspector"></script>
+  <script src="../shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>
 </html>
