@@ -581,6 +581,27 @@
       box-shadow: none;
     }
     .record-cell.planned.overdue:hover { background: #fbcfe8; box-shadow: none; }
+    .planned-group-label {
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      z-index: 1;
+      color: #92400e;
+      font-size: 8px;
+      line-height: 1;
+    }
+    .record-cell.planned.overdue .planned-group-label {
+      color: #9f1239;
+    }
+    .record-cell.planned.overdue .planned-debt {
+      position: absolute;
+      right: 4px;
+      bottom: 3px;
+      z-index: 1;
+      color: #be123c;
+      font-size: 9px;
+      line-height: 1;
+    }
     .record-cell.locked {
       background: #f1f5f9;
       color: #94a3b8;
@@ -1459,7 +1480,9 @@
                 title="${escapeHtml(title)}"
                 aria-label="${escapeHtml(aria)}">
                 ${pendingPlan
-                  ? overdue ? '<span class="cell-code">欠</span>' : ""
+                  ? pendingGroupLabel
+                    ? `<span class="planned-group-label">${escapeHtml(pendingGroupLabel)}</span>${overdue ? '<span class="planned-debt">欠</span>' : ""}`
+                    : overdue ? '<span class="cell-code">欠</span>' : ""
                   : content?.form
                   ? `<span class="cell-form">${escapeHtml(content.groupLabel || content.form)}</span><span class="cell-activity">${escapeHtml(content.activity)}</span>`
                   : `<span class="cell-code">${content ? escapeHtml(content.text) : ""}</span>`}
