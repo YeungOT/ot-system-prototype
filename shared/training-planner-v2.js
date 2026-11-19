@@ -218,12 +218,12 @@
   function readState() {
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (stored?.version === 5 && Array.isArray(stored.patterns) && stored.plans) return stored;
+      if (stored?.version === 6 && Array.isArray(stored.patterns) && stored.plans) return stored;
     } catch (error) {
       // Start with the deterministic dated plan.
     }
     return {
-      version: 5,
+      version: 6,
       homeCode: HOME.code,
       activeMonth: currentMonth(),
       activeWeek: startOfWeek(TODAY_KEY),

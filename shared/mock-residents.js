@@ -193,7 +193,7 @@
   window.OT_MOCK_RESIDENT_TOTAL = TOTAL_RESIDENTS;
   window.OT_MOCK_HOME_CODE = HOME_CODE;
   window.OT_MOCK_STORAGE_KEYS = Object.freeze({
-    trainingSchedule: `ot006.training-schedule.v7.${HOME_CODE}`,
+    trainingSchedule: `ot006.training-schedule.v8.${HOME_CODE}`,
     autofillTimes: `ot.training.autofill-times.v3.${HOME_CODE}`,
     records: `ot007.records.v3.${HOME_CODE}`,
     icpCycles: `ot.icp.cycles.v4.${HOME_CODE}`,
