@@ -1299,7 +1299,16 @@
     }
 
     function plannedGroupLabel(session) {
-      return OT_PROTOTYPE.groupLabelForSession(plannedSessions, session);
+      if (!session) return null;
+      const datedSessions = plannedSessions.map(item => ({
+        ...item,
+        date: planDateForSession(item)
+      }));
+      const datedSession = {
+        ...session,
+        date: planDateForSession(session)
+      };
+      return OT_PROTOTYPE.groupLabelForSession(datedSessions, datedSession);
     }
 
     function pendingPlanForCell(residentId, day) {
