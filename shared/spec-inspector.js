@@ -57,7 +57,7 @@
       position: fixed;
       z-index: 1200;
       display: none;
-      grid-template-rows: minmax(0, 1fr) auto;
+      grid-template-rows: minmax(0, 1fr);
       min-width: ${MIN_WIDTH}px;
       min-height: ${MIN_HEIGHT}px;
       max-width: calc(100vw - 16px);
@@ -213,25 +213,6 @@
       font-size: 10px;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-    .ot-spec-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      min-height: 29px;
-      padding: 5px 8px;
-      border-top: 1px solid #e7edf2;
-      color: #94a3b8;
-      font-size: 9px;
-    }
-    .ot-spec-reset {
-      border: 0;
-      background: transparent;
-      color: #64748b;
-      padding: 2px;
-      font-size: 9px;
-      font-weight: 800;
     }
     .ot-spec-resizer {
       position: absolute;
@@ -397,15 +378,11 @@
   inspector.setAttribute("aria-label", "規格浮動選單");
   inspector.innerHTML = `
     <div class="ot-spec-content" data-spec-content aria-live="polite"></div>
-    <div class="ot-spec-footer">
-      <button class="ot-spec-reset" type="button" data-spec-reset>重設位置及大小</button>
-    </div>
     <div class="ot-spec-resizer" data-spec-resizer role="separator" aria-label="調整規格選單大小"></div>
   `;
   document.body.append(inspector);
 
   const content = inspector.querySelector("[data-spec-content]");
-  const resetButton = inspector.querySelector("[data-spec-reset]");
   const resizer = inspector.querySelector("[data-spec-resizer]");
 
   let activeIds = [];
@@ -700,8 +677,6 @@
     }
     setOpen(open);
   });
-
-  resetButton.addEventListener("click", resetLayout);
 
   content.addEventListener("click", event => {
     const pick = event.target.closest("[data-spec-pick]");
