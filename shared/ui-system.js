@@ -203,6 +203,22 @@
       overflow: auto;
       overscroll-behavior: contain;
     }
+    html.embedded .app {
+      display: block;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 0;
+      overflow: hidden;
+    }
+    html.embedded .main {
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+    html.embedded .content {
+      height: 100%;
+      min-height: 0;
+    }
     body:has(.todo-panel) .app > .main > .content {
       display: flex;
       flex-direction: column;
@@ -436,7 +452,7 @@
     userPill.title = "目前使用者";
   }
 
-  const VERSION = "0.3.6";
+  const VERSION = "0.3.7";
   const topbarActions = document.querySelector(
     ".topbar .topbar-right, .topbar .topbar-actions, .topbar .actions"
   );
