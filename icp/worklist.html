@@ -319,12 +319,6 @@
       font-size: 10px;
     }
     th:last-child, td:last-child { border-right: 0; }
-    table:not(.compact-table) th:nth-child(2),
-    table:not(.compact-table) td:nth-child(2),
-    .compact-table th:first-child,
-    .compact-table td:first-child {
-      border-right: 0;
-    }
     th {
       position: sticky;
       top: 0;
@@ -337,25 +331,26 @@
     }
     .icp-column-resizer {
       position: absolute;
-      top: 0;
-      right: -3px;
+      inset: 0 0 0 auto;
       z-index: 5;
-      width: 7px;
-      height: 100%;
+      width: 9px;
       cursor: col-resize;
+      touch-action: none;
     }
     .icp-column-resizer::after {
       content: "";
       position: absolute;
-      top: 20%;
-      bottom: 20%;
-      left: 3px;
+      top: 7px;
+      right: 0;
+      bottom: 7px;
       width: 1px;
-      background: transparent;
+      background: var(--line);
+      transition: background-color .12s ease, width .12s ease;
     }
     .icp-column-resizer:hover::after,
     .icp-column-resizer:focus-visible::after,
     body.icp-column-resizing .icp-column-resizer::after {
+      width: 2px;
       background: var(--teal);
     }
     tbody tr { cursor: pointer; }
@@ -449,14 +444,17 @@
     .compact-table { min-width: 0; table-layout: fixed; }
     .compact-table th,
     .compact-table td { padding: 8px 7px; font-size: 11px; }
-    .compact-table th:nth-child(1) { width: 42%; }
-    .compact-table th:nth-child(2) { width: 28%; }
-    .compact-table th:nth-child(3) { width: 30%; }
     .compact-resident { display: flex; align-items: center; gap: 7px; min-width: 0; }
     .compact-resident .resident-cell { min-width: 0; }
     .compact-resident .resident-cell strong,
     .compact-resident .resident-cell span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .row-progress { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .row-progress {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: nowrap;
+      min-width: max-content;
+    }
     .progress-tag {
       display: inline-flex;
       align-items: center;
@@ -911,7 +909,7 @@
       compact: [
         { key: "resident", label: "住客", width: 160, minWidth: 110 },
         { key: "due", label: "限期", width: 112, minWidth: 88 },
-        { key: "progress", label: "進度", width: 190, minWidth: 150 }
+        { key: "progress", label: "進度", width: 210, minWidth: 165 }
       ]
     };
     let icpColumnWidths;
@@ -1759,7 +1757,7 @@
       if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
     });
   </script>
-  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/ui-system.js?v=20261120-version-badge"></script>
   <script src="../shared/spec-inspector-data.js?v=20261119-007-groups"></script>
   <script src="../shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>

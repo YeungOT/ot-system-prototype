@@ -4,7 +4,7 @@
     .nav small { display: none !important; }
     .brand-sub { display: none !important; }
     .top-meta { display: none !important; }
-    .app { grid-template-columns: 180px minmax(0, 1fr) !important; }
+    .app:not(.app-frame) { grid-template-columns: 180px minmax(0, 1fr) !important; }
     .app > .sidebar {
       position: sticky !important;
       top: 0;
@@ -48,21 +48,24 @@
       border-radius: 7px;
       background: transparent;
       color: var(--muted);
-      padding: 6px 8px;
+      padding: 6px 10px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 7px;
       font-size: 11px;
       font-weight: 800;
     }
-    .app.sidebar-collapsed { grid-template-columns: 68px minmax(0, 1fr) !important; }
-    .app.sidebar-collapsed .brand > div:last-child,
-    .app.sidebar-collapsed .nav button { font-size: 0; }
-    .app.sidebar-collapsed .nav button { justify-content: flex-start !important; padding-inline: 10px; }
-    .app.sidebar-collapsed .nav button > span { display: none; }
-    .app.sidebar-collapsed .brand { justify-content: center; padding-inline: 0; }
-    .app.sidebar-collapsed .shared-sidebar-toggle span { display: none; }
+    .shared-sidebar-toggle .shared-nav-icon {
+      flex: 0 0 17px;
+    }
+    .app:not(.app-frame).sidebar-collapsed { grid-template-columns: 68px minmax(0, 1fr) !important; }
+    .app:not(.app-frame).sidebar-collapsed .brand > div:last-child,
+    .app:not(.app-frame).sidebar-collapsed .nav button { font-size: 0; }
+    .app:not(.app-frame).sidebar-collapsed .nav button { justify-content: flex-start !important; padding-inline: 10px; }
+    .app:not(.app-frame).sidebar-collapsed .nav button > span { display: none; }
+    .app:not(.app-frame).sidebar-collapsed .brand { justify-content: center; padding-inline: 0; }
+    .app:not(.app-frame).sidebar-collapsed .shared-sidebar-toggle span { display: none; }
     .home-pill.shared-home-picker { padding: 3px 6px; }
     .shared-home-select {
       width: 100%;
@@ -82,6 +85,29 @@
       font: inherit;
       font-weight: 800;
       cursor: pointer;
+    }
+    .shared-version-badge {
+      min-height: 28px;
+      border: 1px solid var(--line, #d8e1e7);
+      border-radius: 6px;
+      background: #fff;
+      color: #475569;
+      padding: 4px 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 10px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .shared-version-commit {
+      padding-left: 6px;
+      border-left: 1px solid var(--line, #d8e1e7);
+      color: #64748b;
+      font-weight: 700;
     }
     .shared-audit-toggle {
       min-height: 32px;
@@ -147,6 +173,83 @@
     @media (max-width: 620px) {
       .shared-audit-toggle { display: none; }
       .shared-role-select { max-width: 98px; }
+      .shared-version-commit { display: none; }
+    }
+    html,
+    body {
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .app {
+      height: 100vh;
+      height: 100dvh;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .app > .sidebar {
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .app > .main {
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .app > .main > .content {
+      min-height: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
+    }
+    body:has(.todo-panel) .app > .main > .content {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    body:has(.todo-panel) .workspace {
+      flex: 1 1 auto;
+      min-height: 0;
+      align-items: stretch;
+    }
+    body:has(.todo-panel) .todo-panel {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+    }
+    body:has(.todo-panel) .todo-list {
+      min-height: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
+    }
+    body:has(.todo-panel) .handover-panel {
+      height: 100%;
+      max-height: none;
+    }
+    body:has(.schedule-panel) .app > .main > .content {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    body:has(.schedule-panel) .workbench {
+      flex: 1 1 auto;
+      min-height: 0;
+      height: auto;
+    }
+    @media print {
+      html,
+      body {
+        height: auto;
+        overflow: visible;
+      }
+      .app,
+      .app > .main,
+      .app > .main > .content {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+      }
     }
   `;
   document.head.append(style);
@@ -168,6 +271,7 @@
     skipLink.className = "skip-link";
     skipLink.href = `#${main.id}`;
     skipLink.textContent = "跳至主要內容";
+    skipLink.dataset.specCoverageIgnore = "";
     skipLink.addEventListener("click", event => {
       event.preventDefault();
       main.focus({ preventScroll: true });
@@ -232,31 +336,35 @@
     "ICP": "BH-ICP-001,BH-ICP-003",
     "院舍設定": "BH-GLOBAL-001,BH-ICP-008"
   };
-  document.querySelectorAll(".nav button").forEach(button => {
-    const labelNode = button.querySelector("span") || button;
-    const label = labelNode.textContent.trim();
-    const target = routes[label];
-    if (!target) return;
-    if (navSpecs[label]) button.dataset.specIds = navSpecs[label];
-    if (!button.querySelector(".shared-nav-icon")) {
-      const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      icon.setAttribute("class", "shared-nav-icon");
-      icon.setAttribute("viewBox", "0 0 24 24");
-      icon.setAttribute("aria-hidden", "true");
-      icon.innerHTML = iconPaths[label] || '<circle cx="12" cy="12" r="8"></circle>';
-      button.prepend(icon);
-    }
-    button.addEventListener("click", () => {
-      window.location.href = new URL(target, appRoot).href;
+  const isAppShell = Boolean(document.querySelector(".app.app-frame"));
+  if (!isAppShell) {
+    document.querySelectorAll(".nav button").forEach(button => {
+      const labelNode = button.querySelector("span") || button;
+      const label = labelNode.textContent.trim();
+      const target = routes[label];
+      if (!target) return;
+      if (navSpecs[label]) button.dataset.specIds = navSpecs[label];
+      if (!button.querySelector(".shared-nav-icon")) {
+        const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        icon.setAttribute("class", "shared-nav-icon");
+        icon.setAttribute("viewBox", "0 0 24 24");
+        icon.setAttribute("aria-hidden", "true");
+        icon.innerHTML = iconPaths[label] || '<circle cx="12" cy="12" r="8"></circle>';
+        button.prepend(icon);
+      }
+      button.addEventListener("click", () => {
+        window.location.href = new URL(target, appRoot).href;
+      });
     });
-  });
+  }
 
   const sidebar = document.querySelector(".app > .sidebar") || document.querySelector(".sidebar");
   const app = document.querySelector(".app");
-  if (sidebar && app) {
+  if (sidebar && app && !isAppShell) {
     const toggle = document.createElement("button");
     toggle.type = "button";
     toggle.className = "shared-sidebar-toggle";
+    toggle.dataset.specCoverageIgnore = "";
     toggle.innerHTML = '<svg class="shared-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg><span>收起選單</span>';
     sidebar.append(toggle);
     const setCollapsed = collapsed => {
@@ -281,7 +389,7 @@
   }
 
   const homePill = document.querySelector(".home-pill");
-  if (homePill && window.OT_HOME_SETTINGS) {
+  if (!isAppShell && homePill && window.OT_HOME_SETTINGS) {
     const select = document.createElement("select");
     select.className = "shared-home-select";
     select.setAttribute("aria-label", "選擇院舍");
@@ -300,7 +408,7 @@
   }
 
   const userPill = document.querySelector(".user-pill");
-  if (userPill && window.OT_PROTOTYPE) {
+  if (!isAppShell && userPill && window.OT_PROTOTYPE) {
     const user = OT_PROTOTYPE.currentUser();
     const avatar = userPill.querySelector(".avatar");
     userPill.replaceChildren();
@@ -326,6 +434,47 @@
     userPill.append(roleSelect);
     userPill.querySelector(".avatar").textContent = user.role === "PT" ? "P" : "T";
     userPill.title = "目前使用者";
+  }
+
+  const VERSION = "0.3.1";
+  const topbarActions = document.querySelector(
+    ".topbar .topbar-right, .topbar .topbar-actions, .topbar .actions"
+  );
+  if (topbarActions && !topbarActions.querySelector(".shared-version-badge")) {
+    const versionBadge = document.createElement("span");
+    versionBadge.className = "shared-version-badge";
+    versionBadge.dataset.specCoverageIgnore = "";
+    versionBadge.setAttribute("aria-label", "系統版本");
+    const versionLabel = document.createElement("span");
+    versionLabel.textContent = `v${VERSION}`;
+    versionBadge.append(versionLabel);
+    versionBadge.title = `OT System Prototype · v${VERSION}`;
+    topbarActions.prepend(versionBadge);
+
+    fetch(new URL("version.json", appRoot), { cache: "no-store" })
+      .then(response => response.ok ? response.json() : null)
+      .then(build => {
+        if (!build) return;
+        const deployedVersion = String(build.version || VERSION);
+        const shortCommit = String(build.commit || "").slice(0, 7);
+        versionLabel.textContent = `v${deployedVersion}`;
+        versionBadge.querySelector(".shared-version-commit")?.remove();
+        if (shortCommit && shortCommit !== "local") {
+          const commitLabel = document.createElement("span");
+          commitLabel.className = "shared-version-commit";
+          commitLabel.textContent = shortCommit;
+          versionBadge.append(commitLabel);
+        }
+        versionBadge.title = [
+          "OT System Prototype",
+          `Version ${deployedVersion}`,
+          shortCommit && shortCommit !== "local" ? `Commit ${shortCommit}` : "",
+          build.generatedAt ? `Built ${build.generatedAt}` : ""
+        ].filter(Boolean).join(" · ");
+      })
+      .catch(() => {
+        // The bundled version remains visible when build metadata is unavailable.
+      });
   }
 
   document.documentElement.classList.add("ui-system-ready");

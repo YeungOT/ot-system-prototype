@@ -4,22 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>OT System</title>
-  <script>
-    (() => {
-      const routes = {
-        workbench: "workbench/index.html",
-        residents: "residents/index.html",
-        training: "training/index.html",
-        records: "records/index.html",
-        assessment: "assessment/paper-aligned.html",
-        icp: "icp/worklist.html",
-        settings: "settings/index.html"
-      };
-      const requested = location.hash.replace(/^#/, "");
-      const target = routes[requested] || routes.workbench;
-      location.replace(new URL(target, location.href).href);
-    })();
-  </script>
   <style>
     :root {
       --bg: #f4f6f8;
@@ -71,7 +55,7 @@
       grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr);
     }
     .app.sidebar-collapsed .sidebar {
-      padding-inline: 8px;
+      padding-inline: 10px;
     }
     .sidebar {
       min-height: 0;
@@ -186,12 +170,12 @@
       outline-offset: 2px;
     }
     .app.sidebar-collapsed .nav-label { display: none; }
-    .app.sidebar-collapsed .nav button { justify-content: center; padding-inline: 0; }
+    .app.sidebar-collapsed .nav button { justify-content: flex-start; padding-inline: 10px; }
     .app.sidebar-collapsed .sidebar-toggle {
       width: 100%;
       min-height: 36px;
-      padding: 0;
-      justify-content: center;
+      padding: 0 11px;
+      justify-content: flex-start;
     }
     .app.sidebar-collapsed .toggle-label { display: none; }
     .app.sidebar-collapsed .toggle-icon { transform: none; }
@@ -506,7 +490,8 @@
         <select id="home-select" class="home-select" aria-label="目前院舍" data-spec-ids="BH-GLOBAL-001"></select>
       </div>
       <div class="topbar-right">
-        <button class="annotation-toggle" id="open-annotation-preview" type="button" aria-label="Open annotatable module view">Annotate</button>
+        <button class="annotation-toggle" id="open-annotation-preview" type="button"
+          aria-label="Open annotatable module view" data-spec-coverage-ignore>Annotate</button>
         <span class="top-meta">2026年10月26日</span>
         <label class="user-pill" title="切換示範身份">
           <span class="avatar" id="current-user-avatar">T</span>
@@ -551,7 +536,8 @@
           </button>
         </nav>
         <div class="sidebar-footer">
-          <button id="sidebar-toggle" class="sidebar-toggle" type="button" title="收起側欄" aria-label="收起側欄" aria-expanded="true">
+          <button id="sidebar-toggle" class="sidebar-toggle" type="button" title="收起側欄"
+            aria-label="收起側欄" aria-expanded="true" data-spec-coverage-ignore>
             <span class="toggle-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"></path></svg>
             </span>
@@ -566,7 +552,7 @@
             id="module-frame"
             class="module-frame"
             title="工作台"
-            src="workbench/index.html?embed=1&v=20261110-10"
+            src="workbench/index.html?embed=1&v=20261120-version-badge"
           ></iframe>
           <div id="placeholder" class="placeholder" hidden>
             <div class="placeholder-panel"><strong id="placeholder-title">模組</strong>尚未建立</div>
@@ -576,7 +562,8 @@
     </div>
   </div>
 
-  <aside class="assessment-tracker" id="assessment-tracker" aria-label="進行中的 016 評估" hidden>
+  <aside class="assessment-tracker" id="assessment-tracker" aria-label="進行中的 016 評估"
+    data-spec-ids="BH-AX-016" hidden>
     <button class="assessment-tracker-resume" id="assessment-tracker-resume" type="button" data-spec-ids="BH-AX-016">
       <span class="assessment-tracker-mark">016</span>
       <span class="assessment-tracker-copy">
@@ -587,7 +574,8 @@
     <button class="assessment-tracker-close" id="assessment-tracker-close" type="button" aria-label="關閉 016 提示">×</button>
   </aside>
 
-  <dialog class="draft-dialog" id="assessment-close-dialog" aria-labelledby="assessment-close-title">
+  <dialog class="draft-dialog" id="assessment-close-dialog" aria-labelledby="assessment-close-title"
+    data-spec-ids="BH-AX-016">
     <div class="draft-dialog-head">
       <h2 id="assessment-close-title">確定關閉評估？</h2>
     </div>
@@ -606,13 +594,13 @@
   <script src="shared/prototype-domain.js?v=20261119-007-groups"></script>
   <script>
     const modules = {
-      workbench: { label: "工作台", src: "workbench/index.html?embed=1&v=20261110-10" },
-      residents: { label: "住客管理", src: "residents/index.html?embed=1&v=20261110-11" },
-      training: { label: "訓練時間表", src: "training/index.html?embed=1&v=20261110-10" },
-      records: { label: "復康運動紀錄", src: "records/index.html?embed=1&v=20261110-10" },
-      assessment: { label: "評估系統", src: "assessment/paper-aligned.html?embed=1&v=20261110-10" },
-      icp: { label: "ICP", src: "icp/worklist.html?embed=1&v=20261110-10" },
-      settings: { label: "院舍設定", src: "settings/index.html?embed=1&v=20261110-10" }
+      workbench: { label: "工作台", src: "workbench/index.html?embed=1&v=20261120-version-badge" },
+      residents: { label: "住客管理", src: "residents/index.html?embed=1&v=20261120-version-badge" },
+      training: { label: "訓練時間表", src: "training/index.html?embed=1&v=20261120-version-badge" },
+      records: { label: "復康運動紀錄", src: "records/index.html?embed=1&v=20261120-version-badge" },
+      assessment: { label: "評估系統", src: "assessment/paper-aligned.html?embed=1&v=20261120-version-badge" },
+      icp: { label: "ICP", src: "icp/worklist.html?embed=1&v=20261120-version-badge" },
+      settings: { label: "院舍設定", src: "settings/index.html?embed=1&v=20261120-version-badge" }
     };
 
     const navButtons = document.querySelectorAll(".nav button");
@@ -933,7 +921,7 @@
       openModule(initialModule);
     }
   </script>
-  <script src="shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="shared/ui-system.js?v=20261120-version-badge"></script>
   <script src="shared/spec-inspector-data.js?v=20261119-007-groups"></script>
   <script src="shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>

@@ -605,7 +605,7 @@
                 <button class="active" type="button" role="tab" aria-selected="true" data-channel="home">院舍</button>
                 <button type="button" role="tab" aria-selected="false" data-channel="announcement">公告</button>
               </div>
-              <label class="handover-date">
+              <label class="handover-date" data-spec-ids="BH-HO-008">
                 <button class="handover-day-btn" type="button" data-action="prev-handover-day"
                   title="前一日" aria-label="前一日交更">←</button>
                 <input id="handover-date" type="date" value="2026-10-23" aria-label="交更日期" data-spec-ids="BH-HO-008">
@@ -620,7 +620,8 @@
     </main>
   </div>
 
-  <dialog id="task-dialog" aria-labelledby="task-dialog-title">
+  <dialog id="task-dialog" aria-labelledby="task-dialog-title"
+    data-spec-ids="BH-TODO-005,BH-TODO-006,BH-TODO-008,BH-TODO-010,BH-TODO-012">
     <form id="task-form">
       <div class="dialog-head">
         <h2 id="task-dialog-title">新增待辦</h2>
@@ -661,7 +662,8 @@
     </form>
   </dialog>
 
-  <dialog id="post-dialog" aria-labelledby="post-dialog-title">
+  <dialog id="post-dialog" aria-labelledby="post-dialog-title"
+    data-spec-ids="BH-HO-004,BH-HO-009,BH-TODO-005,BH-TODO-010">
     <form id="post-form">
       <div class="dialog-head">
         <h2 id="post-dialog-title">新增貼文</h2>
@@ -708,7 +710,8 @@
     </form>
   </dialog>
 
-  <dialog id="detail-dialog" aria-labelledby="detail-title">
+  <dialog id="detail-dialog" aria-labelledby="detail-title"
+    data-spec-ids="BH-TODO-007,BH-TODO-008,BH-HO-009">
     <div class="dialog-head">
       <h2 id="detail-title"></h2>
       <p>待辦資料</p>
@@ -739,8 +742,10 @@
 
     function applyHomeSettings() {
       const home = OT_HOME_SETTINGS.getHome();
-      document.getElementById("chrome-home-code").textContent = home.code;
-      document.getElementById("chrome-home-name").textContent = home.name;
+      const code = document.getElementById("chrome-home-code");
+      const name = document.getElementById("chrome-home-name");
+      if (code) code.textContent = home.code;
+      if (name) name.textContent = home.name;
     }
 
     let tasks = OT_PROTOTYPE.tasks();
@@ -773,7 +778,12 @@
     function refreshFromStore() {
       tasks = OT_PROTOTYPE.tasks();
       posts = OT_PROTOTYPE.posts();
-      residents = OT_PROTOTYPE.residents().map(({ id, bed, name }) => ({ id, bed, name }));
+      residents = OT_PROTOTYPE.residents().map(({ id, bed, name, admissionDate }) => ({
+        id,
+        bed,
+        name,
+        admissionDate
+      }));
       residentById = new Map(residents.map(resident => [resident.id, resident]));
     }
 
@@ -785,7 +795,26 @@
       toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
     }
 
+    function initialAxWindow(task) {
+      const resident = residentById.get(task.residentId);
+      const start = task.initialAxWindowStart || resident?.admissionDate;
+      if (!start || !String(task.title || "").includes("Initial Ax")) return null;
+      const endDate = parseDate(start);
+      endDate.setDate(endDate.getDate() + 7);
+      const end = task.initialAxWindowEnd || dateKey(endDate);
+      return {
+        inWindow: TODAY_KEY >= start && TODAY_KEY <= end
+      };
+    }
+
     function groupFor(task) {
+      const initialAx = initialAxWindow(task);
+      if (
+        task.status === "open" &&
+        initialAx?.inWindow
+      ) {
+        return "today";
+      }
       if (!task.due || task.due === TODAY_KEY) return "today";
       const due = parseDate(task.due);
       if (due < today) return "overdue";
@@ -867,7 +896,7 @@
           .sort((a, b) => (a.due || TODAY_KEY).localeCompare(b.due || TODAY_KEY));
         if (!rows.length) return "";
         return `
-          <details class="todo-group ${key}" ${key === "later" ? "" : "open"} data-spec-ids="BH-TODO-001,BH-TODO-011">
+          <details class="todo-group ${key}" open data-spec-ids="BH-TODO-001,BH-TODO-011">
             <summary><h3>${label}</h3></summary>
             ${rows.map(task => taskRowMarkup(task, key)).join("")}
           </details>
@@ -1172,7 +1201,7 @@
       if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
     });
   </script>
-  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/ui-system.js?v=20261120-version-badge"></script>
   <script src="../shared/spec-inspector-data.js?v=20261119-007-groups"></script>
   <script src="../shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>

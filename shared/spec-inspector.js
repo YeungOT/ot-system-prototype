@@ -272,7 +272,11 @@
   }
 
   function closestMapping(target) {
-    return target instanceof Element ? target.closest("[data-spec-ids], [data-spec-id]") : null;
+    if (!(target instanceof Element)) return null;
+    const mapped = target.closest("[data-spec-ids], [data-spec-id]");
+    const ignored = target.closest("[data-spec-coverage-ignore]");
+    if (ignored && (!mapped || mapped.contains(ignored))) return null;
+    return mapped;
   }
 
   function escapeHtml(value) {
@@ -339,6 +343,7 @@
   const toggleButton = document.createElement("button");
   toggleButton.type = "button";
   toggleButton.className = "ot-spec-toggle-button";
+  toggleButton.dataset.specCoverageIgnore = "";
   toggleButton.setAttribute("aria-expanded", "false");
   toggleButton.setAttribute("aria-controls", "ot-spec-inspector-panel");
   toggleButton.innerHTML = `
@@ -358,6 +363,7 @@
   const inspector = document.createElement("section");
   inspector.id = "ot-spec-inspector-panel";
   inspector.className = "ot-spec-inspector";
+  inspector.dataset.specCoverageIgnore = "";
   inspector.setAttribute("aria-label", "規格浮動選單");
   inspector.innerHTML = `
     <div class="ot-spec-content" data-spec-content aria-live="polite"></div>

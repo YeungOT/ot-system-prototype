@@ -1852,7 +1852,8 @@
             const readonly = date.slice(0, 7) !== state.activeMonth;
             return `
               <div class="slot ${isLunchTime(time) ? "lunch" : ""} ${readonly ? "readonly" : ""} ${index === dates.length - 1 ? "day-last" : ""}"
-                data-legacy-date="${date}" data-legacy-time="${time}">
+                data-legacy-date="${date}" data-legacy-time="${time}"
+                data-spec-ids="BH-006-005,BH-006-006,BH-006-019,BH-006-021,BH-006-029">
                 ${legacySlotMarkup(date, time, monthView)}
               </div>
             `;
@@ -1875,7 +1876,11 @@
         : "";
       return `
         <button class="resident-row ${progress.count >= progress.target ? "complete" : ""}"
-          type="button" draggable="true" data-legacy-resident="${resident.id}" title="${escapeHtml(cycleSummary)}">
+          type="button" draggable="true" data-legacy-resident="${resident.id}"
+          data-spec-ids="${resident.cadence === "biweekly"
+            ? "BH-006-004,BH-006-005,BH-006-012,BH-006-027"
+            : "BH-006-004,BH-006-005,BH-006-026"}"
+          title="${escapeHtml(cycleSummary)}">
           <span class="resident-name">
             <span class="bed-number">${escapeHtml(resident.bed)}</span>
             ${escapeHtml(resident.name)}
@@ -1915,7 +1920,7 @@
       )));
       return `
         <button class="cadence-week ${weekStart === state.activeWeek ? "active" : ""}" type="button"
-          data-legacy-week="${weekStart}">
+          data-legacy-week="${weekStart}" data-spec-ids="BH-006-002,BH-006-021">
           <strong>${legacyWeekRange(weekStart)}</strong>
           <span class="week-count">${sessions.length} 節</span>
         </button>
@@ -1963,9 +1968,11 @@
           <div class="service-switch">
             <div class="segmented" role="tablist" aria-label="服務類型">
               <button class="${state.serviceMode === "basic" ? "active" : ""}" type="button"
-                role="tab" aria-selected="${state.serviceMode === "basic"}" data-legacy-mode="basic">基本</button>
+                role="tab" aria-selected="${state.serviceMode === "basic"}" data-legacy-mode="basic"
+                data-spec-ids="BH-006-019,BH-006-030">基本</button>
               <button class="${state.serviceMode === "extra" ? "active" : ""}" type="button"
-                role="tab" aria-selected="${state.serviceMode === "extra"}" data-legacy-mode="extra">額外服務</button>
+                role="tab" aria-selected="${state.serviceMode === "extra"}" data-legacy-mode="extra"
+                data-spec-ids="BH-006-019,BH-006-030">額外服務</button>
             </div>
           </div>
           <div class="resident-queue" id="legacy-resident-queue">${legacyQueueMarkup()}</div>
@@ -1985,11 +1992,14 @@
               </div>
               <div class="segmented" role="group" aria-label="時間表檢視">
                 <button class="${state.view === "week" ? "active" : ""}" type="button"
-                  data-legacy-view="week" aria-pressed="${state.view === "week"}">週</button>
+                  data-legacy-view="week" aria-pressed="${state.view === "week"}"
+                  data-spec-ids="BH-006-001,BH-006-002">週</button>
                 <button class="${state.view === "month" ? "active" : ""}" type="button"
-                  data-legacy-view="month" aria-pressed="${state.view === "month"}">月</button>
+                  data-legacy-view="month" aria-pressed="${state.view === "month"}"
+                  data-spec-ids="BH-006-001,BH-006-003,BH-006-015,BH-006-017">月</button>
               </div>
-              <button class="btn" type="button" data-legacy-action="autofill">自動填入</button>
+              <button class="btn" type="button" data-legacy-action="autofill"
+                data-spec-ids="BH-006-010,BH-006-020">自動填入</button>
             </div>
             <div class="schedule-toolbar-group schedule-toolbar-actions">
               <button class="btn icon-btn" type="button" disabled title="復原上一步" aria-label="復原上一步" data-spec-ids="BH-006-009">↶</button>
@@ -2002,10 +2012,13 @@
         </article>
       </div>
       <small class="save-status-corner" id="legacy-save">${escapeHtml(legacyPlanLabel())}</small>
-      <dialog class="scope-dialog" id="legacy-scope-dialog" aria-label="變更範圍">
+      <dialog class="scope-dialog" id="legacy-scope-dialog" aria-label="變更範圍"
+        data-spec-ids="BH-006-011">
         <div class="scope-options" role="group" aria-label="變更範圍">
-          <button class="scope-option" type="button" data-legacy-scope="date">只更改本節</button>
-          <button class="scope-option" type="button" data-legacy-scope="recurring">更改所有相關節數</button>
+          <button class="scope-option" type="button" data-legacy-scope="date"
+            data-spec-ids="BH-006-011">只更改本節</button>
+          <button class="scope-option" type="button" data-legacy-scope="recurring"
+            data-spec-ids="BH-006-011">更改所有相關節數</button>
         </div>
       </dialog>
     `;

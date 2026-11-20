@@ -610,7 +610,7 @@
       line-height: 1;
     }
     .record-cell.locked {
-      background: #f1f5f9;
+      background: repeating-linear-gradient(135deg, #f8fafc, #f8fafc 4px, #e8edf1 4px, #e8edf1 6px);
       color: #94a3b8;
       cursor: not-allowed;
       box-shadow: none;
@@ -1503,7 +1503,9 @@
                 ${lockReason ? "disabled" : 'data-action="open-cell"'} data-resident-id="${resident.id}" data-day="${day}"
                 title="${escapeHtml(title)}"
                 aria-label="${escapeHtml(aria)}">
-                ${pendingPlan
+                ${lockReason
+                  ? '<span class="cell-code">╱</span>'
+                  : pendingPlan
                   ? pendingGroupLabel
                     ? `<span class="planned-group-label">${groupLabelMarkup(pendingGroupLabel)}</span>${overdue ? '<span class="planned-debt">欠</span>' : ""}`
                     : overdue ? '<span class="cell-code">欠</span>' : ""
@@ -1937,7 +1939,7 @@
       if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
     });
   </script>
-  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/ui-system.js?v=20261120-version-badge"></script>
   <script src="../shared/spec-inspector-data.js?v=20261119-007-groups"></script>
   <script src="../shared/spec-inspector.js?v=20261118-spec-inspector"></script>
 </body>

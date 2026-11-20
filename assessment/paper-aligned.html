@@ -452,6 +452,9 @@
       gap: 12px;
       align-items: start;
     }
+    .assessment-shell.explorer-collapsed {
+      grid-template-columns: 44px minmax(0, 1fr);
+    }
     .assessment-explorer {
       position: sticky;
       top: 0;
@@ -464,8 +467,47 @@
       flex-direction: column;
       overflow: hidden;
     }
-    .explorer-search {
+    .explorer-toolbar {
       margin: 9px 9px 0;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      align-items: center;
+      gap: 6px;
+    }
+    .explorer-toggle {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: #475569;
+      padding: 0;
+      display: grid;
+      place-items: center;
+    }
+    .explorer-toggle:hover {
+      border-color: var(--strong-line);
+      background: #f8fafc;
+      color: var(--teal-dark);
+    }
+    .assessment-shell.explorer-collapsed .assessment-explorer {
+      width: 44px;
+    }
+    .assessment-shell.explorer-collapsed .explorer-toolbar {
+      margin: 9px 5px 0;
+      grid-template-columns: 34px;
+      gap: 0;
+    }
+    .assessment-shell.explorer-collapsed .explorer-search,
+    .assessment-shell.explorer-collapsed .explorer-filters,
+    .assessment-shell.explorer-collapsed .resident-tree {
+      display: none;
+    }
+    .assessment-shell.explorer-collapsed .explorer-toggle .ui-chevron {
+      transform: rotate(-45deg);
+    }
+    .explorer-search {
+      margin: 0;
       min-height: 34px;
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -592,12 +634,6 @@
       border-left: 1px solid var(--line);
       display: grid;
       gap: 2px;
-    }
-    .record-year {
-      padding: 4px 5px 2px;
-      color: var(--muted);
-      font-size: 9px;
-      font-weight: 800;
     }
     .explorer-record {
       width: 100%;
@@ -1507,13 +1543,20 @@
       <div class="content assessment-content">
         <div class="assessment-shell">
           <aside class="assessment-explorer" aria-label="評估檔案" data-spec-ids="BH-AX-019">
-            <label class="console-search console-search--wide explorer-search">
-              <svg class="console-search-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="11" cy="11" r="7"></circle>
-                <path d="m20 20-4-4"></path>
-              </svg>
-              <input id="assessment-search" type="search" placeholder="搜尋住客或床號" aria-label="搜尋評估住客" autocomplete="off">
-            </label>
+            <div class="explorer-toolbar">
+              <button class="explorer-toggle" id="assessment-explorer-toggle" type="button"
+                aria-label="收起評估檔案" aria-controls="resident-tree" aria-expanded="true"
+                title="收起評估檔案" data-spec-ids="BH-AX-019">
+                <span class="ui-chevron left" aria-hidden="true"></span>
+              </button>
+              <label class="console-search console-search--wide explorer-search">
+                <svg class="console-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <path d="m20 20-4-4"></path>
+                </svg>
+                <input id="assessment-search" type="search" placeholder="搜尋住客或床號" aria-label="搜尋評估住客" autocomplete="off">
+              </label>
+            </div>
             <div class="explorer-filters" role="group" aria-label="住客篩選">
               <button class="active" type="button" data-resident-place="all" aria-pressed="true">全部</button>
               <button type="button" data-resident-place="voucher" aria-pressed="false">券位</button>
@@ -2609,16 +2652,6 @@
       return resident.place === (activeResidentPlace === "voucher" ? "券位" : "買位");
     }
 
-    function recordsByYear(residentId) {
-      const groups = new Map();
-      recordsFor(residentId).forEach(record => {
-        const year = record.date.slice(0, 4);
-        if (!groups.has(year)) groups.set(year, []);
-        groups.get(year).push(record);
-      });
-      return groups;
-    }
-
     function renderExplorer() {
       const normalizedSearch = searchTerm.trim().toLowerCase();
       const residents = assessmentResidents.filter(resident => (
@@ -2632,24 +2665,21 @@
           const state = residentState(resident);
           const expanded = expandedResidentIds.has(resident.id);
           const selected = resident.id === selectedResidentId;
-          const years = recordsByYear(resident.id);
+          const records = recordsFor(resident.id);
           const branch = expanded
             ? `
               <div class="record-branch">
-                ${[...years.entries()].map(([year, records]) => `
-                  <div class="record-year">${year}</div>
-                  ${records.map(record => {
-                    const meta = STATUS_META[record.status];
-                    return `
-                      <button class="explorer-record ${record.id === selectedRecordId ? "active" : ""}"
-                        type="button" data-resident-id="${resident.id}" data-record-id="${record.id}">
-                        <span class="explorer-record-date">${record.date}</span>
-                        <span class="record-dot ${meta.dot}"></span>
-                        <span class="explorer-record-type">${escapeHtml(record.type)} · ${meta.label}</span>
-                      </button>
-                    `;
-                  }).join("")}
-                `).join("")}
+                ${records.map(record => {
+                  const meta = STATUS_META[record.status];
+                  return `
+                    <button class="explorer-record ${record.id === selectedRecordId ? "active" : ""}"
+                      type="button" data-resident-id="${resident.id}" data-record-id="${record.id}">
+                      <span class="explorer-record-date">${record.date}</span>
+                      <span class="record-dot ${meta.dot}"></span>
+                      <span class="explorer-record-type">${escapeHtml(record.type)} · ${meta.label}</span>
+                    </button>
+                  `;
+                }).join("")}
               </div>
             `
             : "";
@@ -3014,6 +3044,20 @@
       renderOverview();
     }
 
+    function setExplorerCollapsed(collapsed) {
+      const shell = document.querySelector(".assessment-shell");
+      const toggle = document.getElementById("assessment-explorer-toggle");
+      shell.classList.toggle("explorer-collapsed", collapsed);
+      toggle.setAttribute("aria-expanded", String(!collapsed));
+      toggle.setAttribute("aria-label", collapsed ? "展開評估檔案" : "收起評估檔案");
+      toggle.title = collapsed ? "展開評估檔案" : "收起評估檔案";
+    }
+
+    document.getElementById("assessment-explorer-toggle").addEventListener("click", () => {
+      const shell = document.querySelector(".assessment-shell");
+      setExplorerCollapsed(!shell.classList.contains("explorer-collapsed"));
+    });
+
     document.getElementById("assessment-search").addEventListener("input", event => {
       searchTerm = event.target.value;
       renderExplorer();
@@ -3262,7 +3306,7 @@
       if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
     });
   </script>
-  <script src="../shared/ui-system.js?v=20261116-browser-comments"></script>
+  <script src="../shared/ui-system.js?v=20261120-version-badge"></script>
   <style>
     .clinical-note-button {
       min-height: 26px;

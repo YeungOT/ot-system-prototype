@@ -421,6 +421,8 @@
       residentId: resident.id,
       owner: "OT",
       due: dateKeyAfterDays(resident.admissionDate, 7),
+      initialAxWindowStart: resident.admissionDate,
+      initialAxWindowEnd: dateKeyAfterDays(resident.admissionDate, 7),
       status: "open",
       kind: "auto",
       source: "新增住客",
