@@ -288,9 +288,13 @@
       .replaceAll("'", "&#039;");
   }
 
+  const validIds = element => [...new Set(parseIds(element))].filter(id => specsById.has(id));
+
   if (embedded) {
     let lastMapped = null;
     let clearTimer = null;
+    let selectMode = false;
+    let pinned = false;
     const setMapped = element => {
       if (lastMapped === element) return;
       lastMapped?.classList.remove("spec-hover-target");
@@ -309,33 +313,59 @@
           || String(element?.textContent || "").replace(/\s+/g, " ").trim().slice(0, 100)
       }, "*");
     };
+    const cancelClear = () => {
+      if (clearTimer) clearTimeout(clearTimer);
+      clearTimer = null;
+    };
+    const scheduleClear = () => {
+      cancelClear();
+      clearTimer = setTimeout(() => {
+        setMapped(null);
+        post("clear", null, []);
+      }, 120);
+    };
     const show = (element, action) => {
+      if (pinned) return;
       const mapped = closestMapping(element);
       if (!mapped) return;
-      const ids = parseIds(mapped).filter(id => specsById.has(id));
+      const ids = validIds(mapped);
       if (!ids.length) return;
-      if (clearTimer) clearTimeout(clearTimer);
+      cancelClear();
       setMapped(mapped);
       post(action, mapped, ids);
     };
     document.addEventListener("pointerover", event => show(event.target, "hover"));
     document.addEventListener("pointerout", event => {
+      if (pinned) return;
       const mapped = closestMapping(event.target);
       if (!mapped) return;
       if (event.relatedTarget instanceof Node && mapped.contains(event.relatedTarget)) return;
-      if (clearTimer) clearTimeout(clearTimer);
-      clearTimer = setTimeout(() => {
-        setMapped(null);
-        post("clear", null, []);
-      }, 120);
+      scheduleClear();
     });
     document.addEventListener("focusin", event => show(event.target, "focus"));
     document.addEventListener("focusout", () => {
-      if (clearTimer) clearTimeout(clearTimer);
-      clearTimer = setTimeout(() => {
+      if (pinned) return;
+      scheduleClear();
+    });
+    document.addEventListener("click", event => {
+      if (!selectMode) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const mapped = closestMapping(event.target);
+      const ids = mapped ? validIds(mapped) : [];
+      cancelClear();
+      pinned = Boolean(ids.length);
+      setMapped(pinned ? mapped : null);
+      post(pinned ? "select" : "release", pinned ? mapped : null, ids);
+    }, true);
+    window.addEventListener("message", event => {
+      if (event.data?.type !== "ot-spec-select-mode") return;
+      selectMode = Boolean(event.data.active);
+      pinned = selectMode && Boolean(event.data.pinned);
+      if (!pinned) {
+        cancelClear();
         setMapped(null);
-        post("clear", null, []);
-      }, 120);
+      }
     });
     return;
   }
@@ -380,6 +410,7 @@
 
   let activeIds = [];
   let lastMapped = null;
+  let pinned = false;
   let layout = null;
   let drag = null;
   let resize = null;
@@ -439,6 +470,7 @@
     inspector.classList.toggle("is-open", open);
     toggleButton.setAttribute("aria-expanded", String(open));
     if (open && !activeIds.length) renderBrowse();
+    broadcastSelectMode();
   }
 
   function openPanel() {
@@ -446,8 +478,26 @@
   }
 
   function closePanel() {
+    pinned = false;
     setOpen(false);
     clearHighlight();
+  }
+
+  function pin(element, ids) {
+    pinned = true;
+    activeIds = ids;
+    renderActive();
+    if (element) highlightElement(element);
+    else highlight(ids);
+    broadcastSelectMode();
+  }
+
+  function releasePin() {
+    pinned = false;
+    activeIds = [];
+    clearHighlight();
+    renderBrowse();
+    broadcastSelectMode();
   }
 
   function clearHighlight() {
@@ -455,12 +505,19 @@
     lastMapped = null;
   }
 
-  function highlight(ids) {
+  function highlightElement(element) {
     clearHighlight();
-    if (!ids.length) return;
-    lastMapped = [...document.querySelectorAll("[data-spec-ids], [data-spec-id]")]
-      .find(element => parseIds(element).some(id => ids.includes(id))) || null;
+    lastMapped = element || null;
     lastMapped?.classList.add("spec-hover-target");
+  }
+
+  function highlight(ids) {
+    if (!ids.length) {
+      highlightElement(null);
+      return;
+    }
+    highlightElement([...document.querySelectorAll("[data-spec-ids], [data-spec-id]")]
+      .find(element => parseIds(element).some(id => ids.includes(id))) || null);
   }
 
   function specMetaRows(spec) {
@@ -555,6 +612,7 @@
   }
 
   function handleMappedEvent(target) {
+    if (pinned) return;
     if (!inspector.classList.contains("is-open")) return;
     if (target instanceof Node && inspector.contains(target)) return;
     const mapped = closestMapping(target);
@@ -562,14 +620,68 @@
     showIds(parseIds(mapped));
   }
 
+  const watchedFrames = new WeakSet();
+
+  function watchFrame(frame) {
+    if (watchedFrames.has(frame)) return;
+    watchedFrames.add(frame);
+    frame.addEventListener("load", () => broadcastSelectModeTo(frame));
+  }
+
+  function broadcastSelectModeTo(frame) {
+    frame.contentWindow?.postMessage({
+      type: "ot-spec-select-mode",
+      active: inspector.classList.contains("is-open"),
+      pinned
+    }, "*");
+  }
+
+  function broadcastSelectMode() {
+    [...document.querySelectorAll("iframe")].forEach(frame => {
+      watchFrame(frame);
+      broadcastSelectModeTo(frame);
+    });
+  }
+
   document.addEventListener("pointerover", event => handleMappedEvent(event.target));
   document.addEventListener("focusin", event => handleMappedEvent(event.target));
   document.addEventListener("pointerout", event => {
+    if (pinned) return;
     if (closestMapping(event.target)) clearHighlight();
   });
 
+  // An open inspector is a selection mode: page clicks pick behaviours instead of
+  // activating the control underneath.
+  document.addEventListener("click", event => {
+    if (!inspector.classList.contains("is-open")) return;
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (inspector.contains(target) || toggleButton.contains(target)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const mapped = closestMapping(target);
+    const ids = mapped ? validIds(mapped) : [];
+    if (ids.length) pin(mapped, ids);
+    else releasePin();
+  }, true);
+
+  document.addEventListener("load", event => {
+    if (event.target instanceof HTMLIFrameElement) broadcastSelectModeTo(event.target);
+  }, true);
+
   window.addEventListener("message", event => {
     if (event.source === window || event.data?.type !== "ot-spec-inspector") return;
+    if (event.data.action === "select") {
+      const ids = [...new Set(event.data.ids || [])].filter(id => specsById.has(id));
+      if (ids.length) pin(null, ids);
+      else releasePin();
+      return;
+    }
+    if (event.data.action === "release") {
+      releasePin();
+      return;
+    }
+    if (pinned) return;
     if (event.data.action === "clear") {
       clearHighlight();
       return;
@@ -579,9 +691,12 @@
 
   toggleButton.addEventListener("click", () => {
     const open = !inspector.classList.contains("is-open");
+    pinned = false;
     if (open) {
       activeIds = [];
       renderBrowse();
+    } else {
+      clearHighlight();
     }
     setOpen(open);
   });
@@ -682,4 +797,8 @@
   const storedLayout = readLayout();
   if (storedLayout) applyLayout(storedLayout);
   else resetLayout();
+
+  // Frames may already exist (shell) or be created later; keep them informed of
+  // selection mode across their loads and module changes.
+  broadcastSelectMode();
 })();
