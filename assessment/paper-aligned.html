@@ -452,9 +452,6 @@
       gap: 12px;
       align-items: start;
     }
-    .assessment-shell.explorer-collapsed {
-      grid-template-columns: 44px minmax(0, 1fr);
-    }
     .assessment-explorer {
       position: sticky;
       top: 0;
@@ -469,42 +466,13 @@
     }
     .explorer-toolbar {
       margin: 9px 9px 0;
-      display: grid;
-      grid-template-columns: 34px minmax(0, 1fr);
-      align-items: center;
-      gap: 6px;
+      display: block;
     }
-    .explorer-toggle {
-      width: 34px;
-      height: 34px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fff;
-      color: #475569;
-      padding: 0;
-      display: grid;
-      place-items: center;
+    .assessment-shell.explorer-hidden {
+      grid-template-columns: minmax(0, 1fr);
     }
-    .explorer-toggle:hover {
-      border-color: var(--strong-line);
-      background: #f8fafc;
-      color: var(--teal-dark);
-    }
-    .assessment-shell.explorer-collapsed .assessment-explorer {
-      width: 44px;
-    }
-    .assessment-shell.explorer-collapsed .explorer-toolbar {
-      margin: 9px 5px 0;
-      grid-template-columns: 34px;
-      gap: 0;
-    }
-    .assessment-shell.explorer-collapsed .explorer-search,
-    .assessment-shell.explorer-collapsed .explorer-filters,
-    .assessment-shell.explorer-collapsed .resident-tree {
+    .assessment-shell.explorer-hidden > .assessment-explorer {
       display: none;
-    }
-    .assessment-shell.explorer-collapsed .explorer-toggle .ui-chevron {
-      transform: rotate(-45deg);
     }
     .explorer-search {
       margin: 0;
@@ -795,6 +763,22 @@
       background: #fff;
       padding: 8px 10px;
       box-shadow: 0 3px 12px rgba(15, 23, 42, .08);
+    }
+    .assessment-fullscreen-toggle {
+      width: 34px;
+      min-width: 34px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+    }
+    .assessment-fullscreen-toggle svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
     .assessment-shell.session-mode .record-view .screen-head { display: none; }
     .record-view.readonly .paper input { pointer-events: none; }
@@ -1542,13 +1526,8 @@
 
       <div class="content assessment-content">
         <div class="assessment-shell">
-          <aside class="assessment-explorer" aria-label="評估檔案" data-spec-ids="BH-AX-019">
+          <aside class="assessment-explorer" id="assessment-explorer" aria-label="評估檔案" data-spec-ids="BH-AX-019">
             <div class="explorer-toolbar">
-              <button class="explorer-toggle" id="assessment-explorer-toggle" type="button"
-                aria-label="收起評估檔案" aria-controls="resident-tree" aria-expanded="true"
-                title="收起評估檔案" data-spec-ids="BH-AX-019">
-                <span class="ui-chevron left" aria-hidden="true"></span>
-              </button>
               <label class="console-search console-search--wide explorer-search">
                 <svg class="console-search-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <circle cx="11" cy="11" r="7"></circle>
@@ -1601,6 +1580,13 @@
                 <div class="actions">
                   <button class="btn" type="button" data-action="print-record" data-spec-ids="BH-AX-023">列印</button>
                   <button class="btn btn-primary" id="save-record" type="button" data-action="save-record" data-spec-ids="BH-AX-010,BH-AX-016">儲存草稿</button>
+                  <button class="btn assessment-fullscreen-toggle" id="assessment-fullscreen-toggle" type="button"
+                    aria-controls="assessment-explorer" aria-expanded="true"
+                    aria-label="全螢幕查看評估表" title="全螢幕查看評估表" data-spec-ids="BH-AX-019">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
 
@@ -2703,6 +2689,7 @@
     }
 
     function renderOverview() {
+      setExplorerHidden(false);
       const empty = document.getElementById("workspace-empty");
       const overview = document.getElementById("resident-overview");
       const recordView = document.getElementById("record-view");
@@ -3044,18 +3031,19 @@
       renderOverview();
     }
 
-    function setExplorerCollapsed(collapsed) {
+    function setExplorerHidden(hidden) {
       const shell = document.querySelector(".assessment-shell");
-      const toggle = document.getElementById("assessment-explorer-toggle");
-      shell.classList.toggle("explorer-collapsed", collapsed);
-      toggle.setAttribute("aria-expanded", String(!collapsed));
-      toggle.setAttribute("aria-label", collapsed ? "展開評估檔案" : "收起評估檔案");
-      toggle.title = collapsed ? "展開評估檔案" : "收起評估檔案";
+      const toggle = document.getElementById("assessment-fullscreen-toggle");
+      if (!toggle) return;
+      shell.classList.toggle("explorer-hidden", hidden);
+      toggle.setAttribute("aria-expanded", String(!hidden));
+      toggle.setAttribute("aria-label", hidden ? "顯示評估檔案欄" : "全螢幕查看評估表");
+      toggle.title = hidden ? "顯示評估檔案欄" : "全螢幕查看評估表";
     }
 
-    document.getElementById("assessment-explorer-toggle").addEventListener("click", () => {
+    document.getElementById("assessment-fullscreen-toggle").addEventListener("click", () => {
       const shell = document.querySelector(".assessment-shell");
-      setExplorerCollapsed(!shell.classList.contains("explorer-collapsed"));
+      setExplorerHidden(!shell.classList.contains("explorer-hidden"));
     });
 
     document.getElementById("assessment-search").addEventListener("input", event => {

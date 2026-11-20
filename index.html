@@ -207,21 +207,6 @@
       outline-offset: 2px;
     }
     .top-meta { color: var(--muted); }
-    .annotation-toggle {
-      min-height: 34px;
-      border: 1px solid #b7ded7;
-      border-radius: 7px;
-      background: #edf8f5;
-      color: var(--teal-dark);
-      padding: 6px 10px;
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .annotation-toggle:hover { background: #e2f4f0; }
-    .annotation-toggle:focus-visible {
-      outline: 3px solid rgba(15, 118, 110, .25);
-      outline-offset: 2px;
-    }
     .user-pill {
       border: 1px solid var(--line);
       border-radius: 999px;
@@ -272,52 +257,6 @@
       color: var(--muted);
     }
     .placeholder-panel strong { color: var(--ink); margin-right: 6px; }
-    .annotation-preview-toolbar {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid #b7ded7;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, .96);
-      padding: 6px 7px 6px 11px;
-      box-shadow: 0 10px 28px rgba(15, 23, 42, .18);
-    }
-    .annotation-preview-toolbar strong {
-      color: var(--teal-dark);
-      font-size: 11px;
-      font-weight: 900;
-    }
-    .annotation-preview-toolbar button {
-      min-height: 30px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fff;
-      color: var(--ink);
-      padding: 4px 9px;
-      font-size: 11px;
-      font-weight: 800;
-    }
-    .annotation-preview-root {
-      position: fixed;
-      inset: 0;
-      z-index: 9000;
-      overflow: auto;
-      margin: 0;
-      min-height: 100vh;
-      background: #f4f6f8;
-    }
-    body.annotation-preview-active {
-      overflow: hidden;
-    }
-    body.annotation-preview-active > .app,
-    body.annotation-preview-active > .assessment-tracker,
-    body.annotation-preview-active > .draft-dialog {
-      display: none !important;
-    }
     .assessment-tracker {
       position: fixed;
       right: 18px;
@@ -490,8 +429,6 @@
         <select id="home-select" class="home-select" aria-label="目前院舍" data-spec-ids="BH-GLOBAL-001"></select>
       </div>
       <div class="topbar-right">
-        <button class="annotation-toggle" id="open-annotation-preview" type="button"
-          aria-label="Open annotatable module view" data-spec-coverage-ignore>Annotate</button>
         <span class="top-meta">2026年10月26日</span>
         <label class="user-pill" title="切換示範身份">
           <span class="avatar" id="current-user-avatar">T</span>
@@ -614,7 +551,6 @@
     const assessmentTrackerResume = document.getElementById("assessment-tracker-resume");
     const assessmentTrackerClose = document.getElementById("assessment-tracker-close");
     const assessmentCloseDialog = document.getElementById("assessment-close-dialog");
-    const annotationButton = document.getElementById("open-annotation-preview");
     const currentRoleSelect = document.getElementById("current-role-select");
     const currentUserAvatar = document.getElementById("current-user-avatar");
     const ACTIVE_ASSESSMENT_DRAFT_KEY = OT_MOCK_STORAGE_KEYS.assessmentDraft;
@@ -785,92 +721,6 @@
         writeShellAssessmentDraft(event.data.draft);
         renderAssessmentTracker();
       }
-    });
-
-    let annotationPreviewRoot = null;
-    let annotationPreviewToolbar = null;
-    let annotationHadEmbeddedClass = false;
-
-    function closeAnnotationPreview() {
-      annotationPreviewRoot?.remove();
-      annotationPreviewToolbar?.remove();
-      document.querySelectorAll("[data-annotation-preview-style]").forEach(node => node.remove());
-      annotationPreviewRoot = null;
-      annotationPreviewToolbar = null;
-      document.body.classList.remove("annotation-preview-active");
-      if (!annotationHadEmbeddedClass) document.documentElement.classList.remove("embedded");
-      annotationButton.focus({ preventScroll: true });
-    }
-
-    function copyAnnotationStyles(sourceDocument) {
-      sourceDocument.querySelectorAll('link[rel~="stylesheet"], style').forEach(node => {
-        const copy = node.cloneNode(true);
-        copy.setAttribute("data-annotation-preview-style", "");
-        if (copy.tagName === "LINK") copy.href = node.href;
-        document.head.append(copy);
-      });
-    }
-
-    function copyAnnotationFormState(sourceDocument, targetRoot) {
-      const sourceControls = [...sourceDocument.querySelectorAll("input, select, textarea")];
-      const targetControls = [...targetRoot.querySelectorAll("input, select, textarea")];
-      sourceControls.forEach((source, index) => {
-        const target = targetControls[index];
-        if (!target) return;
-        if (target.type === "checkbox" || target.type === "radio") {
-          target.checked = source.checked;
-        } else if (target.tagName === "SELECT") {
-          target.value = source.value;
-        } else {
-          target.value = source.value;
-        }
-      });
-    }
-
-    function openAnnotationPreview() {
-      if (annotationPreviewRoot) return;
-      const sourceDocument = frame.contentDocument;
-      if (!sourceDocument?.body) return;
-
-      const root = document.createElement("div");
-      root.className = "annotation-preview-root";
-      root.setAttribute("data-codex-annotation-surface", currentModuleKey);
-      const bodyStyle = sourceDocument.defaultView.getComputedStyle(sourceDocument.body);
-      root.style.background = bodyStyle.backgroundColor;
-      root.style.color = bodyStyle.color;
-      root.style.fontFamily = bodyStyle.fontFamily;
-      root.style.fontSize = bodyStyle.fontSize;
-      root.style.lineHeight = bodyStyle.lineHeight;
-
-      sourceDocument.body.childNodes.forEach(node => {
-        if (node.nodeType === Node.ELEMENT_NODE && ["SCRIPT", "NOSCRIPT"].includes(node.tagName)) return;
-        root.append(node.cloneNode(true));
-      });
-
-      const toolbar = document.createElement("div");
-      toolbar.className = "annotation-preview-toolbar";
-      toolbar.innerHTML = `
-        <strong>${modules[currentModuleKey]?.label || "Annotation"}</strong>
-        <button type="button" aria-label="Close annotation preview">Close</button>
-      `;
-      toolbar.querySelector("button").addEventListener("click", closeAnnotationPreview);
-
-      copyAnnotationStyles(sourceDocument);
-      document.body.append(root, toolbar);
-      annotationHadEmbeddedClass = document.documentElement.classList.contains("embedded");
-      if (sourceDocument.documentElement.classList.contains("embedded")) {
-        document.documentElement.classList.add("embedded");
-      }
-      document.body.classList.add("annotation-preview-active");
-      copyAnnotationFormState(sourceDocument, root);
-      annotationPreviewRoot = root;
-      annotationPreviewToolbar = toolbar;
-      annotationPreviewToolbar.querySelector("button").focus({ preventScroll: true });
-    }
-
-    annotationButton.addEventListener("click", openAnnotationPreview);
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape" && annotationPreviewRoot) closeAnnotationPreview();
     });
 
     frame.addEventListener("load", () => {
