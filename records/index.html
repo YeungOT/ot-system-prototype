@@ -1154,28 +1154,43 @@
       try {
         const stored = JSON.parse(localStorage.getItem(PLAN_STORAGE_KEY));
         if (stored?.plans) {
-          plannedSessions = Object.values(stored.plans)
-            .filter(plan => plan.status === "valid")
-            .flatMap(plan => plan.sessions)
-            .map(session => ({
+          const plansByMonth = new Map();
+          Object.values(stored.plans).forEach(plan => {
+            if (!plan?.month || !["draft", "valid"].includes(plan.status)) return;
+            const existing = plansByMonth.get(plan.month);
+            if (!existing || plan.status === "valid") plansByMonth.set(plan.month, plan);
+          });
+          plannedSessions = [...plansByMonth.values()].flatMap(plan => (
+            (plan.sessions || []).map(session => ({
               ...session,
               paid: Boolean(session.paid),
               format: session.paid
                 ? (session.format === "g" ? "eg" : "ei")
-                : session.format
-            }));
+                : session.format,
+              planStatus: plan.status,
+              planMonth: plan.month
+            }))
+          ));
+          if (plannedSessions.length) return;
+          plannedSessions = FALLBACK_PLAN.map(session => ({
+            ...session,
+            memberIds: [...session.memberIds],
+            planStatus: "fallback"
+          }));
           return;
         }
         if (Array.isArray(stored?.sessions) && stored.sessions.length) {
           plannedSessions = stored.sessions.map(session => ({
             ...session,
-            memberIds: [...session.memberIds]
+            memberIds: [...session.memberIds],
+            planStatus: "legacy"
           }));
         }
       } catch (error) {
         plannedSessions = FALLBACK_PLAN.map(session => ({
           ...session,
-          memberIds: [...session.memberIds]
+          memberIds: [...session.memberIds],
+          planStatus: "fallback"
         }));
       }
     }
@@ -1475,6 +1490,7 @@
           const pendingPlan = content ? null : pendingPlanForCell(resident.id, day);
           const overdue = Boolean(pendingPlan && dateKey(day) < TODAY_KEY);
           const pendingGroupLabel = pendingPlan ? plannedGroupLabel(pendingPlan) : null;
+          const pendingPlanSource = pendingPlan?.planStatus === "draft" ? "006 草稿" : "006";
           const splitCell = Boolean(
             content?.form ||
             (pendingPlan && OT_PROTOTYPE.isGroupSession(pendingPlan))
@@ -1485,14 +1501,14 @@
           const title = lockReason
             ? lockReason
             : pendingPlan
-            ? `006 已安排${pendingKind}${pendingGroupLabel ? ` ${pendingGroupLabel}` : ""}，${overdue ? "欠：" : ""}尚待輸入紀錄`
+            ? `${pendingPlanSource} 已安排${pendingKind}${pendingGroupLabel ? ` ${pendingGroupLabel}` : ""}，${overdue ? "欠：" : ""}尚待輸入紀錄`
             : content
               ? `${content.text} · ${content.sub} · 最後修改 ${content.modifiedBy} ${new Date(content.modifiedAt).toLocaleString("zh-HK", { hour12: false })}`
               : "新增記錄";
           const aria = lockReason
             ? `${resident.name} ${day}日 ${lockReason}`
             : pendingPlan
-              ? `${resident.name} ${day}日 006 已安排${pendingKind}${pendingGroupLabel ? ` ${pendingGroupLabel}` : ""}，${overdue ? "欠，尚待輸入紀錄" : "尚待輸入紀錄"}`
+              ? `${resident.name} ${day}日 ${pendingPlanSource} 已安排${pendingKind}${pendingGroupLabel ? ` ${pendingGroupLabel}` : ""}，${overdue ? "欠，尚待輸入紀錄" : "尚待輸入紀錄"}`
               : content
                 ? `${resident.name} ${day}日 ${content.text} ${content.sub}`
                 : `${resident.name} ${day}日 新增記錄`;
@@ -1623,14 +1639,16 @@
         activity: record?.activity || null,
         special: status,
         plannedSessionId: plannedSession?.id || null,
-        groupLabel
+        groupLabel,
+        planStatus: plannedSession?.planStatus || null
       };
       document.querySelectorAll(".record-cell.selected").forEach(cell => cell.classList.remove("selected"));
       const anchor = document.querySelector(`[data-action="open-cell"][data-resident-id="${residentId}"][data-day="${day}"]`);
       anchor?.classList.add("selected");
       document.getElementById("menu-error").textContent = "";
+      const planSource = plannedSession?.planStatus === "draft" ? "006 草稿" : "006";
       const planMeta = plannedSession
-        ? `006：${groupLabel ? `${groupLabel} · ` : ""}${OT_PROTOTYPE.isGroupSession(plannedSession) ? "小組" : "個別"}`
+        ? `${planSource}：${groupLabel ? `${groupLabel} · ` : ""}${OT_PROTOTYPE.isGroupSession(plannedSession) ? "小組" : "個別"}`
         : "";
       const recordMeta = record
         ? `最後修改：${record.modifiedBy || "OT Test"} · ${new Date(record.modifiedAt || "2026-10-22T09:30:00+08:00").toLocaleString("zh-HK", { hour12: false })}`
@@ -1702,6 +1720,10 @@
 
     function saveCell() {
       if (!selectedCell || !draftEntry) return;
+      if (draftEntry.planStatus === "draft") {
+        document.getElementById("menu-error").textContent = "006 時間表仍為草稿，請先完成時間表後再記錄。";
+        return;
+      }
       if (!draftEntry.special && (!draftEntry.form || !draftEntry.activity)) {
         document.getElementById("menu-error").textContent = "請先選擇形式和活動性質。";
         return;
