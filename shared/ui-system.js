@@ -436,7 +436,7 @@
     userPill.title = "目前使用者";
   }
 
-  const VERSION = "0.3.5";
+  const VERSION = "0.3.6";
   const topbarActions = document.querySelector(
     ".topbar .topbar-right, .topbar .topbar-actions, .topbar .actions"
   );

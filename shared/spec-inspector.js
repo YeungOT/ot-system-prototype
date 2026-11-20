@@ -306,7 +306,7 @@
       }, 120);
     };
     const show = (element, action) => {
-      if (pinned) return;
+      if (!selectMode || pinned) return;
       const mapped = closestMapping(element);
       if (!mapped) return;
       const ids = validIds(mapped);
@@ -317,7 +317,7 @@
     };
     document.addEventListener("pointerover", event => show(event.target, "hover"));
     document.addEventListener("pointerout", event => {
-      if (pinned) return;
+      if (!selectMode || pinned) return;
       const mapped = closestMapping(event.target);
       if (!mapped) return;
       if (event.relatedTarget instanceof Node && mapped.contains(event.relatedTarget)) return;
@@ -325,7 +325,7 @@
     });
     document.addEventListener("focusin", event => show(event.target, "focus"));
     document.addEventListener("focusout", () => {
-      if (pinned) return;
+      if (!selectMode || pinned) return;
       scheduleClear();
     });
     document.addEventListener("click", event => {
