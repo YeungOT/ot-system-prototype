@@ -372,13 +372,17 @@
       font-weight: 900;
     }
     .table-card .resident-cell,
-    .table-card .resident-cell strong {
+    .table-card .resident-cell strong,
+    .table-card .name-cell,
+    .table-card .place-cell {
       background: transparent;
       box-shadow: none;
       border-right: 0;
     }
     .resident-cell strong { display: block; font-size: 11px; }
     .resident-cell span { display: block; margin-top: 1px; color: var(--muted); font-size: 9px; }
+    .name-cell { font-size: 11px; font-weight: 800; }
+    .place-cell { color: var(--muted); font-size: 10px; white-space: nowrap; }
     .date { white-space: nowrap; font-family: "Cascadia Mono", Consolas, monospace; font-size: 10px; }
     .half-block-head {
       min-height: 30px;
@@ -492,12 +496,15 @@
       box-shadow: 0 18px 46px rgba(15, 23, 42, .22);
       overflow: hidden;
       position: fixed;
-      top: 76px;
-      right: 24px;
-      bottom: 24px;
+      top: 50%;
+      left: 50%;
+      right: auto;
+      bottom: auto;
+      transform: translate(-50%, -50%);
       z-index: 80;
-      width: min(380px, calc(100vw - 32px));
-      max-height: none;
+      width: min(620px, calc(100vw - 48px));
+      height: min(680px, calc(100dvh - 48px));
+      max-height: calc(100dvh - 48px);
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
       outline: none;
@@ -707,11 +714,6 @@
     html.embedded .app { display: block; }
     html.embedded .main { display: block; }
     html.embedded .content { padding: 12px; }
-    html.embedded .inspector {
-      top: 12px;
-      right: 12px;
-      bottom: 12px;
-    }
 
     @media (max-width: 1120px) {
       .app { grid-template-columns: 72px minmax(0, 1fr); }
@@ -720,10 +722,9 @@
     @media (max-width: 900px) {
       .screen-head { align-items: flex-start; flex-direction: column; }
       .inspector {
-        top: 12px;
-        right: 12px;
-        bottom: 12px;
         width: calc(100vw - 24px);
+        height: min(680px, calc(100dvh - 24px));
+        max-height: calc(100dvh - 24px);
       }
       .filter-popover { right: auto; left: 0; }
     }
@@ -926,7 +927,8 @@
     const ICP_COLUMNS = {
       full: [
         { key: "bed", label: "床號", width: 52, minWidth: 44 },
-        { key: "resident", label: "住客", width: 130, minWidth: 90 },
+        { key: "name", label: "姓名", width: 100, minWidth: 72 },
+        { key: "place", label: "宿位", width: 64, minWidth: 50 },
         { key: "due", label: "ICP 限期", width: 100, minWidth: 82 },
         { key: "nextType", label: "下次性質", width: 78, minWidth: 68 },
         { key: "icpDate", label: "ICP 日期", width: 96, minWidth: 80 },
@@ -1130,7 +1132,8 @@
       return `
         <tr data-cycle-id="${cycle.id}" tabindex="0" aria-label="開啟 ${escapeHtml(cycle.bed)} ${escapeHtml(cycle.name)} ICP 週期" class="${cycle.id === selectedCycleId ? "selected" : ""}">
           <td><span class="bed">${escapeHtml(cycle.bed)}</span></td>
-          <td class="resident-cell"><strong>${escapeHtml(cycle.name)}</strong><span>${escapeHtml(cycle.place)}</span></td>
+          <td class="name-cell">${escapeHtml(cycle.name)}</td>
+          <td class="place-cell">${escapeHtml(cycle.place)}</td>
           <td>
             <span class="deadline">
               <span class="date">${formatDate(cycle.dueDate, true)}</span>
@@ -1784,7 +1787,7 @@
       if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
     });
   </script>
-  <script src="../shared/ui-system.js?v=20261121-layout-corrections"></script>
+  <script src="../shared/ui-system.js?v=20261121-v0310"></script>
   <script src="../shared/spec-inspector-data.js?v=20261119-007-groups"></script>
   <script src="../shared/spec-inspector.js?v=20261121-spec-hover-mode"></script>
 </body>
