@@ -452,7 +452,7 @@
     userPill.title = "目前使用者";
   }
 
-  const VERSION = "0.3.8";
+  const VERSION = "0.3.9";
   const topbarActions = document.querySelector(
     ".topbar .topbar-right, .topbar .topbar-actions, .topbar .actions"
   );

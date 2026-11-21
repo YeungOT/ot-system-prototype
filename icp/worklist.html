@@ -371,8 +371,13 @@
       font-size: 9px;
       font-weight: 900;
     }
-    .resident-cell { background: transparent; border-right: 0; }
-    .resident-cell strong { display: block; background: transparent; font-size: 11px; }
+    .table-card .resident-cell,
+    .table-card .resident-cell strong {
+      background: transparent;
+      box-shadow: none;
+      border-right: 0;
+    }
+    .resident-cell strong { display: block; font-size: 11px; }
     .resident-cell span { display: block; margin-top: 1px; color: var(--muted); font-size: 9px; }
     .date { white-space: nowrap; font-family: "Cascadia Mono", Consolas, monospace; font-size: 10px; }
     .half-block-head {
