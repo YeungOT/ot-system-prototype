@@ -19,7 +19,7 @@
     }
     .resident-summary-card {
       position: sticky !important;
-      top: 72px;
+      top: 0;
       align-self: start;
     }
     .shared-nav-icon {
@@ -452,7 +452,7 @@
     userPill.title = "目前使用者";
   }
 
-  const VERSION = "0.3.7";
+  const VERSION = "0.3.8";
   const topbarActions = document.querySelector(
     ".topbar .topbar-right, .topbar .topbar-actions, .topbar .actions"
   );

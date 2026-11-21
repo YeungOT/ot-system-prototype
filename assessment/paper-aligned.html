@@ -652,13 +652,17 @@
     .assessment-workspace {
       min-width: 0;
       min-height: 0;
+      height: auto;
+      overflow: visible;
+      display: block;
+    }
+    .assessment-workspace:has(> #record-view:not([hidden])) {
       height: 100%;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
     .workspace-empty {
-      flex: 1 1 auto;
       min-height: 430px;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -687,9 +691,6 @@
     .workspace-empty strong { display: block; font-size: 14px; }
     .workspace-empty span { color: var(--muted); font-size: 11px; }
     .resident-overview {
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow: auto;
       display: grid;
       gap: 10px;
     }
@@ -3343,7 +3344,7 @@
       if (event.key === OT_HOME_SETTINGS.activeHomeKey) applyHomeSettings();
     });
   </script>
-  <script src="../shared/ui-system.js?v=20261121-embedded-height"></script>
+  <script src="../shared/ui-system.js?v=20261121-layout-corrections"></script>
   <style>
     .clinical-note-button {
       min-height: 26px;

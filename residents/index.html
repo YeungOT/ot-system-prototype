@@ -558,10 +558,8 @@
     }
     .resident-summary-card {
       position: sticky;
-      top: 12px;
+      top: 0;
       z-index: 5;
-      max-height: calc(100dvh - 100px);
-      overflow: auto;
       border: 1px solid var(--line);
       border-top: 4px solid var(--teal);
       border-radius: 9px;
@@ -1387,8 +1385,6 @@
       .detail-layout { grid-template-columns: minmax(0, 1fr); }
       .resident-summary-card {
         position: static;
-        max-height: none;
-        overflow: visible;
         display: grid;
         grid-template-columns: minmax(220px, .8fr) minmax(0, 2fr);
         align-items: stretch;
@@ -3849,7 +3845,7 @@
       }, 100);
     });
   </script>
-  <script src="../shared/ui-system.js?v=20261121-embedded-height"></script>
+  <script src="../shared/ui-system.js?v=20261121-layout-corrections"></script>
   <script src="../shared/spec-inspector-data.js?v=20261119-007-groups"></script>
   <script src="../shared/spec-inspector.js?v=20261121-spec-hover-mode"></script>
 </body>
