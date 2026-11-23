@@ -1774,15 +1774,13 @@
       const activitySets = members.map(member => new Set(member.activities || []));
       const first = [...(activitySets.shift() || [])];
       const common = first.filter(code => activitySets.every(set => set.has(code)));
-      const activityOptions = [...new Set([session.activity, ...common].filter(Boolean))];
+      const activities = common.join(", ") || "－";
       const groupLabel = OT_PROTOTYPE.groupLabelForSession(allSessionEntries(), session);
       return `
         <div class="${classNames}" draggable="true" data-legacy-session="${session.id}" data-spec-ids="BH-006-005,BH-006-014,BH-006-016,BH-006-022,BH-006-023,BH-006-031,BH-006-032,BH-006-033">
           <div class="group-heading" data-spec-ids="BH-006-016,BH-006-033">
             <span class="format-mark">${groupLabelMarkup(groupLabel || "G1")}</span>
-            <select class="suggested-activity" draggable="false" data-legacy-group-activity="${session.id}" title="組員共同建議的活動性質" aria-label="小組活動性質">
-              ${activityOptions.map(code => `<option value="${escapeHtml(code)}"${code === session.activity ? " selected" : ""}>${escapeHtml(code)}</option>`).join("")}
-            </select>
+            <span class="suggested-activity" title="組員共同建議的活動性質">${escapeHtml(activities)}</span>
             <span class="group-capacity">${members.length}/${GROUP_LIMIT}</span>
           </div>
           <div class="group-members">
@@ -2233,19 +2231,6 @@
       content.addEventListener("dragend", () => {
         legacyDragPayload = null;
         clearLegacyDropCues();
-      });
-      content.addEventListener("dragstart", event => {
-        if (event.target.closest?.("select")) event.preventDefault();
-      }, true);
-      content.addEventListener("change", event => {
-        const select = event.target.closest?.("[data-legacy-group-activity]");
-        if (!select) return;
-        const found = findSession(select.dataset.legacyGroupActivity);
-        if (!found) return;
-        found.session.activity = select.value;
-        markPlanDraft(found.plan.month, "設定小組活動性質");
-        saveState();
-        render();
       });
       document.addEventListener("click", event => {
         const scopeDialog = event.target.closest?.("#legacy-scope-dialog");
