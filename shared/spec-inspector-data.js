@@ -1,6 +1,6 @@
 (() => {
   window.OT_SPEC_INSPECTOR_DATA = Object.freeze({
-  "sourceHash": "d2a837666667c08df437efa22f069bacaa6b14e971e93bdf2dd7c63ca8425ef3",
+  "sourceHash": "6ddf5cbc155fe52fb5228e8dabaeabb73d11fba0fa84d8da5801823dfd95189b",
   "sourceFiles": [
     "spec/canonical/rules.tsv",
     "spec/canonical/rule-fields.tsv",
@@ -2646,19 +2646,19 @@
       "module": "ICP",
       "entryType": "UI_POLICY",
       "entryTypeLabel": "介面政策",
-      "scope": "Worklist",
+      "scope": "工作清單",
       "trigger": "",
-      "rule": "ICP 工作清單預設顯示當前月份，使用者可以逐月預覽未來月份。",
+      "rule": "ICP 工作清單預設顯示當前月份，可逐月預覽未來月份。",
       "condition": "",
       "reads": [],
       "writes": [],
       "tests": [
         {
           "id": "TST-092",
-          "given": "使用者已開啟「Worklist」頁面，並具備所需權限。",
-          "when": "開啟「Worklist」。",
-          "then": "ICP 工作清單預設顯示當前月份，使用者可以逐月預覽未來月份。",
-          "expectedErrors": "畫面未按「Worklist」的介面政策顯示，或顯示內容與規則不一致。"
+          "given": "已開啟 ICP 工作清單，並具備所需權限。",
+          "when": "查看工作清單。",
+          "then": "預設顯示當前月份，可逐月預覽未來月份。",
+          "expectedErrors": "預設不是當前月份，或不能預覽未來月份。"
         }
       ],
       "uat": []
@@ -2669,19 +2669,19 @@
       "module": "ICP",
       "entryType": "UI_POLICY",
       "entryTypeLabel": "介面政策",
-      "scope": "Worklist",
+      "scope": "工作清單",
       "trigger": "",
-      "rule": "使用者可以按月份、半月、自訂日期範圍、狀態及 OT/PT 篩選。",
+      "rule": "可按月份、半月、自訂日期範圍、狀態及 OT/PT 篩選。",
       "condition": "",
       "reads": [],
       "writes": [],
       "tests": [
         {
           "id": "TST-093",
-          "given": "使用者已開啟「Worklist」頁面，並具備所需權限。",
-          "when": "開啟「Worklist」。",
-          "then": "使用者可以按月份、半月、自訂日期範圍、狀態及 OT/PT 篩選。",
-          "expectedErrors": "畫面未按「Worklist」的介面政策顯示，或顯示內容與規則不一致。"
+          "given": "已開啟 ICP 工作清單，並具備所需權限。",
+          "when": "使用篩選。",
+          "then": "可按月份、半月、自訂日期範圍、狀態及 OT/PT 篩選。",
+          "expectedErrors": "缺少上述任何一種篩選。"
         }
       ],
       "uat": []
@@ -2692,7 +2692,7 @@
       "module": "ICP",
       "entryType": "UI_POLICY",
       "entryTypeLabel": "介面政策",
-      "scope": "Worklist",
+      "scope": "工作清單",
       "trigger": "",
       "rule": "ICP 工作清單顯示床號、姓名、宿位、狀態、評估窗口、ICP 限期、已連結評估、評估進度、ICP 日期、ICP 表格 OT/PT 完成紀錄及下一步。",
       "condition": "",
@@ -2701,10 +2701,10 @@
       "tests": [
         {
           "id": "TST-094",
-          "given": "使用者已開啟「Worklist」頁面，並具備所需權限。",
-          "when": "開啟「Worklist」。",
-          "then": "ICP 工作清單顯示評估進度及 ICP 表格的 OT/PT 完成紀錄。",
-          "expectedErrors": "畫面把 016 評估顯示為 OT/PT 兩個獨立完成狀態。"
+          "given": "工作清單有住客含評估進度及 ICP 完成紀錄。",
+          "when": "查看評估進度及完成紀錄。",
+          "then": "016 評估顯示單一進度；ICP 表格分開顯示 OT 及 PT 完成紀錄。",
+          "expectedErrors": "把 016 評估顯示為 OT/PT 兩個獨立完成狀態。"
         }
       ],
       "uat": []
@@ -2715,7 +2715,7 @@
       "module": "ICP",
       "entryType": "TRANSITION",
       "entryTypeLabel": "狀態轉換",
-      "scope": "ICP cycle",
+      "scope": "ICP 週期",
       "trigger": "已連結評估自動完成",
       "rule": "已連結評估自動完成後，ICP 週期由「待評估」轉為「已完成評估，待填ICP」。",
       "condition": "評估已連結至週期",
@@ -2730,7 +2730,7 @@
       "module": "ICP",
       "entryType": "TRANSITION",
       "entryTypeLabel": "狀態轉換",
-      "scope": "ICP cycle",
+      "scope": "ICP 週期",
       "trigger": "記錄 OT 或 PT 已填寫 ICP",
       "rule": "系統分別記錄 OT 及 PT 的 ICP 表格完成情況。兩者均完成後，週期由「已完成評估，待填 ICP」轉為「已填 ICP」。只有一方完成時仍顯示「待填 ICP」。",
       "condition": "ICP 表格已填寫",
@@ -2745,9 +2745,9 @@
       "module": "ICP",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Completion",
+      "scope": "完成紀錄",
       "trigger": "完成 ICP",
-      "rule": "OT 及 PT 的完成紀錄會分開記錄；簽名留在紙本表格。",
+      "rule": "OT 及 PT 的完成紀錄分開記錄；簽名留在紙本表格。",
       "condition": "",
       "reads": [],
       "writes": [
@@ -2757,10 +2757,10 @@
       "tests": [
         {
           "id": "TST-095",
-          "given": "系統已載入相關資料，並符合「完成 ICP」的業務條件。",
-          "when": "完成 ICP。",
-          "then": "OT 及 PT 的完成紀錄會分開記錄；簽名留在紙本表格。",
-          "expectedErrors": "系統未按「Completion」規則處理，或結果與規則不一致。"
+          "given": "OT 及 PT 分別完成 ICP 表格。",
+          "when": "查看完成紀錄。",
+          "then": "OT 及 PT 的完成紀錄分開記錄；簽名留在紙本表格。",
+          "expectedErrors": "兩方完成紀錄合併為一，或系統要求電子簽署。"
         }
       ],
       "uat": []
@@ -2821,7 +2821,7 @@
       "module": "ICP",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Actions",
+      "scope": "操作",
       "trigger": "使用工作清單",
       "rule": "ICP 工作清單提供直接開啟已連結評估的連結。",
       "condition": "",
@@ -2830,10 +2830,10 @@
       "tests": [
         {
           "id": "TST-096",
-          "given": "系統已載入相關資料，並符合「使用工作清單」的業務條件。",
-          "when": "使用工作清單。",
-          "then": "ICP 工作清單提供直接開啟已連結評估的連結。",
-          "expectedErrors": "系統未按「Actions」規則處理，或結果與規則不一致。"
+          "given": "ICP 週期已連結評估。",
+          "when": "在工作清單開啟該評估。",
+          "then": "直接開啟對應的評估。",
+          "expectedErrors": "沒有直接連結，或開啟了錯誤的評估。"
         }
       ],
       "uat": []
@@ -2844,9 +2844,9 @@
       "module": "ICP",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Urgent ICP",
+      "scope": "緊急 ICP",
       "trigger": "建立緊急 ICP",
-      "rule": "使用者記錄緊急 ICP 的日期及原因後，系統會按院舍設定的「緊急 ICP 影響」方式計算下次限期：沒有影響、重啟週期或計算於本週期內。",
+      "rule": "記錄緊急 ICP 的日期及原因後，按院舍設定的「緊急 ICP 影響」方式計算下次限期：沒有影響、重啟週期或計算於本週期內。",
       "condition": "",
       "reads": [
         "HOME-007",
@@ -2860,10 +2860,10 @@
       "tests": [
         {
           "id": "TST-097",
-          "given": "系統已載入相關資料，並符合「建立緊急 ICP」的業務條件。",
-          "when": "建立緊急 ICP。",
-          "then": "使用者記錄緊急 ICP 的日期及原因後，系統會按院舍設定的「緊急 ICP 影響」方式計算下次限期：沒有影響、重啟週期或計算於本週期內。",
-          "expectedErrors": "系統未按「Urgent ICP」規則處理，或結果與規則不一致。"
+          "given": "院舍已設定「緊急 ICP 影響」方式。",
+          "when": "記錄緊急 ICP 的日期及原因。",
+          "then": "按所設方式計算下次限期：沒有影響、重啟週期或計算於本週期內。",
+          "expectedErrors": "下次限期沒有按所設方式計算。"
         }
       ],
       "uat": []
@@ -2874,7 +2874,7 @@
       "module": "ICP",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Assessment link",
+      "scope": "評估連結",
       "trigger": "連結評估",
       "rule": "一個 ICP 週期可以連結多份評估，但只能有一份標記為 ICP Ax；評估記錄會以「對應 ICP 週期」指定所屬週期。",
       "condition": "",
@@ -2885,10 +2885,10 @@
       "tests": [
         {
           "id": "TST-098",
-          "given": "系統已載入相關資料，並符合「連結評估」的業務條件。",
-          "when": "連結評估。",
-          "then": "一個 ICP 週期可以連結多份評估，但只能有一份標記為 ICP Ax；評估記錄會以「對應 ICP 週期」指定所屬週期。",
-          "expectedErrors": "系統未按「Assessment link」規則處理，或結果與規則不一致。"
+          "given": "一個 ICP 週期已連結多份評估。",
+          "when": "再標記另一份評估為 ICP Ax。",
+          "then": "只有一份為 ICP Ax；評估記錄以「對應 ICP 週期」指定所屬週期。",
+          "expectedErrors": "同時有兩份標記為 ICP Ax，或所屬週期錯誤。"
         }
       ],
       "uat": []
@@ -2899,9 +2899,9 @@
       "module": "ICP",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "History",
+      "scope": "歷史",
       "trigger": "開啟住客詳情",
-      "rule": "系統會保留每個 ICP 週期，包括退住住客的週期。",
+      "rule": "所有 ICP 週期均保留，包括退住住客的週期。",
       "condition": "",
       "reads": [],
       "writes": [],
@@ -2910,7 +2910,7 @@
           "id": "TST-099",
           "given": "住客有多於五份 ICP 歷史紀錄。",
           "when": "開啟住客 ICP 歷史。",
-          "then": "系統只顯示最近五份，其他紀錄隱藏於「Show more」；歷史本身完整保留。",
+          "then": "只顯示最近五份；其他紀錄收在「顯示更多」；歷史本身完整保留。",
           "expectedErrors": "所有紀錄一次顯示，或較舊紀錄被刪除。"
         }
       ],
@@ -2922,9 +2922,9 @@
       "module": "ICP",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Handover",
+      "scope": "交更",
       "trigger": "生成交更",
-      "rule": "交更訊息會按半月及月份顯示由 ICP 完成記錄計算的 OT 及 PT ICP 表格完成數，並列出尚未評估的住客。",
+      "rule": "交更訊息按半月及月份顯示按 ICP 完成記錄計算的 OT 及 PT ICP 表格完成數，並列出尚未評估的住客。",
       "condition": "",
       "reads": [
         "ICP-012"
@@ -2954,7 +2954,7 @@
       "module": "ICP",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Paper form",
+      "scope": "紙本表格",
       "trigger": "任何 ICP 流程",
       "rule": "ICP 內容在紙本表格填寫；電子系統只追蹤週期、限期、已連結評估及完成紀錄，只有治療師可完成 ICP。",
       "condition": "",
@@ -2963,10 +2963,10 @@
       "tests": [
         {
           "id": "TST-101",
-          "given": "系統已載入相關資料，並符合「任何 ICP 流程」的業務條件。",
-          "when": "任何 ICP 流程。",
+          "given": "任何 ICP 流程。",
+          "when": "處理 ICP。",
           "then": "ICP 內容在紙本表格填寫；電子系統只追蹤週期、限期、已連結評估及完成紀錄，只有治療師可完成 ICP。",
-          "expectedErrors": "系統未按「Paper form」規則處理，或結果與規則不一致。"
+          "expectedErrors": "系統要求電子填寫 ICP 內容，或非治療師可完成 ICP。"
         }
       ],
       "uat": []
@@ -2977,9 +2977,9 @@
       "module": "ICP",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Assessment link",
+      "scope": "評估連結",
       "trigger": "連結評估",
-      "rule": "ICP 窗口內自動完成的 Initial Ax 自動成為該週期 ICP Ax。窗口內建立的 Re-Ax 草稿會詢問是否用作 ICP Ax，選擇保存於草稿並於自動完成後生效；拒絕後可日後由 ICP 工作清單連結。",
+      "rule": "ICP 窗口內自動完成的 Initial Ax 自動成為該週期 ICP Ax。窗口內建立 Re-Ax 草稿時會詢問是否用作 ICP Ax，選擇保存於草稿，自動完成後才生效；拒絕後可日後由 ICP 工作清單連結。",
       "condition": "",
       "reads": [],
       "writes": [
@@ -2990,12 +2990,12 @@
           "id": "TST-102",
           "given": "Initial Ax 日期在 ICP 評估窗口內。",
           "when": "完成 Initial Ax。",
-          "then": "系統自動把 Initial Ax 設為該週期 ICP Ax。",
+          "then": "Initial Ax 自動成為該週期 ICP Ax。",
           "expectedErrors": "Initial Ax 已完成但仍未連結 ICP Ax。"
         },
         {
           "id": "TST-107",
-          "given": "Re-Ax 日期在 ICP 評估窗口內，週期未有替代 ICP Ax。",
+          "given": "Re-Ax 日期在 ICP 評估窗口內，該週期尚無 ICP Ax。",
           "when": "建立 Re-Ax 草稿。",
           "then": "系統詢問是否用作 ICP Ax，並把選擇保存於草稿；Re-Ax 自動完成後才建立連結。",
           "expectedErrors": "草稿尚未完成便取代 ICP Ax，或選擇沒有保存。"
@@ -3009,7 +3009,7 @@
       "module": "ICP",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Assessment link",
+      "scope": "評估連結",
       "trigger": "取代 ICP Ax",
       "rule": "確認用作 ICP Ax 的 Re-Ax 自動完成後，取代原有 ICP Ax；原 ICP Ax 保留為已連結歷史。使用中的 ICP Ax 不可在沒有替代評估時移除。",
       "condition": "",
@@ -3043,7 +3043,7 @@
       "entryTypeLabel": "介面政策",
       "scope": "ICP 歷史",
       "trigger": "開啟住客 ICP 歷史",
-      "rule": "ICP 歷史只顯示最近五份紀錄，其餘紀錄隱藏於「Show more」按鈕下。",
+      "rule": "ICP 歷史只顯示最近五份紀錄，其餘收在「顯示更多」按鈕下。",
       "condition": "",
       "reads": [
         "ICP-002",
@@ -3055,8 +3055,8 @@
           "id": "TST-112",
           "given": "住客有六份或以上 ICP 歷史紀錄。",
           "when": "開啟住客 ICP 歷史。",
-          "then": "畫面只顯示最近五份紀錄，其餘收在「Show more」按鈕下；按鈕可顯示其餘紀錄。",
-          "expectedErrors": "一次顯示全部紀錄、沒有「Show more」，或舊紀錄被移除。"
+          "then": "只顯示最近五份，其餘收在「顯示更多」按鈕下，按鈕可展開其餘紀錄。",
+          "expectedErrors": "一次顯示全部紀錄、沒有「顯示更多」，或舊紀錄被移除。"
         }
       ],
       "uat": []
