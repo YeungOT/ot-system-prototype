@@ -1131,7 +1131,7 @@
     return `
       <button class="${classes}" type="button" draggable="true"
         data-tp-session="${session.id}"
-        data-spec-ids="BH-006-005,BH-006-014,BH-006-016,BH-006-022,BH-006-024,BH-006-031,BH-006-032,BH-006-033"
+        data-spec-ids="BH-006-005,BH-006-014,BH-006-016,BH-006-022,BH-006-031,BH-006-032,BH-006-033"
         title="${escapeHtml(sessionTitle(session))}">
         <strong>${group}${escapeHtml(sessionTitle(session))}</strong>
         <small>${session.paid ? "額外" : session.format === "g" ? `小組 ${session.memberIds.length}/${GROUP_LIMIT}` : "個別"} · ${escapeHtml(session.activity)}${session.patternId ? " · 固定" : ""}</small>
@@ -1775,7 +1775,7 @@
       const groupLabel = OT_PROTOTYPE.groupLabelForSession(allSessionEntries(), session);
       return `
         <div class="${classNames}" draggable="true" data-legacy-session="${session.id}" data-spec-ids="BH-006-005,BH-006-014,BH-006-016,BH-006-022,BH-006-023,BH-006-031,BH-006-032,BH-006-033">
-          <div class="group-heading" data-spec-ids="BH-006-024,BH-006-033">
+          <div class="group-heading" data-spec-ids="BH-006-016,BH-006-033">
             <span class="format-mark">${groupLabelMarkup(groupLabel || "G1")}</span>
             <span class="suggested-activity">${escapeHtml(activities)}</span>
             <span class="group-capacity">${members.length}/${GROUP_LIMIT}</span>
