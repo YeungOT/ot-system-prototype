@@ -162,6 +162,22 @@
       background: #f0f8f6;
       color: #115e59;
     }
+    .ot-spec-tooltip {
+      position: fixed;
+      z-index: 1300;
+      display: none;
+      max-width: 280px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: #172033;
+      color: #f8fafc;
+      font-size: 10px;
+      line-height: 1.5;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, .28);
+      pointer-events: none;
+      overflow-wrap: anywhere;
+    }
+    .ot-spec-tooltip.is-visible { display: block; }
     .ot-spec-details {
       margin-top: 8px;
       border-top: 1px solid #e8edf2;
@@ -385,6 +401,45 @@
   const content = inspector.querySelector("[data-spec-content]");
   const resizer = inspector.querySelector("[data-spec-resizer]");
 
+  const chipTip = document.createElement("div");
+  chipTip.className = "ot-spec-tooltip";
+  chipTip.dataset.specCoverageIgnore = "";
+  chipTip.setAttribute("role", "tooltip");
+  document.body.append(chipTip);
+
+  function hideChipTip() {
+    chipTip.classList.remove("is-visible");
+  }
+
+  function showChipTip(chip) {
+    const text = chip.dataset.specTip;
+    if (!text) return;
+    chipTip.textContent = text;
+    chipTip.classList.add("is-visible");
+    const rect = chip.getBoundingClientRect();
+    const tipRect = chipTip.getBoundingClientRect();
+    const left = Math.min(
+      Math.max(8, rect.left),
+      Math.max(8, innerWidth - tipRect.width - 8)
+    );
+    let top = rect.bottom + 6;
+    if (top + tipRect.height > innerHeight - 8) top = rect.top - tipRect.height - 6;
+    chipTip.style.left = `${left}px`;
+    chipTip.style.top = `${top}px`;
+  }
+
+  content.addEventListener("pointerover", event => {
+    const chip = event.target.closest?.(".ot-spec-chip[data-spec-tip]");
+    if (chip) showChipTip(chip);
+  });
+  content.addEventListener("pointerout", event => {
+    const chip = event.target.closest?.(".ot-spec-chip[data-spec-tip]");
+    if (!chip) return;
+    if (event.relatedTarget instanceof Node && chip.contains(event.relatedTarget)) return;
+    hideChipTip();
+  });
+  content.addEventListener("scroll", hideChipTip);
+
   let activeIds = [];
   let lastMapped = null;
   let pinned = false;
@@ -403,6 +458,7 @@
   }
 
   function applyLayout(candidate, persist = false) {
+    hideChipTip();
     layout = clampLayout(candidate);
     inspector.style.left = `${layout.left}px`;
     inspector.style.top = `${layout.top}px`;
@@ -458,6 +514,7 @@
     pinned = false;
     setOpen(false);
     clearHighlight();
+    hideChipTip();
   }
 
   function pin(element, ids) {
@@ -514,7 +571,7 @@
       const title = field
         ? `${field.name}${field.option ? ` · ${field.option}` : ""}${field.notes ? ` · ${field.notes}` : ""}`
         : "Field not found in the current data specification";
-      return `<span class="ot-spec-chip" data-field-defined="${Boolean(field)}" title="${escapeHtml(title)}">${escapeHtml(code)}</span>`;
+      return `<span class="ot-spec-chip" data-field-defined="${Boolean(field)}" data-spec-tip="${escapeHtml(title)}">${escapeHtml(code)}</span>`;
     }).join("");
   }
 
@@ -549,6 +606,7 @@
   }
 
   function renderActive() {
+    hideChipTip();
     const specs = activeIds.map(id => specsById.get(id)).filter(Boolean);
     if (!specs.length) {
       renderBrowse();
@@ -558,6 +616,7 @@
   }
 
   function renderBrowse() {
+    hideChipTip();
     content.innerHTML = `
       <div class="ot-spec-browse-list">
         ${data.specs.map(spec => `
