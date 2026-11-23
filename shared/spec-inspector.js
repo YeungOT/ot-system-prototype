@@ -519,14 +519,6 @@
   }
 
   function specDetails(spec) {
-    const tests = spec.tests.length
-      ? `<details class="ot-spec-details" ${spec.tests.length === 1 ? "open" : ""}>
-          <summary>測試案例 · ${spec.tests.length}</summary>
-          <ul class="ot-spec-detail-list">${spec.tests.map(test => `
-            <li><strong>${escapeHtml(test.id)}</strong> ${escapeHtml(test.then)}</li>
-          `).join("")}</ul>
-        </details>`
-      : "";
     const uat = spec.uat.length
       ? `<details class="ot-spec-details">
           <summary>UAT · ${spec.uat.length}</summary>
@@ -551,7 +543,6 @@
         <dl class="ot-spec-meta">${specMetaRows(spec)}</dl>
         ${read}
         ${write}
-        ${tests}
         ${uat}
       </article>
     `;
