@@ -1,6 +1,6 @@
 (() => {
   window.OT_SPEC_INSPECTOR_DATA = Object.freeze({
-  "sourceHash": "d008a7c13d4fc24cc6daf5996bc78dbc282ea33933d0e91ae65fb2c8710effce",
+  "sourceHash": "b80318f7ad96d13e886358a3a35abdc3d5a210afa19977257cb6f339754d779d",
   "sourceFiles": [
     "spec/canonical/rules.tsv",
     "spec/canonical/rule-fields.tsv",
@@ -1723,10 +1723,10 @@
       "tests": [
         {
           "id": "TST-065",
-          "given": "使用者已開啟「主畫面」頁面，並具備所需權限。",
-          "when": "開啟「主畫面」。",
-          "then": "復康運動紀錄分開顯示 007a 及 007c；007a 是復康訓練紀錄，007c 是額外服務，兩者紀錄不會混合。",
-          "expectedErrors": "畫面未按「主畫面」的介面政策顯示，或顯示內容與規則不一致。"
+          "given": "已開啟復康運動紀錄，並具備所需權限。",
+          "when": "查看紀錄。",
+          "then": "007a（復康訓練紀錄）及 007c（額外服務）分開顯示，兩者的紀錄不會混合。",
+          "expectedErrors": "007a 及 007c 混在同一畫面，或其中一個不顯示。"
         }
       ],
       "uat": []
@@ -1739,17 +1739,17 @@
       "entryTypeLabel": "介面政策",
       "scope": "宿位篩選",
       "trigger": "",
-      "rule": "使用者可以同時選取買位、券位及私位；暫託住客會歸入私位一併顯示。",
+      "rule": "篩選可同時選取買位、券位及私位；暫託住客歸入私位一併顯示。",
       "condition": "",
       "reads": [],
       "writes": [],
       "tests": [
         {
           "id": "TST-066",
-          "given": "使用者已開啟「宿位篩選」頁面，並具備所需權限。",
-          "when": "開啟「宿位篩選」。",
-          "then": "使用者可以同時選取買位、券位及私位；暫託住客會歸入私位一併顯示。",
-          "expectedErrors": "畫面未按「宿位篩選」的介面政策顯示，或顯示內容與規則不一致。"
+          "given": "已開啟復康運動紀錄，並具備所需權限。",
+          "when": "使用宿位篩選。",
+          "then": "可同時選取買位、券位及私位；暫託住客歸入私位一併顯示。",
+          "expectedErrors": "只能選一種宿位，或暫託住客沒有歸入私位。"
         }
       ],
       "uat": []
@@ -1762,17 +1762,17 @@
       "entryTypeLabel": "介面政策",
       "scope": "輸入",
       "trigger": "",
-      "rule": "復康運動紀錄以月曆時間表輸入；使用者點選月曆格後會開啟選單。",
+      "rule": "復康運動紀錄以月曆時間表輸入；點選月曆格即開啟選單。",
       "condition": "",
       "reads": [],
       "writes": [],
       "tests": [
         {
           "id": "TST-067",
-          "given": "使用者已開啟「輸入」頁面，並具備所需權限。",
-          "when": "開啟「輸入」。",
-          "then": "復康運動紀錄以月曆時間表輸入；使用者點選月曆格後會開啟選單。",
-          "expectedErrors": "畫面未按「輸入」的介面政策顯示，或顯示內容與規則不一致。"
+          "given": "已開啟復康運動紀錄。",
+          "when": "點選月曆格。",
+          "then": "該月曆格開啟選單。",
+          "expectedErrors": "點選月曆格沒有開啟選單，或需另開輸入畫面。"
         }
       ],
       "uat": []
@@ -1783,9 +1783,9 @@
       "module": "復康運動紀錄",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "007a cell menu",
+      "scope": "007a 月曆格選單",
       "trigger": "點 007a cell",
-      "rule": "使用者點選 007a 的月曆格後，可選擇 i（個別）或 g（小組），再選擇活動性質。",
+      "rule": "點選 007a 的月曆格後，可選 i（個別）或 g（小組），再選活動性質。",
       "condition": "",
       "reads": [],
       "writes": [
@@ -1796,10 +1796,10 @@
       "tests": [
         {
           "id": "TST-068",
-          "given": "系統已載入相關資料，並符合「點 007a cell」的業務條件。",
-          "when": "點 007a cell。",
-          "then": "使用者點選 007a 的月曆格後，可選擇 i（個別）或 g（小組），再選擇活動性質。",
-          "expectedErrors": "系統未按「007a cell menu」規則處理，或結果與規則不一致。"
+          "given": "已開啟 007a。",
+          "when": "點該日的月曆格。",
+          "then": "可選 i（個別）或 g（小組），再選活動性質。",
+          "expectedErrors": "選單沒有 i／g 選項，或不能選活動性質。"
         }
       ],
       "uat": []
@@ -1810,9 +1810,9 @@
       "module": "復康運動紀錄",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "007c cell menu",
+      "scope": "007c 月曆格選單",
       "trigger": "點 007c cell",
-      "rule": "使用者點選 007c 的月曆格後，可選擇 ei（額外個別）或 eg（額外小組），再選擇活動性質。",
+      "rule": "點選 007c 的月曆格後，可選 ei（額外個別）或 eg（額外小組），再選活動性質。",
       "condition": "",
       "reads": [],
       "writes": [
@@ -1823,10 +1823,10 @@
       "tests": [
         {
           "id": "TST-069",
-          "given": "系統已載入相關資料，並符合「點 007c cell」的業務條件。",
-          "when": "點 007c cell。",
-          "then": "使用者點選 007c 的月曆格後，可選擇 ei（額外個別）或 eg（額外小組），再選擇活動性質。",
-          "expectedErrors": "系統未按「007c cell menu」規則處理，或結果與規則不一致。"
+          "given": "已開啟 007c。",
+          "when": "點該日的月曆格。",
+          "then": "可選 ei（額外個別）或 eg（額外小組），再選活動性質。",
+          "expectedErrors": "選單沒有 ei／eg 選項，或不能選活動性質。"
         }
       ],
       "uat": []
@@ -1837,9 +1837,9 @@
       "module": "復康運動紀錄",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Special status",
+      "scope": "出席及住客狀態",
       "trigger": "點 cell menu",
-      "rule": "使用者可在同一個月曆格選單輸入該日的出席紀錄及住客狀態，選項包括 X、H、入住及退住；兩個欄位不另設獨立輸入畫面。",
+      "rule": "同一個月曆格選單可輸入該日的出席紀錄及住客狀態，選項包括 X、H、入住及退住；兩個欄位不另設獨立輸入畫面。",
       "condition": "",
       "reads": [],
       "writes": [
@@ -1849,10 +1849,10 @@
       "tests": [
         {
           "id": "TST-070",
-          "given": "系統已載入相關資料，並符合「點 cell menu」的業務條件。",
-          "when": "點 cell menu。",
-          "then": "使用者可在同一個月曆格選單輸入該日的出席紀錄及住客狀態，選項包括 X、H、入住及退住；兩個欄位不另設獨立輸入畫面。",
-          "expectedErrors": "系統未按「Special status」規則處理，或結果與規則不一致。"
+          "given": "已開啟 007a。",
+          "when": "點選月曆格，在選單輸入出席紀錄及住客狀態。",
+          "then": "兩個欄位可在同一個月曆格選單輸入，選項包括 X、H、入住及退住。",
+          "expectedErrors": "任一欄位要另開獨立畫面，或選項不全。"
         }
       ],
       "uat": []
@@ -1865,7 +1865,7 @@
       "entryTypeLabel": "規則",
       "scope": "留醫",
       "trigger": "選 H",
-      "rule": "使用者選 H 後，需在入院日及出院日各記錄一次 H，系統會把中間日期顯示為留醫期間。",
+      "rule": "選 H 後，需在入院日及出院日各記錄一次 H，中間日期會顯示為留醫期間。",
       "condition": "",
       "reads": [],
       "writes": [
@@ -1888,9 +1888,9 @@
       "module": "復康運動紀錄",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Missing record",
+      "scope": "缺漏紀錄",
       "trigger": "系統檢查",
-      "rule": "系統會檢查 007a 的所需節數及 007c 的額外服務目標；如有缺漏會提示，但不顯示「超」的提示。",
+      "rule": "系統檢查 007a 的所需節數及 007c 的額外服務目標；如有缺漏會提示，但不顯示「超」。",
       "condition": "",
       "reads": [
         "REC-005"
@@ -1899,10 +1899,10 @@
       "tests": [
         {
           "id": "TST-071",
-          "given": "系統已載入相關資料，並符合「系統檢查」的業務條件。",
-          "when": "系統檢查。",
-          "then": "系統會檢查 007a 的所需節數及 007c 的額外服務目標；如有缺漏會提示，但不顯示「超」的提示。",
-          "expectedErrors": "系統未按「Missing record」規則處理，或結果與規則不一致。"
+          "given": "007a 有住客未達所需節數，007c 未達額外服務目標。",
+          "when": "系統檢查紀錄。",
+          "then": "缺漏會提示；不顯示「超」。",
+          "expectedErrors": "缺漏沒有提示，或出現「超」的提示。"
         }
       ],
       "uat": []
@@ -1939,9 +1939,9 @@
       "module": "復康運動紀錄",
       "entryType": "RULE",
       "entryTypeLabel": "規則",
-      "scope": "Activity with X/H",
+      "scope": "X/H 與活動性質",
       "trigger": "選 X 或 H",
-      "rule": "月曆格如已選 X 或 H，使用者不可再選活動性質。",
+      "rule": "月曆格已選 X 或 H 時，不可再選活動性質。",
       "condition": "",
       "reads": [
         "REC-005"
@@ -1950,10 +1950,10 @@
       "tests": [
         {
           "id": "TST-072",
-          "given": "系統已載入相關資料，並符合「選 X 或 H」的業務條件。",
-          "when": "選 X 或 H。",
-          "then": "月曆格如已選 X 或 H，使用者不可再選活動性質。",
-          "expectedErrors": "系統未按「Activity with X/H」規則處理，或結果與規則不一致。"
+          "given": "月曆格已選 X 或 H。",
+          "when": "查看活動性質選項。",
+          "then": "不可再選活動性質。",
+          "expectedErrors": "仍出現可選的活動性質。"
         }
       ],
       "uat": []
@@ -1964,19 +1964,19 @@
       "module": "復康運動紀錄",
       "entryType": "UI_POLICY",
       "entryTypeLabel": "介面政策",
-      "scope": "Print",
+      "scope": "列印",
       "trigger": "",
-      "rule": "使用者可以列印 007a／007c。",
+      "rule": "007a／007c 可以列印。",
       "condition": "",
       "reads": [],
       "writes": [],
       "tests": [
         {
           "id": "TST-073",
-          "given": "使用者已開啟「Print」頁面，並具備所需權限。",
-          "when": "開啟「Print」。",
-          "then": "使用者可以列印 007a／007c。",
-          "expectedErrors": "畫面未按「Print」的介面政策顯示，或顯示內容與規則不一致。"
+          "given": "已開啟復康運動紀錄。",
+          "when": "使用列印功能。",
+          "then": "007a 及 007c 也提供列印。",
+          "expectedErrors": "007a 或 007c 沒有列印功能。"
         }
       ],
       "uat": []
