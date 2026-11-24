@@ -1516,7 +1516,7 @@
           const overdue = Boolean(pendingPlan && dateKey(day) < TODAY_KEY);
           const pendingGroupLabel = pendingPlan ? plannedGroupLabel(pendingPlan) : null;
           const pendingPlanSource = pendingPlan?.planStatus === "draft" ? "006 草稿" : "006";
-          const splitCell = Boolean(
+          const splitCell = !overdue && Boolean(
             content?.form ||
             (pendingPlan && OT_PROTOTYPE.isGroupSession(pendingPlan))
           );

@@ -2026,12 +2026,6 @@
     document.getElementById("legacy-scope-dialog")?.addEventListener("cancel", () => {
       pendingMove = null;
     });
-    const issues = collectIssues(state.activeMonth);
-    if (issues.length) {
-      document.getElementById("legacy-issues").innerHTML = `
-        <div class="tp2-issues"><strong>${issues.length} 項需要處理</strong><ul>${issues.slice(0, 8).map(issue => `<li>${escapeHtml(issue.message)}</li>`).join("")}</ul></div>
-      `;
-    }
     bindLegacyEvents();
   }
 
