@@ -927,6 +927,44 @@
     });
   }
 
+  function createIcpCycle(sourceCycleId, patch = {}, action = "建立下次 ICP 週期") {
+    return mutate(action, "cycles", null, home => {
+      const source = findById(home.cycles, sourceCycleId);
+      if (!source) throw new Error("找不到 ICP 週期。");
+      const cycle = {
+        ...clone(source),
+        id: uid("icp"),
+        dueDate: patch.dueDate || source.dueDate,
+        nextIcpType: patch.nextIcpType || "6個月",
+        activeAssessment: null,
+        linkedAssessments: [],
+        assessmentDone: false,
+        assessmentCompletedAt: null,
+        icpDate: "",
+        icpOtDone: false,
+        icpPtDone: false,
+        icpOtCompletedAt: null,
+        icpPtCompletedAt: null,
+        urgentEvents: [],
+        history: [{
+          date: TODAY_KEY,
+          label: `承接 ${source.bed} ${source.name} ${source.icpDate || source.dueDate} 的 ICP 週期`
+        }],
+        status: "assess",
+        endedAt: null,
+        endReason: null
+      };
+      home.cycles.unshift(cycle);
+      const resident = findById(home.residents, source.residentId);
+      if (resident) {
+        resident.icpDue = cycle.dueDate;
+        resident.icpType = cycle.nextIcpType;
+        resident.icpState = "待評估";
+      }
+      return cycle;
+    });
+  }
+
   function setIcpRoleComplete(id, role, complete) {
     const cycle = findById(currentHome().cycles, id);
     if (!cycle) throw new Error("找不到 ICP 週期。");
@@ -1276,6 +1314,7 @@
     voidAssessment,
     cycles: listCycles,
     updateCycle,
+    createIcpCycle,
     setIcpRoleComplete,
     tasks: listTasks,
     createTask,

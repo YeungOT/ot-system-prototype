@@ -700,6 +700,13 @@
       gap: 7px;
     }
 
+    .next-icp-hint {
+      margin: 1px 0 0;
+      color: var(--muted, #64748b);
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
     .toast {
       position: fixed;
       right: 18px;
@@ -1305,22 +1312,6 @@
             </button>
           </section>
 
-          <section class="workspace-card" id="icp-date-section" data-spec-ids="BH-ICP-019">
-            <div class="workspace-card-head">
-              <h3>下次 ICP</h3>
-              <span class="status-chip ${cycle.dueDate ? "status-filled" : "status-fill"}">${cycle.dueDate ? "已記錄" : "待輸入"}</span>
-            </div>
-            <div class="inline-form">
-              <select id="next-icp-type-input" aria-label="下次 ICP 性質" data-spec-ids="BH-ICP-019">
-                <option value="1個月" ${cycle.nextIcpType === "1個月" ? "selected" : ""}>1 個月</option>
-                <option value="6個月" ${cycle.nextIcpType === "6個月" ? "selected" : ""}>6 個月</option>
-                <option value="1年" ${cycle.nextIcpType === "1年" ? "selected" : ""}>1 年</option>
-              </select>
-              <input id="next-icp-due-input" type="date" value="${cycle.dueDate || ""}" aria-label="下次 ICP 限期" data-spec-ids="BH-ICP-019">
-              <button class="btn btn-primary" type="button" data-action="save-next-icp" data-cycle-id="${cycle.id}">儲存</button>
-            </div>
-          </section>
-
           <section class="workspace-card" id="icp-meeting-section">
             <div class="workspace-card-head">
               <h3>ICP 會議日期</h3>
@@ -1330,6 +1321,25 @@
               <input id="icp-date-input" type="date" value="${cycle.icpDate || ""}" aria-label="ICP 會議日期">
               <button class="btn btn-primary" type="button" data-action="save-icp-date" data-cycle-id="${cycle.id}">儲存日期</button>
             </div>
+          </section>
+
+          <section class="workspace-card" id="icp-date-section" data-spec-ids="BH-ICP-019">
+            <div class="workspace-card-head">
+              <h3>下次 ICP</h3>
+              <span class="status-chip ${cycle.icpDate ? "status-fill" : "status-assess"}">${cycle.icpDate ? "自動限期" : "待會議日期"}</span>
+            </div>
+            <div class="inline-form">
+              <select id="next-icp-type-input" aria-label="下次 ICP 性質" data-spec-ids="BH-ICP-019" ${cycle.icpDate ? "" : "disabled"}>
+                <option value="1個月" ${cycle.nextIcpType === "1個月" ? "selected" : ""}>1 個月</option>
+                <option value="6個月" ${cycle.nextIcpType === "6個月" ? "selected" : ""}>6 個月</option>
+                <option value="1年" ${cycle.nextIcpType === "1年" ? "selected" : ""}>1 年</option>
+              </select>
+              <input id="next-icp-due-input" type="date" value="${autoNextIcpDue(cycle)}" min="${cycle.icpDate || ""}" max="${autoNextIcpDue(cycle)}" aria-label="下次 ICP 限期" data-spec-ids="BH-ICP-019" ${cycle.icpDate ? "" : "disabled"}>
+              <button class="btn btn-primary" type="button" data-action="save-next-icp" data-cycle-id="${cycle.id}">建立下次 ICP</button>
+            </div>
+            <p class="next-icp-hint">${cycle.icpDate
+              ? "限期按會議日期與頻率自動產生；只可提前，不可延後。儲存後會新增一張下次 ICP 紀錄，目前紀錄保留。"
+              : "請先記錄是次 ICP 會議日期，再選擇頻率及確認限期。"}</p>
           </section>
 
           <section class="workspace-card" id="icp-form-section" data-spec-ids="BH-ICP-005,BH-ICP-006,BH-ICP-012">
@@ -1497,26 +1507,56 @@
       showToast("ICP 會議日期已記錄。");
     }
 
+    function nextIcpInterval(type) {
+      return type === "1個月" ? 1 : type === "1年" ? 12 : 6;
+    }
+
+    function autoNextIcpDue(cycle) {
+      if (!cycle?.icpDate) return "";
+      return dateKey(addDays(addMonths(parseDate(cycle.icpDate), nextIcpInterval(cycle.nextIcpType)), -1));
+    }
+
     function saveNextIcp(cycleId) {
       const cycle = cycleById(cycleId);
       const typeInput = document.getElementById("next-icp-type-input");
       const dueInput = document.getElementById("next-icp-due-input");
-      if (!cycle || !typeInput?.value || !dueInput?.value) {
-        showToast("請選擇下次 ICP 性質及限期。");
+      if (!cycle || !typeInput || !dueInput) return;
+      if (!cycle.icpDate) {
+        showToast("請先記錄是次 ICP 會議日期。");
+        return;
+      }
+      const type = typeInput.value || "6個月";
+      const autoDue = autoNextIcpDue({ icpDate: cycle.icpDate, nextIcpType: type });
+      const due = dueInput.value || autoDue;
+      if (due > autoDue) {
+        dueInput.value = autoDue;
+        showToast("下次限期只可調前，不可延後。");
+        return;
+      }
+      if (due <= cycle.icpDate) {
+        showToast("下次限期必須晚於是次 ICP 會議日期。");
         return;
       }
       try {
-        OT_PROTOTYPE.updateCycle(cycle.id, {
-          nextIcpType: typeInput.value,
-          dueDate: dueInput.value
-        }, "修改下次 ICP");
+        OT_PROTOTYPE.updateCycle(cycle.id, { nextIcpType: type }, "記錄下次 ICP 性質");
+        const pendingNext = cycles.find(item => (
+          item.residentId === cycle.residentId &&
+          item.id !== cycle.id &&
+          item.dueDate === due &&
+          !item.icpDate
+        ));
+        if (pendingNext) {
+          OT_PROTOTYPE.updateCycle(pendingNext.id, { dueDate: due, nextIcpType: type }, "更新下次 ICP 限期");
+        } else {
+          OT_PROTOTYPE.createIcpCycle(cycle.id, { dueDate: due, nextIcpType: type });
+        }
         refreshCycles();
       } catch (error) {
         showToast(error.message);
         return;
       }
       render();
-      showToast("下次 ICP 性質及限期已更新。");
+      showToast(`下次 ICP 紀錄已建立（限期 ${formatDate(due, true)}），目前紀錄保留。`);
     }
 
     function startIcpAssessment(cycleId, origin = "icp") {
@@ -1692,6 +1732,27 @@
       if (action === "open-assessment") return openAssessment(actionTarget.dataset.cycleId, actionTarget.dataset.assessmentId);
       if (action === "toggle-completion") return toggleCompletion(actionTarget.dataset.cycleId, actionTarget.dataset.role, actionTarget.dataset.area);
       if (action === "open-urgent") return openUrgentDialog(actionTarget.dataset.cycleId);
+    });
+
+    document.getElementById("inspector").addEventListener("change", event => {
+      const cycle = cycleById(selectedCycleId);
+      if (!cycle) return;
+      if (event.target.id === "next-icp-type-input") {
+        const dueInput = document.getElementById("next-icp-due-input");
+        const auto = autoNextIcpDue({ icpDate: cycle.icpDate, nextIcpType: event.target.value });
+        if (dueInput && auto) {
+          dueInput.min = cycle.icpDate || dueInput.min;
+          dueInput.max = auto;
+          dueInput.value = auto;
+        }
+      }
+      if (event.target.id === "next-icp-due-input") {
+        const max = event.target.max;
+        if (max && event.target.value > max) {
+          event.target.value = max;
+          showToast("下次限期只可調前，不可延後。");
+        }
+      }
     });
 
     document.addEventListener("keydown", event => {
