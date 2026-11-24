@@ -547,7 +547,8 @@
       padding: 0;
       flex: 0 0 auto;
     }
-    .inspector-body { padding: 10px 12px 12px; overflow: auto; display: grid; gap: 8px; }
+    .inspector-body { padding: 10px 12px 12px; overflow: auto; display: grid; align-content: start; gap: 8px; }
+    .inspector .workspace-card-head { background: #fff; }
     .workspace-card {
       margin-top: 0;
       border: 1px solid var(--line);
@@ -698,13 +699,6 @@
       display: flex;
       justify-content: flex-end;
       gap: 7px;
-    }
-
-    .next-icp-hint {
-      margin: 1px 0 0;
-      color: var(--muted, #64748b);
-      font-size: 10px;
-      line-height: 1.45;
     }
 
     .toast {
@@ -1337,9 +1331,6 @@
               <input id="next-icp-due-input" type="date" value="${autoNextIcpDue(cycle)}" min="${cycle.icpDate || ""}" max="${autoNextIcpDue(cycle)}" aria-label="下次 ICP 限期" data-spec-ids="BH-ICP-019" ${cycle.icpDate ? "" : "disabled"}>
               <button class="btn btn-primary" type="button" data-action="save-next-icp" data-cycle-id="${cycle.id}">建立下次 ICP</button>
             </div>
-            <p class="next-icp-hint">${cycle.icpDate
-              ? "限期按會議日期與頻率自動產生；只可提前，不可延後。儲存後會新增一張下次 ICP 紀錄，目前紀錄保留。"
-              : "請先記錄是次 ICP 會議日期，再選擇頻率及確認限期。"}</p>
           </section>
 
           <section class="workspace-card" id="icp-form-section" data-spec-ids="BH-ICP-005,BH-ICP-006,BH-ICP-012">
