@@ -659,6 +659,11 @@
     }
     .menu-fields { display: grid; gap: 7px; }
     .menu-field { display: block; }
+    .menu-field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
     .menu-field select {
       width: 100%;
       min-width: 0;
@@ -944,7 +949,10 @@
 
   <div class="cell-menu" id="cell-menu" hidden data-spec-ids="BH-REC-004,BH-REC-005,BH-REC-006,BH-REC-007,BH-REC-009,BH-REC-011">
     <div class="menu-fields">
-      <label class="menu-field"><select id="form-select" aria-label="形式"></select></label>
+      <div class="menu-field-row">
+        <label class="menu-field"><select id="form-select" aria-label="形式"></select></label>
+        <label class="menu-field"><select id="group-select" aria-label="組別編號"></select></label>
+      </div>
       <label class="menu-field"><select id="activity-select" aria-label="活動"></select></label>
       <label class="menu-field"><select id="status-select" aria-label="住客狀態"></select></label>
     </div>
@@ -1344,6 +1352,23 @@
       return plannedSessionForCell(residentId, day);
     }
 
+    function availableGroupNumbers(day) {
+      const date = dateKey(day);
+      const used = new Set();
+      plannedSessions.forEach(session => {
+        if (planDateForSession(session) !== date) return;
+        if (!OT_PROTOTYPE.isGroupSession(session)) return;
+        const num = Number(String(plannedGroupLabel(session) || "").slice(1));
+        if (Number.isInteger(num) && num > 0) used.add(num);
+      });
+      residents.forEach(resident => {
+        const num = Number(String(recordsForMode()[cellKey(resident.id, day)]?.groupLabel || "").slice(1));
+        if (Number.isInteger(num) && num > 0) used.add(num);
+      });
+      const max = used.size ? Math.max(...used) : 0;
+      return Array.from({ length: Math.max(max + 1, 1) }, (_, index) => index + 1);
+    }
+
     function pendingPlanCount(rows) {
       return rows.reduce((count, resident) => (
         count + Array.from({ length: daysInVisibleMonth() }, (_, index) => index + 1)
@@ -1522,9 +1547,7 @@
                 ${lockReason
                   ? '<span class="cell-code">╱</span>'
                   : pendingPlan
-                  ? pendingGroupLabel
-                    ? `<span class="planned-group-label">${groupLabelMarkup(pendingGroupLabel)}</span>${overdue ? '<span class="planned-debt">欠</span>' : ""}`
-                    : overdue ? '<span class="cell-code">欠</span>' : ""
+                  ? (overdue ? '<span class="cell-code">欠</span>' : "")
                   : content?.form
                   ? `<span class="cell-form">${content.groupLabel ? groupLabelMarkup(content.groupLabel) : escapeHtml(content.form)}</span><span class="cell-activity">${escapeHtml(content.activity)}</span>`
                   : `<span class="cell-code">${content ? escapeHtml(content.text) : ""}</span>`}
@@ -1667,6 +1690,22 @@
       draftEntry = null;
     }
 
+    function syncGroupSelect() {
+      const groupSelect = document.getElementById("group-select");
+      if (!groupSelect || !selectedCell || !draftEntry) return;
+      const groupForm = draftEntry.form === "g" || draftEntry.form === "eg";
+      const numbers = availableGroupNumbers(selectedCell.day);
+      const allowed = numbers.map(num => `G${num}`);
+      groupSelect.innerHTML = allowed
+        .map(label => `<option value="${label}">${label}</option>`)
+        .join("");
+      if (!groupForm || !allowed.includes(draftEntry.groupLabel)) {
+        draftEntry.groupLabel = groupForm ? (allowed[0] || null) : null;
+      }
+      groupSelect.value = draftEntry.groupLabel || "";
+      groupSelect.disabled = !groupForm || Boolean(draftEntry.special);
+    }
+
     function populateCellMenu(resident) {
       if (!selectedCell || !draftEntry) return;
       const forms = activeMode === "a"
@@ -1680,6 +1719,7 @@
         .map(form => `<option value="${form.code}">${escapeHtml(form.label)}</option>`)
         .join("");
       formSelect.value = draftEntry.form || "";
+      syncGroupSelect();
 
       const activitySelect = document.getElementById("activity-select");
       const activityOptions = [...new Set([...resident.activities, "Ax"])];
@@ -1908,6 +1948,10 @@
         draftEntry.special = null;
         document.getElementById("status-select").value = "";
         document.getElementById("menu-error").textContent = "";
+        syncGroupSelect();
+      }
+      if (event.target.id === "group-select") {
+        draftEntry.groupLabel = event.target.value || null;
       }
       if (event.target.id === "activity-select") {
         draftEntry.activity = event.target.value || null;
@@ -1928,6 +1972,7 @@
         }
         document.getElementById("form-select").disabled = Boolean(draftEntry.special || draftEntry.autoForm);
         document.getElementById("activity-select").disabled = Boolean(draftEntry.special);
+        syncGroupSelect();
         document.getElementById("menu-error").textContent = "";
       }
     });

@@ -1720,6 +1720,8 @@
     content.querySelectorAll(".session-card.combine-valid,.session-card.combine-invalid")
       .forEach(card => card.classList.remove("combine-valid", "combine-invalid"));
     content.querySelectorAll(".dragging").forEach(item => item.classList.remove("dragging"));
+    content.querySelectorAll(".resident-panel.session-remove-target")
+      .forEach(panel => panel.classList.remove("session-remove-target"));
   }
 
   function paintLegacyDropCues(payload) {
@@ -1803,10 +1805,6 @@
           <span class="format-mark">${session.paid ? "ei" : "i"}</span>
           <span class="bed-number">${escapeHtml(member?.bed || "")}</span>
           <span class="session-name">${escapeHtml(member?.name || "")}</span>
-        </div>
-        <div class="session-meta">
-          <span>${escapeHtml(session.activity)}</span>
-          <span>${session.paid ? "額外" : "固定"}</span>
         </div>
       </div>
     `;
@@ -2096,6 +2094,16 @@
     renderLegacyShell();
   }
 
+  function removableToQueuePayload() {
+    if (!legacyDragPayload) return null;
+    if (legacyDragPayload.type === "member") return legacyDragPayload;
+    if (legacyDragPayload.type === "session") {
+      const found = findSession(legacyDragPayload.sessionId);
+      if (found && found.session.memberIds.length === 1) return legacyDragPayload;
+    }
+    return null;
+  }
+
   function bindLegacyEvents() {
     if (!legacyListenersBound) {
       legacyListenersBound = true;
@@ -2231,6 +2239,36 @@
       content.addEventListener("dragend", () => {
         legacyDragPayload = null;
         clearLegacyDropCues();
+      });
+      content.addEventListener("dragover", event => {
+        const panel = event.target.closest(".resident-panel");
+        if (!panel || !removableToQueuePayload()) return;
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+        panel.classList.add("session-remove-target");
+      });
+      content.addEventListener("dragleave", event => {
+        const panel = event.target.closest(".resident-panel");
+        if (panel && !panel.contains(event.relatedTarget)) {
+          panel.classList.remove("session-remove-target");
+        }
+      });
+      content.addEventListener("drop", event => {
+        const panel = event.target.closest(".resident-panel");
+        if (!panel) return;
+        panel.classList.remove("session-remove-target");
+        const payload = removableToQueuePayload();
+        if (!payload) return;
+        event.preventDefault();
+        if (payload.type === "member") {
+          detachSessionMember(payload.sessionId, payload.residentId);
+        } else {
+          removeSession(payload.sessionId);
+        }
+        legacyDragPayload = null;
+        saveState();
+        render();
+        legacyShowToast("已移出時間表，住客已移回左側清單。");
       });
       document.addEventListener("click", event => {
         const scopeDialog = event.target.closest?.("#legacy-scope-dialog");
