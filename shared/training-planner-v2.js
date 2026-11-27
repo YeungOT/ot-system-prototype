@@ -274,6 +274,41 @@
     window.OT_TRAINING_PLANNER_STATE = clone(state);
   }
 
+  const undoStack = [];
+  const redoStack = [];
+
+  function trackUndo(label) {
+    undoStack.push({ label, plans: clone(state.plans) });
+    if (undoStack.length > 40) undoStack.shift();
+    redoStack.length = 0;
+  }
+
+  function undoChange() {
+    const entry = undoStack.pop();
+    if (!entry) {
+      renderStatusMessage("沒有可復原的步驟。");
+      return;
+    }
+    redoStack.push({ label: entry.label, plans: clone(state.plans) });
+    state.plans = clone(entry.plans);
+    saveState();
+    render();
+    legacyShowToast(`已復原：${entry.label}`);
+  }
+
+  function redoChange() {
+    const entry = redoStack.pop();
+    if (!entry) {
+      renderStatusMessage("沒有可重做的步驟。");
+      return;
+    }
+    undoStack.push({ label: entry.label, plans: clone(state.plans) });
+    state.plans = clone(entry.plans);
+    saveState();
+    render();
+    legacyShowToast(`已重做：${entry.label}`);
+  }
+
   function sessionCycleKey(resident, date) {
     return resident.cadence === "biweekly" ? cycleForDate(resident, date)?.key || null : null;
   }
@@ -1353,6 +1388,7 @@
   function applySessionMove(sessionId, targetDate, targetTime, scope) {
     const found = findSession(sessionId);
     if (!found) return;
+    trackUndo("移動訓練");
     const sourceDate = found.session.date;
     if (scope === "date") {
       removeSession(sessionId);
@@ -1410,6 +1446,7 @@
       renderStatusMessage(result.reason);
       return;
     }
+    trackUndo("新增個別訓練");
     addSession(date, time, [residentId], { paid: state.serviceMode === "extra" });
     saveState();
     render();
@@ -1423,6 +1460,7 @@
       renderStatusMessage(result.reason);
       return;
     }
+    trackUndo("加入小組");
     const session = found.session;
     session.memberIds.push(residentId);
     session.format = "g";
@@ -1440,6 +1478,7 @@
       renderStatusMessage(result.reason);
       return;
     }
+    trackUndo("合併小組");
     const target = targetFound.session;
     target.memberIds = [
       ...new Set([...sourceFound.session.memberIds, ...target.memberIds])
@@ -1476,6 +1515,7 @@
       return;
     }
     const source = memberSessionContext(residentId, sourceSessionId);
+    trackUndo("移動組員");
     const sourceMeta = {
       paid: source.session.paid,
       activity: source.session.activity,
@@ -1503,6 +1543,7 @@
       return;
     }
     const target = findSession(targetSessionId);
+    trackUndo("移動組員");
     detachSessionMember(sourceSessionId, residentId);
     target.session.memberIds.push(residentId);
     target.session.format = "g";
@@ -2003,8 +2044,9 @@
                 data-spec-ids="BH-006-010,BH-006-020">自動填入</button>
             </div>
             <div class="schedule-toolbar-group schedule-toolbar-actions">
-              <button class="btn icon-btn" type="button" disabled title="復原上一步" aria-label="復原上一步" data-spec-ids="BH-006-009">↶</button>
-              <button class="btn icon-btn" type="button" disabled title="重做" aria-label="重做" data-spec-ids="BH-006-009">↷</button>
+              <button class="btn icon-btn" type="button" disabled id="legacy-undo" data-legacy-action="undo" title="復原上一步" aria-label="復原上一步" data-spec-ids="BH-006-009">↶</button>
+              <button class="btn icon-btn" type="button" disabled id="legacy-redo" data-legacy-action="redo" title="重做" aria-label="重做" data-spec-ids="BH-006-009">↷</button>
+              <button class="btn" type="button" data-legacy-action="reset-demo" title="重設示範數據" data-spec-coverage-ignore>重設示範</button>
               <button class="btn btn-primary" type="button" data-legacy-action="complete" data-spec-ids="BH-006-013,BH-006-030">${state.serviceMode === "extra" ? "完成額外服務" : "完成時間表"}</button>
             </div>
           </div>
@@ -2026,6 +2068,8 @@
     document.getElementById("legacy-scope-dialog")?.addEventListener("cancel", () => {
       pendingMove = null;
     });
+    document.getElementById("legacy-undo").disabled = !undoStack.length;
+    document.getElementById("legacy-redo").disabled = !redoStack.length;
     bindLegacyEvents();
   }
 
@@ -2045,6 +2089,7 @@
       return;
     }
     const plan = ensurePlan(state.activeMonth);
+    trackUndo("標為有效");
     plan.status = "valid";
     plan.approvedAt = new Date().toISOString();
     saveState();
@@ -2075,6 +2120,7 @@
   }
 
   function legacyConfirmAutofill() {
+    trackUndo("自動填入");
     autoFillCandidates.forEach(session => {
       const plan = planForDate(session.date);
       session.carryOut = session.date.slice(0, 7) !== plan.month;
@@ -2141,6 +2187,20 @@
         if (action.dataset.legacyAction === "next") movePeriod(1);
         if (action.dataset.legacyAction === "autofill") legacyOpenAutofill();
         if (action.dataset.legacyAction === "complete") legacyComplete();
+        if (action.dataset.legacyAction === "undo") undoChange();
+        if (action.dataset.legacyAction === "redo") redoChange();
+        if (action.dataset.legacyAction === "reset-demo") {
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+            if (window.OT_MOCK_STORAGE_KEYS) {
+              Object.values(window.OT_MOCK_STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+            }
+            window.OT_PROTOTYPE?.resetCurrentHome?.();
+          } catch (error) {
+            // Reload still yields a fresh deterministic demo.
+          }
+          location.reload();
+        }
       });
       content.addEventListener("dragstart", event => {
         const member = event.target.closest("[data-legacy-member]");
@@ -2254,6 +2314,7 @@
         const payload = removableToQueuePayload();
         if (!payload) return;
         event.preventDefault();
+        trackUndo("移回住客清單");
         if (payload.type === "member") {
           detachSessionMember(payload.sessionId, payload.residentId);
         } else {
