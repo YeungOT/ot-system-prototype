@@ -1141,8 +1141,6 @@
     }
     .moca-auto-item span { color: var(--muted); font-size: 9px; font-weight: 800; }
     .moca-auto-item strong { font-size: 13px; }
-    .moca-lock-note { color: #64748b; font-size: 10px; font-weight: 700; margin: 8px 0 0; }
-    .moca-score-input { width: 76px; font-size: 13px; }
     .number-field {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -1814,7 +1812,6 @@
                 <section class="measure-panel">
                   <div class="measure-panel-head">
                     <strong>HK-MoCA 5-minute</strong>
-                    <button class="btn" type="button" data-action="edit-moca" data-spec-ids="BH-AX-013" hidden>編輯 HK-MoCA</button>
                     <span class="role-tag">Auto-generated</span>
                   </div>
                   <div class="moca-auto-grid">
@@ -2829,53 +2826,6 @@
       document.documentElement.style.setProperty("--assessment-sticky-offset", `${offset}px`);
     }
 
-    function applyMocaRoleAccess() {
-      const panel = document.querySelector(".measure-panel");
-      if (!panel) return;
-      const isOt = CURRENT_USER.role === "OT";
-      const button = panel.querySelector('[data-action="edit-moca"]');
-      if (button) button.hidden = !isOt;
-      const note = panel.querySelector(".moca-lock-note");
-      if (!isOt && !note) {
-        const lock = document.createElement("p");
-        lock.className = "moca-lock-note";
-        lock.dataset.specIds = "BH-AX-013";
-        lock.textContent = "只有 OT 可以編輯 HK-MoCA；PT 可查看摘要。";
-        panel.appendChild(lock);
-      }
-      if (isOt && note) note.remove();
-    }
-
-    function editMocaSummary() {
-      if (CURRENT_USER.role !== "OT") {
-        showToast("只有 OT 可以編輯 HK-MoCA；PT 可查看摘要。");
-        return;
-      }
-      const items = document.querySelectorAll("#cog .moca-auto-item");
-      const scoreItem = items[1];
-      const percentileItem = items[3];
-      if (!scoreItem || scoreItem.querySelector("input")) return;
-      const strong = scoreItem.querySelector("strong");
-      const input = document.createElement("input");
-      input.type = "number";
-      input.min = "0";
-      input.max = "30";
-      input.className = "moca-score-input";
-      input.setAttribute("aria-label", "HK-MoCA 分數");
-      input.value = String(parseInt(strong.textContent, 10) || 0);
-      scoreItem.replaceChild(input, strong);
-      input.focus();
-      input.addEventListener("change", () => {
-        const score = Math.max(0, Math.min(30, Number(input.value) || 0));
-        const updated = document.createElement("strong");
-        updated.textContent = `${score} / 30`;
-        scoreItem.replaceChild(updated, input);
-        const percentile = percentileItem?.querySelector("strong");
-        if (percentile) percentile.textContent = score >= 26 ? "> 16th" : "≤ 16th";
-        showToast("HK-MoCA 摘要已更新。");
-      });
-    }
-
     function openRecord(residentId, recordId) {
       const resident = residentById.get(residentId);
       const record = recordById(residentId, recordId);
@@ -2906,7 +2856,6 @@
       renderSignoffIdentity();
       renderContributorList(record);
       updateSectionRoleLabels(record);
-      applyMocaRoleAccess();
       if (!sessionContext) {
         document.querySelector(".assessment-shell").classList.remove("session-mode");
         document.getElementById("session-context").hidden = true;
@@ -3276,7 +3225,6 @@
           );
           return;
         }
-        if (action === "edit-moca") return editMocaSummary();
       }
       const historyButton = event.target.closest("[data-record-id]");
       if (historyButton) {
