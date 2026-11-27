@@ -1009,6 +1009,37 @@
         minute: "2-digit",
         hour12: false
       })}`;
+      if (task.generatedFrom === "weekly-check") {
+        const siblings = home.tasks.filter(item => (
+          item.id !== task.id &&
+          item.generatedFrom === task.generatedFrom
+        ));
+        siblings
+          .filter(item => item.status === "done")
+          .forEach(item => {
+            item.status = "archived";
+          });
+        if (!siblings.some(item => item.status === "open")) {
+          const next = new Date(`${(task.due || TODAY_KEY)}T00:00:00`);
+          next.setDate(next.getDate() + 7);
+          home.tasks.unshift({
+            id: uid("todo"),
+            title: task.title,
+            residentId: task.residentId,
+            owner: task.owner,
+            due: [
+              next.getFullYear(),
+              String(next.getMonth() + 1).padStart(2, "0"),
+              String(next.getDate()).padStart(2, "0")
+            ].join("-"),
+            status: "open",
+            kind: task.kind,
+            source: task.source,
+            generatedFrom: task.generatedFrom,
+            recurrenceNote: "每週重複"
+          });
+        }
+      }
       return task;
     });
   }
