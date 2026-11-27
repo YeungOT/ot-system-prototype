@@ -1112,44 +1112,6 @@
     scopeDialog.showModal();
   };
 
-  function renderQueue() {
-    const visible = queueResidents();
-    const weekly = visible.filter(resident => resident.cadence === "weekly");
-    const biweekly = visible.filter(resident => resident.cadence === "biweekly");
-    const groupMarkup = (title, residentsInGroup) => `
-      <section class="tp2-queue-group">
-        <h3>${title} · ${residentsInGroup.length} 位</h3>
-        ${residentsInGroup.map(resident => {
-          const progress = residentProgress(resident);
-          const cycleDetail = resident.cadence === "biweekly"
-            ? progress.cycles.map(cycle => (
-                `${cycle.start.slice(5)}–${cycle.end.slice(5)} ${cycleSessionCount(resident.id, cycle.key) ? "✓" : "○"}`
-              )).join(" · ")
-            : "";
-          const weekSummary = resident.cadence === "weekly"
-            ? ` · ${weeksForMonth(state.activeMonth).filter(week => (
-                weeklySessionCount(resident.id, week.start) >= resident.requiredSessions
-              )).length}/${weeksForMonth(state.activeMonth).length} 週`
-            : "";
-          return `
-            <button class="tp2-resident" type="button" draggable="true" data-tp-resident="${resident.id}"
-              data-spec-ids="${resident.cadence === "biweekly" ? "BH-006-004,BH-006-005,BH-006-012,BH-006-027" : "BH-006-004,BH-006-005,BH-006-026"}"
-              title="${escapeHtml(cycleDetail)}">
-              <strong>${escapeHtml(resident.bed)} · ${escapeHtml(resident.name)}</strong>
-              <b>${progress.count}/${progress.target}</b>
-              <small>${escapeHtml(progress.label)} · ${escapeHtml(resident.place)}${weekSummary}</small>
-            </button>
-          `;
-        }).join("") || '<div class="tp2-empty">沒有住客</div>'}
-      </section>
-    `;
-    queueBody.innerHTML = state.serviceMode === "extra"
-      ? groupMarkup("額外服務", visible)
-      : groupMarkup("每週需要", weekly) + groupMarkup("14 日週期", biweekly);
-    document.getElementById("tp2-queue-summary").textContent = state.serviceMode === "extra"
-      ? `${visible.length} 位`
-      : `${weekly.length} 常規 · ${biweekly.length} 週期`;
-  }
 
   function sessionMarkup(session) {
     const member = residentById.get(session.memberIds[0]);
@@ -1216,55 +1178,8 @@
     `;
   }
 
-  function renderBoard() {
-    const plan = ensurePlan(state.activeMonth);
-    const issues = collectIssues(state.activeMonth);
-    const title = state.view === "week"
-      ? `${state.activeWeek.slice(8, 10)}/${state.activeWeek.slice(5, 7)}–${addDays(state.activeWeek, 6).slice(8, 10)}/${addDays(state.activeWeek, 6).slice(5, 7)}`
-      : monthLabel(state.activeMonth);
-    document.getElementById("tp2-period-title").textContent = title;
-    document.getElementById("tp2-board-title").textContent = state.view === "week" ? "週時間表" : "月時間表";
-    document.getElementById("tp2-plan-meta").textContent =
-      `${plan.status === "valid" ? "已有效" : "草稿"}${plan.sourcePlanId ? ` · 沿用 ${state.plans[plan.sourcePlanId]?.month || plan.sourcePlanId}` : " · 新計劃"}${plan.changed ? " · 已修改" : " · 未修改"}`;
-    document.getElementById("tp2-board-summary").textContent = state.serviceMode === "extra" ? "額外服務" : "基本訓練";
-    document.querySelectorAll("[data-tp-view]").forEach(button => {
-      button.classList.toggle("active", button.dataset.tpView === state.view);
-    });
-    document.querySelectorAll("[data-tp-mode]").forEach(button => {
-      button.classList.toggle("active", button.dataset.tpMode === state.serviceMode);
-    });
-    const issuesBox = document.getElementById("tp2-issues");
-    issuesBox.innerHTML = issues.length
-      ? `<div class="tp2-issues"><strong>${issues.length} 項需要處理</strong><ul>${issues.slice(0, 12).map(issue => `<li>${escapeHtml(issue.message)}</li>`).join("")}</ul></div>`
-      : "";
-    if (state.view === "week") {
-      boardBody.innerHTML = `<section class="tp2-week-card">${weekGridMarkup(state.activeWeek)}</section>`;
-    } else {
-      boardBody.innerHTML = calendarRows(state.activeMonth).map(weekStart => {
-        const dates = serviceDates(weekStart);
-        const weekEnd = endOfWeek(weekStart);
-        const currentSessions = dates.flatMap(date => allSessionEntries().filter(session => (
-          session.date === date && sessionMatchesMode(session)
-        )));
-        return `
-          <section class="tp2-week-card" data-spec-ids="BH-006-021,BH-006-022">
-            <header>
-              <strong>${weekStart.slice(8, 10)}/${weekStart.slice(5, 7)}–${weekEnd.slice(8, 10)}/${weekEnd.slice(5, 7)}</strong>
-              <span>${weekStart.slice(0, 7) !== weekEnd.slice(0, 7) ? '<b class="tp2-boundary">跨月</b> · ' : ""}${currentSessions.length} 節 · ${currentSessions.reduce((sum, session) => sum + session.memberIds.length, 0)} 人次</span>
-            </header>
-            ${weekGridMarkup(weekStart)}
-          </section>
-        `;
-      }).join("");
-    }
-    requestAnimationFrame(renderQueue);
-  }
 
-  function render() {
-    ensureCoverage(state.activeMonth);
-    saveState();
-    renderBoard();
-  }
+  let render = () => {};
 
   function createPlannedSession(date, time, residentIds, options = {}, planned = []) {
     const resident = residentById.get(residentIds[0]);

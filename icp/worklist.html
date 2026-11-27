@@ -1529,15 +1529,16 @@
         showToast("下次限期必須晚於是次 ICP 會議日期。");
         return;
       }
+      let reusedExisting = false;
       try {
         OT_PROTOTYPE.updateCycle(cycle.id, { nextIcpType: type }, "記錄下次 ICP 性質");
         const pendingNext = cycles.find(item => (
           item.residentId === cycle.residentId &&
           item.id !== cycle.id &&
-          item.dueDate === due &&
           !item.icpDate
         ));
         if (pendingNext) {
+          reusedExisting = true;
           OT_PROTOTYPE.updateCycle(pendingNext.id, { dueDate: due, nextIcpType: type }, "更新下次 ICP 限期");
         } else {
           OT_PROTOTYPE.createIcpCycle(cycle.id, { dueDate: due, nextIcpType: type });
@@ -1548,7 +1549,9 @@
         return;
       }
       render();
-      showToast(`下次 ICP 紀錄已建立（限期 ${formatDate(due, true)}），目前紀錄保留。`);
+      showToast(reusedExisting
+        ? `已更新現有下一週期（限期 ${formatDate(due, true)}），未重複建立。`
+        : `下次 ICP 紀錄已建立（限期 ${formatDate(due, true)}），目前紀錄保留。`);
     }
 
     function startIcpAssessment(cycleId, origin = "icp") {
